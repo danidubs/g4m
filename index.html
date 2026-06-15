@@ -1413,6 +1413,380 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
         .g4m-note-text       { flex: 1; font-size: 11px; color: #555; }
         .g4m-flexrow-mb4     { display: flex; align-items: center; margin-bottom: 4px; }
 
+        /* ════════════════════════════════════════════════════════════
+           F2-PANEL-NEUGESTALTUNG (v153) — Look & Feel des Tool-Panels.
+           Das Panel füllt exakt die Canvas-Fläche: 12u x 12u, rechts
+           nahtlos ans Navigation-Panel grenzend. Das Panel SELBST ist
+           das 12-Spalten/12-Reihen-Raster (keine separate Titelleiste).
+             Reihe 1     (1u)  = Page-2-Button (2u) · Titel (4u, verbunden)
+                                 · Formula-Button (2u, rechts) — Reihe füllt
+                                 alle 12 Spalten
+             Reihen 2-7  (6u)  = 18 Quadrate à 2u x 2u (6 x 3):
+                                 · oben a, b, α, β, N + 1 Reserve
+                                 · Min-/Max-Viz je 4u x 4u (schwarz, links)
+                                 · rechts 4 Reserve-Quadrate (anklickbar)
+             Reihen 8-11 (4u)  = Slider-Feld (aktive Parameterzeile +
+                                 Random-Color + Farbwähler)
+             Reihe 12    (1u)  = 6 ungenutzte 2u-Buttons (anklickbar)
+           Alle Flächen tragen die Modusfarbe (hellblau) AUSSER den zwei
+           Viz-Fenstern (schwarz). Funktional unverändert; Slider weiter
+           zweigleisig (Min/Max). ─────────────────────────────────────── */
+        #archimedean-panel.g4m-arch-v153 {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: repeat(12, 1fr);
+            padding: 0;
+            overflow: hidden;
+        }
+        /* Gemeinsame Optik aller F2-Rasterfelder: Modusfarbe + feine
+           Umrandung, nahtlos gefügt (wie tool-btn, nur blau statt grau) */
+        .g4m-arch-cell {
+            box-sizing: border-box;
+            background-color: var(--g4m-mode-color-archimedean);
+            border: 1px solid #bdbdbd;
+            font-family: 'JetBrains Mono', monospace;
+            color: #666666;
+            margin: 0;
+        }
+        button.g4m-arch-cell { cursor: pointer; }
+
+        /* Kopf-/Fußreihe */
+        .g4m-arch-top  { grid-row: 1; }
+        .g4m-arch-bot  { grid-row: 12; }
+        /* Unterste Modulations-Reihe: zentrierte Beschriftung, Aktiv-Optik */
+        .g4m-arch-botmod,
+        .g4m-arch-botopt,
+        .g4m-arch-botcon,
+        .g4m-arch-botcol {
+            display: flex; align-items: center; justify-content: center;
+            font-size: clamp(9px, calc(var(--u) * 0.269), 14px);
+            font-weight: 700;
+        }
+        /* Farbzelle (Zelle 3): nativer Farbwähler füllt die Zelle wie ein
+           Button in der gewählten Farbe. Bei Random On wird stattdessen
+           das 4-Quadrate-Symbol eingeblendet (über dem Picker). */
+        .g4m-arch-colorcell { position: relative; padding: 0; overflow: hidden; }
+        .g4m-arch-colorcell input[type=color] {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            border: none; padding: 0; margin: 0; cursor: pointer; background: none;
+        }
+        .g4m-arch-colorcell input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
+        .g4m-arch-colorcell input[type=color]::-webkit-color-swatch { border: none; }
+        .g4m-arch-colorcell input[type=color]::-moz-color-swatch { border: none; }
+        /* 4-Quadrate-Symbol (nur bei Random On sichtbar) */
+        .g4m-arch-color-quad {
+            position: absolute; inset: 0; display: none;
+            grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+        }
+        .g4m-arch-colorcell.g4m-arch-color-random .g4m-arch-color-quad { display: grid; }
+        .g4m-arch-colorcell.g4m-arch-color-random input[type=color] { visibility: hidden; }
+        .g4m-arch-color-quad i { display: block; }
+        .g4m-arch-color-quad i:nth-child(1) { background: #E53935; }
+        .g4m-arch-color-quad i:nth-child(2) { background: #43A047; }
+        .g4m-arch-color-quad i:nth-child(3) { background: #1E88E5; }
+        .g4m-arch-color-quad i:nth-child(4) { background: #FDD835; }
+        .g4m-arch-botmod-active {
+            background-color: #5E8199;   /* dunkleres, leicht „schmutziges" Panel-Blau */
+            color: #ffffff;
+            border-color: #4C6B80;
+        }
+        /* Page-2-Button (Reihe 1, Spalten 1-2) — Beschriftung wie tool-btn */
+        #arch-options-btn.g4m-arch-cell {
+            grid-column: 1 / 3;
+            display: flex; align-items: center; justify-content: center;
+            font-size: clamp(10px, calc(var(--u) * 0.269), 14px);
+            font-weight: 700;
+        }
+        /* Titelfeld (Reihe 1, Spalten 3-11) — 4 Felder (8u) zu einer
+           Fläche verbunden, nicht anklickbar */
+        .g4m-arch-title {
+            grid-column: 3 / 11;
+            display: flex; align-items: center; justify-content: center;
+            font-size: clamp(10px, calc(var(--u) * 0.3), 20px);
+            font-weight: 700;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            padding: 0 6px;
+        }
+        /* Formula-Button (Reihe 1, Spalten 11-13 = letztes 2u-Feld) —
+           öffnet Page 3, Beschriftung wie tool-btn */
+        #arch-formula-toggle.g4m-arch-cell {
+            grid-column: 11 / 13;
+            display: flex; align-items: center; justify-content: center;
+            font-size: clamp(10px, calc(var(--u) * 0.269), 14px);
+            font-weight: 700;
+        }
+
+        /* Quadrat-Raster: Reihen 2-7, 6 Spalten x 3 Reihen à 2u */
+        .g4m-arch-grid {
+            grid-column: 1 / 13;
+            grid-row: 2 / 10;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+        }
+        /* Parameter-Selektor-Quadrate (2u x 2u): Buchstabe oben, darunter
+           die beiden eingestellten Werte (Min/Max) — gleiche Schrift,
+           Farbe, Größe wie der Buchstabe. */
+        .g4m-arch-sq {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: calc(var(--u) * 0.08);
+            overflow: hidden;
+            text-align: center;
+        }
+        /* Buchstabe + Werte exakt im Stil der Tool-Panel-Quadrat-Labels:
+           gleiche Schriftgröße (clamp), Gewicht 700, Farbe #666666 */
+        .g4m-arch-sq .g4m-arch-sq-letter,
+        .g4m-arch-sq .g4m-arch-sq-vals {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(9px, calc(var(--u) * 0.269), 14px);
+            font-weight: 700;
+            color: #666666;
+            line-height: 1.25;
+            text-align: center;
+            max-width: 100%;
+            overflow-wrap: break-word;
+        }
+        .g4m-arch-sq .g4m-arch-sq-vals { white-space: pre-line; }
+        .g4m-arch-sq.g4m-arch-sq-active { box-shadow: inset 0 0 0 2px #333333; }
+        /* erste Rasterzeile fest auf Reihe 1 — deterministische Lage */
+        #arch-sq-a, #arch-sq-b, #arch-sq-alpha, #arch-sq-beta, #arch-sq-n,
+        #arch-sq-optimizer { grid-row: 1; }
+        /* Funktions-Quadrate (Connect/Color/Modulation + Reserven) auf
+           Rasterzeile 4 (direkt unter den Viz-Fenstern). */
+        .g4m-arch-fnsq { grid-row: 2; }
+        /* Reserve-Bereich (Spalten 4-6, Reihe 2): obere Reihe Sin/Cos/Tan
+           (je 2u × 1u), untere Reihe 6 kleine Buttons (je 1u × 1u):
+           On, Off, 3× Reserve, Go. */
+        .g4m-arch-reserve6 {
+            grid-column: 4 / 7;
+            grid-row: 2;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+        }
+        .g4m-arch-reserve6 .g4m-arch-restop { grid-row: 1; }     /* 2u breit */
+        .g4m-arch-reserve6 .g4m-arch-resbot { grid-row: 2; }     /* 1u breit */
+        .g4m-arch-resbtn { cursor: pointer; }
+        /* Modulations-Button ohne Inhalt: leeres Rasterfeld (Rahmen +
+           hellblau bleiben), Text und Aktiv-Farbe ausgeblendet. */
+        .g4m-arch-mod-hidden {
+            color: transparent !important;
+            background-color: var(--g4m-mode-color-archimedean) !important;
+            border-color: #bdbdbd !important;
+            cursor: default;
+        }
+
+        /* Viz-Fenster: je 4u x 4u, linksbündig, Rasterzeilen 2-3, schwarz */
+        .g4m-arch-viz {
+            position: relative;
+            box-sizing: border-box;
+            grid-row: 3 / 5;
+            background-color: #000;
+            border: 1px solid #bdbdbd;
+            overflow: hidden;
+        }
+        .g4m-arch-viz-min { grid-column: 1 / 3; }   /* Spalten 1-2 (4u) */
+        .g4m-arch-viz-max { grid-column: 3 / 5; }   /* Spalten 3-4 (4u) */
+        .g4m-arch-viz-result { grid-column: 5 / 7; grid-row: 3 / 5; }  /* Spalten 5-6 (4u) */
+        .g4m-arch-viz-label {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            color: #fff; font-size: 12px; padding: 2px 5px 2px 8px;
+            text-align: left; font-family: 'JetBrains Mono', monospace;
+            pointer-events: none;
+        }
+
+        /* Slider-Feld: Reihen 8-11 (4u), volle Breite (12u), hellblau.
+           position:relative, damit die Farb-Zeile am unteren Rand
+           verankert werden kann, ohne den zentrierten Slider-Block zu
+           verschieben — so liegt der zweigleisige Regler mittig auf
+           derselben y-Höhe wie der Tool-Panel-Slider (v153). */
+        .g4m-arch-editor {
+            position: relative;
+            grid-column: 1 / 13;
+            grid-row: 10 / 13;
+            overflow: hidden;
+            /* feste Geometrie für identische Rail-Y-Positionen (s. u.) */
+            --g4m-row-h: var(--g4m-arch-field-h);                 /* Höhe einer Rail-Zeile */
+            --g4m-title-h: calc(var(--u) * 0.55);                 /* Titel-/Kopfzeile */
+            --g4m-pad-x: calc(var(--u) * 0.55);                   /* Rand links/rechts */
+            --g4m-pad-top: calc(var(--u) * 0.28);
+        }
+        /* Jede aktive Parameterzeile füllt das Feld deckungsgleich —
+           dadurch liegen Titel und Rails IMMER an derselben Stelle,
+           unabhängig vom Inhalt (kein Springen beim Durchklicken). */
+        .g4m-arch-editor .g4m-arch-prow { display: none; }
+        .g4m-arch-editor .g4m-arch-prow.g4m-arch-prow-active {
+            display: block;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            padding: var(--g4m-pad-top) var(--g4m-pad-x) 0 var(--g4m-pad-x);
+            box-sizing: border-box;
+        }
+        /* Schriftgrößen im Slider-Feld exakt wie im Tool-Panel-Editor */
+        .g4m-arch-editor .g4m-param-label-sm,
+        .g4m-arch-editor .g4m-note-text,
+        .g4m-arch-editor .g4m-val-box,
+        .g4m-arch-editor .g4m-arch-segbtn,
+        .g4m-arch-editor .g4m-arch-presetbtn {
+            font-size: clamp(9px, calc(var(--u) * 0.269), 14px);
+            color: #666666;
+        }
+        .g4m-arch-editor .g4m-param-label-sm { font-weight: 700; }
+
+        /* ── Gemeinsame Spaltengeometrie (v153b) ──────────────────────
+           Feld-/Buttonbreite und -höhe EINE Quelle, damit Coarse-Button,
+           Feld Min., Feld Max. und Preset-Zeile eine bündige rechte
+           Spalte bilden. Höhe = Eingabefeldhöhe. */
+        :root {
+            --g4m-arch-field-w: min(64px, calc(var(--u) * 1.25));
+            --g4m-arch-field-h: clamp(18px, calc(var(--u) * 0.5), 26px);
+            --g4m-arch-lbl-w:   calc(var(--u) * 0.7);
+            --g4m-arch-col-gap: calc(var(--u) * 0.18);
+        }
+        /* Kopfzeile (Titel + ggf. Fine/Coarse rechts): FESTE Höhe, damit
+           die darunter liegenden Rails überall gleich hoch sitzen. */
+        .g4m-arch-phead {
+            display: grid;
+            grid-template-columns: 1fr var(--g4m-arch-field-w);
+            column-gap: var(--g4m-arch-col-gap);
+            align-items: center;
+            height: var(--g4m-title-h);
+            margin: 0;
+        }
+        .g4m-arch-phead .g4m-note-text { grid-column: 1; align-self: center; }
+        .g4m-arch-phead .g4m-arch-seg,
+        .g4m-arch-phead .g4m-arch-seg-spacer {
+            grid-column: 2;
+            justify-self: end;
+            display: flex; align-items: center; gap: var(--g4m-arch-col-gap);
+        }
+        /* Connect/Color: die Bedienelemente (On/Off-Punkte, Farbwähler)
+           sollen nicht in die schmale Feldspalte gequetscht werden,
+           sondern auf der Rail-Achse liegen — also unter dem Titel,
+           linksbündig auf gleicher Höhe wie sonst die erste Rail. */
+        .g4m-arch-optseg {
+            position: absolute;
+            top: calc(var(--g4m-pad-top) + var(--g4m-title-h));
+            left: var(--g4m-pad-x);
+            justify-self: start !important;
+            height: var(--g4m-row-h);
+        }
+        .g4m-arch-seg-spacer { height: var(--g4m-arch-field-h); }
+        .g4m-arch-segbtn {
+            box-sizing: border-box;
+            height: var(--g4m-arch-field-h);
+            border: 1px solid #aaa;
+            border-radius: 0;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            padding: 0 6px;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .g4m-arch-coarse-btn { width: var(--g4m-arch-field-w); }
+        /* Block (v156): feste Zeilenhöhen → Rails an IDENTISCHER Y-Position
+           bei allen Parametern. Aufbau je Zeile: Beschriftung links auf
+           der Rail-Achse, Rail in der Mitte (volle Breite), Wertebox
+           rechts. Min-Zeile und Max-Zeile mit fester Höhe; eine optionale
+           dritte Zeile (Presets) liegt UNTERHALB der Rails und verschiebt
+           sie daher nicht. */
+        .g4m-arch-block {
+            display: grid;
+            grid-template-columns: var(--g4m-arch-lbl-w) 1fr var(--g4m-arch-field-w);
+            grid-template-rows: var(--g4m-row-h) var(--g4m-row-h) auto;
+            column-gap: var(--g4m-arch-col-gap);
+            row-gap: 4px;
+            align-items: center;
+            width: 100%;
+        }
+        .g4m-arch-block .g4m-arch-lbl-min   { grid-column: 1; grid-row: 1; justify-self: start; align-self: center; font-weight: 700; }
+        .g4m-arch-block .g4m-arch-rail-min  { grid-column: 2; grid-row: 1; width: 100%; margin: 0; align-self: center; }
+        .g4m-arch-block .g4m-arch-field-min { grid-column: 3; grid-row: 1; justify-self: end; align-self: center; }
+        .g4m-arch-block .g4m-arch-lbl-max   { grid-column: 1; grid-row: 2; justify-self: start; align-self: center; font-weight: 700; }
+        .g4m-arch-block .g4m-arch-rail-max  { grid-column: 2; grid-row: 2; width: 100%; margin: 0; align-self: center; }
+        .g4m-arch-block .g4m-arch-field-max { grid-column: 3; grid-row: 2; justify-self: end; align-self: center; }
+        .g4m-arch-block .g4m-arch-presets   { grid-column: 1 / 4; grid-row: 3; justify-self: end; }
+        /* Beschriftungen links: feste schmale Spalte, damit die Rails
+           bündig starten und nichts überlappt. */
+        .g4m-arch-block .g4m-arch-lbl-min,
+        .g4m-arch-block .g4m-arch-lbl-max {
+            white-space: nowrap;
+            padding-right: 4px;
+        }
+        /* Modulation: breitere Beschriftungsspalte für „Strength"/„Freq",
+           Beschriftung liegt auf der Rail-Achse (wie Min/Max). */
+        .g4m-arch-block-mod {
+            grid-template-columns: calc(var(--u) * 1.5) 1fr var(--g4m-arch-field-w);
+        }
+        /* Eingabefelder: feste, einheitliche Höhe, kompakt rechts */
+        .g4m-arch-block .g4m-val-box {
+            box-sizing: border-box;
+            min-width: var(--g4m-arch-field-w);
+            height: var(--g4m-arch-field-h);
+            display: flex; align-items: center; justify-content: flex-end;
+            padding: 0 4px;
+            background: #f5f5f5; border: 1px solid #d0d0d0;
+        }
+        .g4m-arch-presets { display: flex; gap: 2px; margin-top: 3px; }
+        .g4m-arch-presetbtn {
+            box-sizing: border-box;
+            height: var(--g4m-arch-field-h);
+            border: 1px solid #ccc; background: #f5f5f5; cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 0 5px;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .g4m-arch-block input[type=range].g4m-row-flex { width: 100%; }
+        /* Größere, gut greifbare Schieberegler-Griffe im F2-Slider-Feld
+           (analog Tool-Panel-Optik). Gilt für die Parameter-Rails und die
+           Modulations-Slider. */
+        .g4m-arch-editor input[type=range]::-webkit-slider-thumb {
+            width: 18px; height: 18px; margin-top: -8px;
+            background: #666666;
+        }
+        .g4m-arch-editor input[type=range]::-moz-range-thumb {
+            width: 18px; height: 18px; background: #666666;
+        }
+        .g4m-arch-editor input[type=range] { background-size: 100% 3px; }
+        /* Kleiner roter Go-Button (Baby-Go): unterste Reihe, ganz rechts
+           (Spalte 12 = 1u). Generiert ein Bild auf der Canvas, ohne das
+           Panel zu schließen. Füllt seine 1u-Zelle wie die Edge-Buttons. */
+        .g4m-arch-babygo {
+            box-sizing: border-box;
+            background-color: #e53935;
+            color: #fff;
+            border: 1px solid #c62828;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: clamp(11px, calc(var(--u) * 0.32), 18px);
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .g4m-arch-babygo:hover { background-color: #c62828; }
+        .g4m-arch-babygo:active { transform: scale(0.96); }
+        /* Farb-Zeile am unteren Feldrand verankert */
+        .g4m-arch-color-row {
+            position: absolute;
+            left: 0; right: 0; bottom: calc(var(--u) * 0.25);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .g4m-arch-color-row > div { font-size: clamp(9px, calc(var(--u) * 0.269), 14px); }
+        /* Optimizer On/Off im Parameter-Kopf — rechtsbündig, kleine Abstände.
+           Höhe exakt = Feldhöhe (wie Fine/Coarse bzw. der Spacer der
+           anderen Parameter), damit die Kopfzeile gleich hoch ist und die
+           Rails auf identischer y-Position liegen. */
+        .g4m-arch-optseg {
+            gap: 5px;
+            height: var(--g4m-arch-field-h);
+            font-size: clamp(9px, calc(var(--u) * 0.269), 14px);
+        }
+
 </style>
 </head>
 <body>
@@ -1695,226 +2069,295 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
 <!-- ================================================================ -->
 <!-- ARCHIMEDEAN SPIRAL PANEL - analog zu superformel-panel          -->
 <!-- ================================================================ -->
-<div id="archimedean-panel" data-arch-open="0">
-    <!-- Header: Titel zentriert, Pfeil rechts, Options-Button links -->
-    <div style="position: relative; display: flex; align-items: center; justify-content: center; padding: 10px 20px; 
-        background-color: var(--g4m-mode-color-archimedean); min-height: 50px;">
-        <button type="button" id="arch-options-btn" style="position: absolute; left: 20px; background: none; border: 1px solid #666; border-radius: 3px;
-            font-size: 14px; cursor: pointer; color: #333; padding: 5px 12px; line-height: 1; white-space: nowrap;">→ Page 2</button>
-        <h2 style="margin: 0; font-size: 24px; color: #666666; text-align: center;">Archimedean Spiral Parameters</h2>
-        
+<div id="archimedean-panel" class="g4m-arch-v153" data-arch-open="0">
+
+    <!-- ===== Reihe 1 (1u): Page-2 · Titel (4 Felder verbunden) · Formula ===== -->
+    <button type="button" id="arch-options-btn" class="g4m-arch-cell g4m-arch-top">→ Page 2</button>
+    <div class="g4m-arch-cell g4m-arch-top g4m-arch-title">Archimedean Spiral Parameters</div>
+    <button type="button" id="arch-formula-toggle" class="g4m-arch-cell g4m-arch-top" role="button" tabindex="0" aria-label="Open formula panel">Formula</button>
+
+    <!-- ===== Reihen 2-7 (6u): 18 Quadrate (6 x 3 à 2u x 2u) ===== -->
+    <div class="g4m-arch-grid">
+        <!-- Rasterzeile 1: a, b, α, β, N + 1 Reserve -->
+        <button type="button" class="g4m-arch-cell g4m-arch-sq" id="arch-sq-a">
+            <span class="g4m-arch-sq-letter">Start radius</span>
+            <span class="g4m-arch-sq-vals" id="arch-sqval-a">Min. 0.0
+Max. 0.0</span>
+        </button>
+        <button type="button" class="g4m-arch-cell g4m-arch-sq" id="arch-sq-b">
+            <span class="g4m-arch-sq-letter">Growth rate</span>
+            <span class="g4m-arch-sq-vals" id="arch-sqval-b">Min. 0.02
+Max. 0.08</span>
+        </button>
+        <button type="button" class="g4m-arch-cell g4m-arch-sq" id="arch-sq-alpha">
+            <span class="g4m-arch-sq-letter">Angle range</span>
+            <span class="g4m-arch-sq-vals" id="arch-sqval-alpha">Min. 15°
+Max. 16°</span>
+        </button>
+        <button type="button" class="g4m-arch-cell g4m-arch-sq" id="arch-sq-beta">
+            <span class="g4m-arch-sq-letter">Start angle</span>
+            <span class="g4m-arch-sq-vals" id="arch-sqval-beta">Min. 0°
+Max. 31°</span>
+        </button>
+        <button type="button" class="g4m-arch-cell g4m-arch-sq" id="arch-sq-n">
+            <span class="g4m-arch-sq-letter">Number of points</span>
+            <span class="g4m-arch-sq-vals" id="arch-sqval-n">Min. 1000
+Max. 1156</span>
+        </button>
+        <button type="button" class="g4m-arch-cell g4m-arch-sq" id="arch-sq-optimizer">
+            <span class="g4m-arch-sq-letter">Optimizer</span>
+            <span class="g4m-arch-sq-vals" id="arch-sqval-optimizer">Min. 10%
+Max. 100%</span>
+        </button>
+
+        <!-- Rasterzeilen 2-3 links: Min-/Max-Viz je 4u x 4u (schwarz) -->
+        <div class="g4m-arch-viz g4m-arch-viz-min">
+            <canvas id="arch-viz-min" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
+            <div class="g4m-arch-viz-label">Min</div>
+        </div>
+        <div class="g4m-arch-viz g4m-arch-viz-max">
+            <canvas id="arch-viz-max" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
+            <div class="g4m-arch-viz-label">Max</div>
+        </div>
+        <!-- Rasterzeilen 2-3 rechts: Viz Result (4u x 4u) — zeigt das
+             Gesamtbild der Canvas, live synchron beim Reglerziehen -->
+        <div class="g4m-arch-viz g4m-arch-viz-result">
+            <canvas id="arch-viz-result" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
+            <div class="g4m-arch-viz-label">Result</div>
+        </div>
+
+        <!-- Rasterzeile 4 (App-Reihen 8-9): 6 Funktions-Quadrate (2u x 2u),
+             schließen nahtlos unter den Viz-Fenstern an. 1=Connecting
+             Lines, 2=Farbe, 3=Modulation, 4-6=Reserve. Bedienung erfolgt
+             im verkleinerten Slider-Feld darunter (Klick = aktive Zeile). -->
+        <button type="button" class="g4m-arch-cell g4m-arch-sq g4m-arch-fnsq" id="arch-sq-connect">
+            <span class="g4m-arch-sq-letter">Connect</span>
+            <span class="g4m-arch-sq-vals" id="arch-sqval-connect">Off</span>
+        </button>
+        <button type="button" class="g4m-arch-cell g4m-arch-sq g4m-arch-fnsq" id="arch-sq-color">
+            <span class="g4m-arch-sq-letter">Color</span>
+            <span class="g4m-arch-sq-vals" id="arch-sqval-color">Random</span>
+        </button>
+        <button type="button" class="g4m-arch-cell g4m-arch-sq g4m-arch-fnsq" id="arch-sq-mod">
+            <span class="g4m-arch-sq-letter">Modulation</span>
+            <span class="g4m-arch-sq-vals" id="arch-sqval-mod">Off</span>
+        </button>
+        <!-- Drei Reserve-Plätze (Spalten 4-6) als 6 Buttons (2u × 1u):
+             3 nebeneinander, 2 Reihen übereinander. -->
+        <div class="g4m-arch-fnsq g4m-arch-reserve6">
+            <!-- obere Reihe: Sin/Cos/Tan, je 2u breit -->
+            <button type="button" id="arch-mod-sin" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-restop g4m-arch-botmod g4m-arch-botmod-active" style="grid-column: 1 / 3;" aria-label="Modulation sine">Sin</button>
+            <button type="button" id="arch-mod-cos" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-restop g4m-arch-botmod" style="grid-column: 3 / 5;" aria-label="Modulation cosine">Cos</button>
+            <button type="button" id="arch-mod-tan" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-restop g4m-arch-botmod" style="grid-column: 5 / 7;" aria-label="Modulation tangent">Tan</button>
+            <!-- untere Reihe: 6 kleine 1u-Buttons: On, Off, Reserve×3, Go -->
+            <button type="button" id="arch-mod-on"  class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botmod" style="grid-column: 1 / 2;" aria-label="Modulation on">On</button>
+            <button type="button" id="arch-mod-off" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botmod g4m-arch-botmod-active" style="grid-column: 2 / 3;" aria-label="Modulation off">Off</button>
+            <!-- Optimizer On/Off: gleiche Zellen wie Modulation On/Off,
+                 nur sichtbar, wenn Optimizer gewählt ist (sich gegenseitig
+                 ausschließend mit der Modulations-Anzeige). -->
+            <button type="button" id="arch-opt-on"  class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botopt g4m-arch-botmod-active" style="grid-column: 1 / 2; grid-row: 2; visibility: hidden;" aria-label="Optimizer on">On</button>
+            <button type="button" id="arch-opt-off" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botopt" style="grid-column: 2 / 3; grid-row: 2; visibility: hidden;" aria-label="Optimizer off">Off</button>
+            <!-- Connecting Line On/Off: gleiche Zellen, nur bei „connect" sichtbar -->
+            <button type="button" id="arch-connect-on"  class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botcon" style="grid-column: 1 / 2; grid-row: 2; visibility: hidden;" aria-label="Connecting lines on">On</button>
+            <button type="button" id="arch-connect-off" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botcon g4m-arch-botmod-active" style="grid-column: 2 / 3; grid-row: 2; visibility: hidden;" aria-label="Connecting lines off">Off</button>
+            <!-- Color: Random On/Off (Zellen 1-2) + Farbwähler (Zelle 3),
+                 nur bei „color" sichtbar. Zelle 3 zeigt die feste Farbe
+                 (Random Off) bzw. 4 bunte Quadrate (Random On). -->
+            <button type="button" id="arch-color-random-on"  class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botcol g4m-arch-botmod-active" style="grid-column: 1 / 2; grid-row: 2; visibility: hidden;" aria-label="Random color on">On</button>
+            <button type="button" id="arch-color-random-off" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botcol" style="grid-column: 2 / 3; grid-row: 2; visibility: hidden;" aria-label="Random color off">Off</button>
+            <div class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botcol g4m-arch-colorcell" style="grid-column: 3 / 4; grid-row: 2; visibility: hidden;">
+                <input type="color" id="arch-default-color" value="#2196F3" aria-label="Pick fixed color">
+                <span class="g4m-arch-color-quad" aria-hidden="true">
+                    <i></i><i></i><i></i><i></i>
+                </span>
+            </div>
+            <button type="button" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot" style="grid-column: 3 / 4;" aria-label="Reserve"></button>
+            <button type="button" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot" style="grid-column: 4 / 5;" aria-label="Reserve"></button>
+            <button type="button" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot" style="grid-column: 5 / 6;" aria-label="Reserve"></button>
+            <button type="button" id="arch-baby-go" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-babygo" style="grid-column: 6 / 7;" aria-label="Generate new image">Go</button>
+        </div>
     </div>
-    
-    <!-- Slider Container — identisch zu superformel-panel -->
-    <div style="flex: 1; padding: 15px; background-color: var(--g4m-mode-color-archimedean); max-height: calc(100% - 64px); overflow: hidden;">
 
-        <!-- Visualisierungen zentriert, zwei Boxen nebeneinander -->
-        <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 30px;">
-            <!-- MIN Visualisierung -->
-            <div class="g4m-viz-box">
-                <canvas id="arch-viz-min" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
-                <!-- Fusszeile transparent + linksbuendig + Label "Min" —
-                     identisch zur Superformula-Box (User-Feedback v150) -->
-                <div style="position: absolute; bottom: 0; left: 0; right: 0; color: white; 
-                    font-size: 12px; padding: 2px 5px 2px 10px; text-align: left;">Min</div>
+    <!-- ===== Reihen 8-11 (4u): Slider-Feld ===== -->
+    <!-- ===== Reihen 8-11 (4u): Slider-Feld =====
+         Jede Parameterzeile (prow) ist eine Flex-Spalte:
+           · Kopf  : links Notiz, rechts Fine/Coarse (nur b, α)
+           · Block : 2-spaltiges Raster — links die zwei Rails (Min/Max),
+                     rechts die zwei Eingabefelder; Rails vertikal auf
+                     Feldmitte zentriert. Bei α zusätzlich eine Preset-
+                     Zeile als rechte Spalte. Coarse-Button, Feld Min.,
+                     Feld Max. (und Presets) bilden eine bündige rechte
+                     Spalte gleicher Breite/Höhe (v153b). -->
+    <div class="g4m-arch-cell g4m-arch-editor">
+
+        <!-- Parameter a: Startabstand (-10 … +10) — kein Fine/Coarse -->
+        <div class="g4m-arch-prow" id="arch-prow-a">
+            <div class="g4m-arch-phead">
+                <span class="g4m-note-text">Start radius</span>
+                <span class="g4m-arch-seg-spacer"></span>
             </div>
-            <!-- MAX Visualisierung -->
-            <div class="g4m-viz-box">
-                <canvas id="arch-viz-max" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
-                <div style="position: absolute; bottom: 0; left: 0; right: 0; color: white; 
-                    font-size: 12px; padding: 2px 5px 2px 10px; text-align: left;">Max</div>
+            <div class="g4m-arch-block">
+                <span class="g4m-param-label-sm g4m-arch-lbl-min">Min</span>
+                <input type="range" id="arch-param-a-min" min="-10" max="10" step="0.1" value="0" class="g4m-row-flex g4m-arch-rail-min">
+                <div id="arch-val-a-min" class="g4m-val-box g4m-arch-field-min">0.0</div>
+                <span class="g4m-param-label-sm g4m-arch-lbl-max">Max</span>
+                <input type="range" id="arch-param-a-max" min="-10" max="10" step="0.1" value="0" class="g4m-row-flex g4m-arch-rail-max">
+                <div id="arch-val-a-max" class="g4m-val-box g4m-arch-field-max">0.0</div>
             </div>
         </div>
 
-        <!-- Parameter a: Startabstand (-10 bis +10) -->
-        <div style="margin-bottom: 10px; position: relative;">
-            <div class="g4m-abs-left-center">
-                <span class="g4m-param-label-30">a</span>
-            </div>
-            <div class="g4m-flexrow-ind-mb">
-                <span class="g4m-param-label">Min</span>
-                <input type="range" id="arch-param-a-min" min="-10" max="10" step="0.1" value="0" class="g4m-row-flex">
-                <div id="arch-val-a-min" class="g4m-val-box">0.0</div>
-            </div>
-            <div class="g4m-flexrow-ind">
-                <span class="g4m-param-label">Max</span>
-                <input type="range" id="arch-param-a-max" min="-10" max="10" step="0.1" value="0" class="g4m-row-flex">
-                <div id="arch-val-a-max" class="g4m-val-box">0.0</div>
-            </div>
-        </div>
-
-        <!-- Parameter b: Wachstumsrate — Fein / Grob -->
-        <div style="margin-bottom:12px; margin-top:10px;">
-            <div class="g4m-flexrow-mb4">
-                <span class="g4m-param-name">b</span>
+        <!-- Parameter b: Wachstumsrate — Fine / Coarse -->
+        <div class="g4m-arch-prow" id="arch-prow-b">
+            <div class="g4m-arch-phead">
                 <span class="g4m-note-text">Growth rate</span>
-                <div class="g4m-seg-group">
-                    <button type="button" id="arch-b-fine-btn" class="g4m-tgl g4m-on g4m-seg-btn-sm">Fine</button>
-                    <button type="button" id="arch-b-coarse-btn" class="g4m-tgl g4m-seg-btn-sm">Coarse</button>
+                <div class="g4m-arch-seg">
+                    <button type="button" id="arch-b-fine-btn" class="g4m-tgl g4m-on g4m-arch-segbtn g4m-arch-fine-btn">Fine</button>
+                    <button type="button" id="arch-b-coarse-btn" class="g4m-tgl g4m-arch-segbtn g4m-arch-coarse-btn">Coarse</button>
                 </div>
             </div>
-            <!-- Fein: -1 bis +1, step 0.01 -->
-            <div id="arch-b-fine" style="display:block;">
-                <div class="g4m-flexrow-ind-mb">
-                    <span class="g4m-param-label-sm">Min</span>
-                    <input type="range" id="arch-param-b-fine-min" min="-1" max="1" step="0.01" value="0.02" class="g4m-row-flex">
-                    <div id="arch-val-b-fine-min" class="g4m-val-box">0.02</div>
-                </div>
-                <div class="g4m-flexrow-ind">
-                    <span class="g4m-param-label-sm">Max</span>
-                    <input type="range" id="arch-param-b-fine-max" min="-1" max="1" step="0.01" value="0.08" class="g4m-row-flex">
-                    <div id="arch-val-b-fine-max" class="g4m-val-box">0.08</div>
-                </div>
+            <div id="arch-b-fine" class="g4m-arch-block">
+                <span class="g4m-param-label-sm g4m-arch-lbl-min">Min</span>
+                <input type="range" id="arch-param-b-fine-min" min="-1" max="1" step="0.01" value="0.02" class="g4m-row-flex g4m-arch-rail-min">
+                <div id="arch-val-b-fine-min" class="g4m-val-box g4m-arch-field-min">0.02</div>
+                <span class="g4m-param-label-sm g4m-arch-lbl-max">Max</span>
+                <input type="range" id="arch-param-b-fine-max" min="-1" max="1" step="0.01" value="0.08" class="g4m-row-flex g4m-arch-rail-max">
+                <div id="arch-val-b-fine-max" class="g4m-val-box g4m-arch-field-max">0.08</div>
             </div>
-            <!-- Grob: -10 bis +10, step 0.1 -->
-            <div id="arch-b-coarse" style="display:none;">
-                <div class="g4m-flexrow-ind-mb">
-                    <span class="g4m-param-label-sm">Min</span>
-                    <input type="range" id="arch-param-b-coarse-min" min="-10" max="10" step="0.1" value="-10" class="g4m-row-flex">
-                    <div id="arch-val-b-coarse-min" class="g4m-val-box">-10.0</div>
-                </div>
-                <div class="g4m-flexrow-ind">
-                    <span class="g4m-param-label-sm">Max</span>
-                    <input type="range" id="arch-param-b-coarse-max" min="-10" max="10" step="0.1" value="10" class="g4m-row-flex">
-                    <div id="arch-val-b-coarse-max" class="g4m-val-box">10.0</div>
-                </div>
+            <div id="arch-b-coarse" class="g4m-arch-block" style="display:none;">
+                <span class="g4m-param-label-sm g4m-arch-lbl-min">Min</span>
+                <input type="range" id="arch-param-b-coarse-min" min="-10" max="10" step="0.1" value="-10" class="g4m-row-flex g4m-arch-rail-min">
+                <div id="arch-val-b-coarse-min" class="g4m-val-box g4m-arch-field-min">-10.0</div>
+                <span class="g4m-param-label-sm g4m-arch-lbl-max">Max</span>
+                <input type="range" id="arch-param-b-coarse-max" min="-10" max="10" step="0.1" value="10" class="g4m-row-flex g4m-arch-rail-max">
+                <div id="arch-val-b-coarse-max" class="g4m-val-box g4m-arch-field-max">10.0</div>
             </div>
         </div>
 
-        <!-- Parameter α: Winkelbereich in Grad — Fein / Grob -->
-        <div style="margin-bottom:12px; margin-top:10px;">
-            <div class="g4m-flexrow-mb4">
-                <span class="g4m-param-name">α</span>
+        <!-- Parameter α: Winkelbereich — Fine / Coarse + Presets -->
+        <div class="g4m-arch-prow" id="arch-prow-alpha">
+            <div class="g4m-arch-phead">
                 <span class="g4m-note-text">Angle range (degrees)</span>
-                <div class="g4m-seg-group">
-                    <button type="button" id="arch-alpha-fine-btn" class="g4m-tgl g4m-on g4m-seg-btn-sm">Fine</button>
-                    <button type="button" id="arch-alpha-coarse-btn" class="g4m-tgl g4m-seg-btn-sm">Coarse</button>
+                <div class="g4m-arch-seg">
+                    <button type="button" id="arch-alpha-fine-btn" class="g4m-tgl g4m-on g4m-arch-segbtn g4m-arch-fine-btn">Fine</button>
+                    <button type="button" id="arch-alpha-coarse-btn" class="g4m-tgl g4m-arch-segbtn g4m-arch-coarse-btn">Coarse</button>
                 </div>
             </div>
-            <!-- Fein: 1–45°, step 1 -->
-            <div id="arch-alpha-fine" style="display:block;">
-                <div class="g4m-flexrow-ind-mb">
-                    <span class="g4m-param-label-sm">Min</span>
-                    <input type="range" id="arch-param-alpha-fine-min" min="1" max="45" step="1" value="15" class="g4m-row-flex">
-                    <div id="arch-val-alpha-fine-min" class="g4m-val-box">15°</div>
-                </div>
-                <div class="g4m-flexrow-ind">
-                    <span class="g4m-param-label-sm">Max</span>
-                    <input type="range" id="arch-param-alpha-fine-max" min="1" max="45" step="1" value="16" class="g4m-row-flex">
-                    <div id="arch-val-alpha-fine-max" class="g4m-val-box">16°</div>
-                </div>
-                <!-- Preset-Buttons für häufige Winkel -->
-                <div style="display:flex; padding-left:30px; margin-top:4px; gap:2px;">
-                    <button type="button" class="arch-alpha-preset g4m-mini-btn" data-deg="5">5°</button>
-                    <button type="button" class="arch-alpha-preset g4m-mini-btn" data-deg="10">10°</button>
-                    <button type="button" class="arch-alpha-preset g4m-mini-btn" data-deg="15">15°</button>
-                    <button type="button" class="arch-alpha-preset g4m-mini-btn" data-deg="30">30°</button>
-                    <button type="button" class="arch-alpha-preset g4m-mini-btn" data-deg="45">45°</button>
+            <div id="arch-alpha-fine" class="g4m-arch-block g4m-arch-block-presets">
+                <span class="g4m-param-label-sm g4m-arch-lbl-min">Min</span>
+                <input type="range" id="arch-param-alpha-fine-min" min="1" max="45" step="1" value="15" class="g4m-row-flex g4m-arch-rail-min">
+                <div id="arch-val-alpha-fine-min" class="g4m-val-box g4m-arch-field-min">15°</div>
+                <span class="g4m-param-label-sm g4m-arch-lbl-max">Max</span>
+                <input type="range" id="arch-param-alpha-fine-max" min="1" max="45" step="1" value="16" class="g4m-row-flex g4m-arch-rail-max">
+                <div id="arch-val-alpha-fine-max" class="g4m-val-box g4m-arch-field-max">16°</div>
+                <div class="g4m-arch-presets">
+                    <button type="button" class="arch-alpha-preset g4m-arch-presetbtn" data-deg="5">5°</button>
+                    <button type="button" class="arch-alpha-preset g4m-arch-presetbtn" data-deg="10">10°</button>
+                    <button type="button" class="arch-alpha-preset g4m-arch-presetbtn" data-deg="15">15°</button>
+                    <button type="button" class="arch-alpha-preset g4m-arch-presetbtn" data-deg="30">30°</button>
+                    <button type="button" class="arch-alpha-preset g4m-arch-presetbtn" data-deg="45">45°</button>
                 </div>
             </div>
-            <!-- Grob: 1–3000°, step 1 -->
-            <div id="arch-alpha-coarse" style="display:none;">
-                <div class="g4m-flexrow-ind-mb">
-                    <span class="g4m-param-label-sm">Min</span>
-                    <input type="range" id="arch-param-alpha-coarse-min" min="1" max="3000" step="1" value="1" class="g4m-row-flex">
-                    <div id="arch-val-alpha-coarse-min" class="g4m-val-box">1°</div>
-                </div>
-                <div class="g4m-flexrow-ind">
-                    <span class="g4m-param-label-sm">Max</span>
-                    <input type="range" id="arch-param-alpha-coarse-max" min="1" max="3000" step="1" value="3000" class="g4m-row-flex">
-                    <div id="arch-val-alpha-coarse-max" class="g4m-val-box">3000°</div>
-                </div>
-                <!-- Preset-Buttons für häufige Winkel -->
-                <div style="display:flex; padding-left:30px; margin-top:4px; gap:2px;">
-                    <button type="button" class="arch-alpha-preset g4m-mini-btn" data-deg="60">60°</button>
-                    <button type="button" class="arch-alpha-preset g4m-mini-btn" data-deg="90">90°</button>
-                    <button type="button" class="arch-alpha-preset g4m-mini-btn" data-deg="120">120°</button>
-                    <button type="button" class="arch-alpha-preset g4m-mini-btn" data-deg="360">360°</button>
-                    <button type="button" class="arch-alpha-preset g4m-mini-btn" data-deg="720">720°</button>
-                    <button type="button" class="arch-alpha-preset g4m-mini-btn" data-deg="1080">1080°</button>
+            <div id="arch-alpha-coarse" class="g4m-arch-block g4m-arch-block-presets" style="display:none;">
+                <span class="g4m-param-label-sm g4m-arch-lbl-min">Min</span>
+                <input type="range" id="arch-param-alpha-coarse-min" min="1" max="3000" step="1" value="1" class="g4m-row-flex g4m-arch-rail-min">
+                <div id="arch-val-alpha-coarse-min" class="g4m-val-box g4m-arch-field-min">1°</div>
+                <span class="g4m-param-label-sm g4m-arch-lbl-max">Max</span>
+                <input type="range" id="arch-param-alpha-coarse-max" min="1" max="3000" step="1" value="3000" class="g4m-row-flex g4m-arch-rail-max">
+                <div id="arch-val-alpha-coarse-max" class="g4m-val-box g4m-arch-field-max">3000°</div>
+                <div class="g4m-arch-presets">
+                    <button type="button" class="arch-alpha-preset g4m-arch-presetbtn" data-deg="60">60°</button>
+                    <button type="button" class="arch-alpha-preset g4m-arch-presetbtn" data-deg="90">90°</button>
+                    <button type="button" class="arch-alpha-preset g4m-arch-presetbtn" data-deg="120">120°</button>
+                    <button type="button" class="arch-alpha-preset g4m-arch-presetbtn" data-deg="360">360°</button>
+                    <button type="button" class="arch-alpha-preset g4m-arch-presetbtn" data-deg="720">720°</button>
+                    <button type="button" class="arch-alpha-preset g4m-arch-presetbtn" data-deg="1080">1080°</button>
                 </div>
             </div>
         </div>
 
-        <!-- Parameter β: Startwinkel (1–360°) -->
-        <div style="margin-bottom:12px; margin-top:10px; position:relative;">
-            <div class="g4m-flexrow-mb4">
-                <span class="g4m-param-name">β</span>
+        <!-- Parameter β: Startwinkel (1–360°) — kein Fine/Coarse -->
+        <div class="g4m-arch-prow" id="arch-prow-beta">
+            <div class="g4m-arch-phead">
                 <span class="g4m-note-text">Start angle [1 … 360°]</span>
+                <span class="g4m-arch-seg-spacer"></span>
             </div>
-            <div class="g4m-flexrow-ind-mb">
-                <span class="g4m-param-label-sm">Min</span>
-                <input type="range" id="arch-param-beta-min" min="0" max="360" step="1" value="0" class="g4m-row-flex">
-                <div id="arch-val-beta-min" class="g4m-val-box">0°</div>
-            </div>
-            <div class="g4m-flexrow-ind">
-                <span class="g4m-param-label-sm">Max</span>
-                <input type="range" id="arch-param-beta-max" min="0" max="360" step="1" value="31" class="g4m-row-flex">
-                <div id="arch-val-beta-max" class="g4m-val-box">31°</div>
-            </div>
-        </div>
-
-        <!-- Anzahl Punkte — unabhängig vom Tool-Panel -->
-        <!-- alpha = Winkelschritt pro Punkt, Punkte = Anzahl Schritte -->
-        <!-- Totaler Winkel = alpha × Punkte -->
-        <div style="margin-bottom:10px; margin-top:10px; position:relative;">
-            <div style="position:absolute; left:0; top:50%; transform:translateY(-50%); z-index:2;">
-                <span class="g4m-param-name">N</span>
-            </div>
-            <div class="g4m-flexrow-ind-mb">
-                <span style="width:40px; font-size:11px; color:#666666; font-weight:bold;">Min</span>
-                <input type="range" id="arch-param-n-min" min="2" max="2000" step="1" value="1000" class="g4m-row-flex">
-                <div id="arch-val-n-min" class="g4m-val-box">1000</div>
-            </div>
-            <div class="g4m-flexrow-ind">
-                <span style="width:40px; font-size:11px; color:#666666; font-weight:bold;">Max</span>
-                <input type="range" id="arch-param-n-max" min="2" max="2000" step="1" value="1156" class="g4m-row-flex">
-                <div id="arch-val-n-max" class="g4m-val-box">1156</div>
-            </div>
-            <div style="padding-left:30px; font-size:10px; color:#666666; margin-top:2px;">
-                Number of points · Total angle = α × N
+            <div class="g4m-arch-block">
+                <span class="g4m-param-label-sm g4m-arch-lbl-min">Min</span>
+                <input type="range" id="arch-param-beta-min" min="0" max="360" step="1" value="0" class="g4m-row-flex g4m-arch-rail-min">
+                <div id="arch-val-beta-min" class="g4m-val-box g4m-arch-field-min">0°</div>
+                <span class="g4m-param-label-sm g4m-arch-lbl-max">Max</span>
+                <input type="range" id="arch-param-beta-max" min="0" max="360" step="1" value="31" class="g4m-row-flex g4m-arch-rail-max">
+                <div id="arch-val-beta-max" class="g4m-val-box g4m-arch-field-max">31°</div>
             </div>
         </div>
 
-        <!-- Farb-Sektion -->
-        <div style="margin-top: 30px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; position: relative;">
-            <div style="width: 70%; display: flex; align-items: center; justify-content: center;">
-                <div style="display: flex; align-items: center; margin-right: 30px;">
-                    <div style="color: #666666; margin-right: 10px;">Random</div>
-                    <div style="color: #666666; margin-right: 5px;">On</div>
-                    <div style="display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; margin-right: 5px;">
-                        <button type="button" id="arch-color-random-on" class="g4m-dot g4m-on g4m-color-dot"></button>
-                    </div>
-                    <div style="color: #666666; margin: 0 5px;">Off</div>
-                    <div style="display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; margin-left: 5px;">
-                        <button type="button" id="arch-color-random-off" class="g4m-dot g4m-color-dot"></button>
-                    </div>
-                </div>
-                <div style="display: flex; align-items: center;">
-                    <div style="font-weight: bold; color: #666666; margin-right: 10px;">Color</div>
-                    <input type="color" id="arch-default-color" value="#2196F3" style="width: 40px; height: 26px; cursor: pointer; border: none;">
-                </div>
+        <!-- Parameter N: Anzahl Punkte — kein Fine/Coarse -->
+        <div class="g4m-arch-prow" id="arch-prow-n">
+            <div class="g4m-arch-phead">
+                <span class="g4m-note-text">Number of points · Total angle = α × N</span>
+                <span class="g4m-arch-seg-spacer"></span>
+            </div>
+            <div class="g4m-arch-block">
+                <span class="g4m-param-label-sm g4m-arch-lbl-min">Min</span>
+                <input type="range" id="arch-param-n-min" min="2" max="2000" step="1" value="1000" class="g4m-row-flex g4m-arch-rail-min">
+                <div id="arch-val-n-min" class="g4m-val-box g4m-arch-field-min">1000</div>
+                <span class="g4m-param-label-sm g4m-arch-lbl-max">Max</span>
+                <input type="range" id="arch-param-n-max" min="2" max="2000" step="1" value="1156" class="g4m-row-flex g4m-arch-rail-max">
+                <div id="arch-val-n-max" class="g4m-val-box g4m-arch-field-max">1156</div>
             </div>
         </div>
 
-        <!-- Preset Buttons -->
-        <div style="margin-top: 12px; display: flex; justify-content: center; gap: 6px;">
-            <button type="button" id="arch-preset-stern" style="padding: 5px 12px; font-size: 11px; margin: 0;
-                background: #000; color: #fff; border: none; cursor: pointer; border-radius: 3px;">
-                ★ Stern-Preset
-            </button>
-            <button type="button" id="arch-preset-stern1" style="padding: 5px 12px; font-size: 11px; margin: 0;
-                background: #000; color: #fff; border: none; cursor: pointer; border-radius: 3px;">
-                ★ Stern (1 Spirale)
-            </button>
+        <!-- Parameter Optimizer: Größen-Modulator pro Kurve (10–200 %),
+             100 % = unverändert; On/Off im Kopf (aus = keine Wirkung) -->
+        <div class="g4m-arch-prow" id="arch-prow-optimizer">
+            <div class="g4m-arch-phead">
+                <span class="g4m-note-text">Size optimizer · 100 % = unchanged</span>
+                <span class="g4m-arch-seg-spacer"></span>
+            </div>
+            <div class="g4m-arch-block">
+                <span class="g4m-param-label-sm g4m-arch-lbl-min">Min</span>
+                <input type="range" id="arch-param-optimizer-min" min="10" max="200" step="1" value="10" class="g4m-row-flex g4m-arch-rail-min">
+                <div id="arch-val-optimizer-min" class="g4m-val-box g4m-arch-field-min">10%</div>
+                <span class="g4m-param-label-sm g4m-arch-lbl-max">Max</span>
+                <input type="range" id="arch-param-optimizer-max" min="10" max="200" step="1" value="100" class="g4m-row-flex g4m-arch-rail-max">
+                <div id="arch-val-optimizer-max" class="g4m-val-box g4m-arch-field-max">100%</div>
+            </div>
         </div>
 
-        <!-- Formel unten rechts — klickbar öffnet Panel 3 -->
-        <div id="arch-formula-toggle" role="button" tabindex="0" aria-label="Open formula panel" style="position: absolute; right: 20px; bottom: 20px; font-size: 13px; color: #666666; text-align: right; cursor: pointer; user-select:none;">
-            r(θ) = a + b · θ<br>
-            <span style="font-size: 10px; color: #555;">θ ∈ [β°, β° + α°] &nbsp;▶</span>
+        <!-- Funktions-Zeilen (erscheinen je nach gewähltem Funktions-
+             Quadrat). Connect: On/Off. Color: Random On/Off + Farbwähler.
+             Modulation: Strength/Frequency (Typ + On/Off liegen in der
+             untersten Reihe). -->
+        <div class="g4m-arch-prow" id="arch-prow-connect">
+            <div class="g4m-arch-phead">
+                <span class="g4m-note-text">Connecting line start → end</span>
+                <span class="g4m-arch-seg-spacer"></span>
+            </div>
+        </div>
+
+        <div class="g4m-arch-prow" id="arch-prow-color">
+            <div class="g4m-arch-phead">
+                <span class="g4m-note-text">Random for Color on or off</span>
+                <span class="g4m-arch-seg-spacer"></span>
+            </div>
+        </div>
+
+        <div class="g4m-arch-prow" id="arch-prow-mod">
+            <div class="g4m-arch-phead">
+                <span class="g4m-note-text">Curve modulation</span>
+                <span class="g4m-arch-seg-spacer"></span>
+            </div>
+            <div class="g4m-arch-block g4m-arch-block-mod">
+                <span class="g4m-param-label-sm g4m-arch-lbl-min">Strength</span>
+                <input type="range" id="arch-mod-strength" min="0" max="1" step="0.01" value="0.71" class="g4m-row-flex g4m-arch-rail-min">
+                <div id="arch-mod-strength-val" class="g4m-val-box g4m-arch-field-min">0.71</div>
+                <span class="g4m-param-label-sm g4m-arch-lbl-max">Freq</span>
+                <input type="range" id="arch-mod-freq" min="0.1" max="20" step="0.1" value="19.1" class="g4m-row-flex g4m-arch-rail-max">
+                <div id="arch-mod-freq-val" class="g4m-val-box g4m-arch-field-max">19.1</div>
+            </div>
         </div>
     </div>
+
 </div>
 
 
@@ -1947,44 +2390,8 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
     </div>
 
     <div style="flex:1; padding:20px; background-color:var(--g4m-mode-color-archimedean); overflow:hidden;">
-
-        <!-- Verbindungslinien -->
-        <div style="margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid rgba(0,0,0,0.15);">
-            <div style="display:flex; align-items:center;">
-                <span style="font-size:13px; color:#333; flex:1; font-weight:bold;">Connecting lines start→end</span>
-                <div class="g4m-seg-group">
-                    <button type="button" id="arch-connect-on" class="g4m-tgl g4m-seg-btn">On</button>
-                    <button type="button" id="arch-connect-off" class="g4m-tgl g4m-on g4m-seg-btn">Off</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Kurvenmodulation -->
-        <div>
-            <div style="display:flex; align-items:center; margin-bottom:10px;">
-                <span style="font-size:13px; color:#333; flex:1; font-weight:bold;">Curve modulation</span>
-                <div class="g4m-seg-group">
-                    <button type="button" id="arch-mod-on" class="g4m-tgl g4m-seg-btn">On</button>
-                    <button type="button" id="arch-mod-off" class="g4m-tgl g4m-on g4m-seg-btn">Off</button>
-                </div>
-            </div>
-            <div style="display:flex; gap:4px; margin-bottom:12px;">
-                <button type="button" id="arch-mod-cos" class="g4m-tgl g4m-preset-btn">cos</button>
-                <button type="button" id="arch-mod-sin" class="g4m-tgl g4m-on g4m-preset-btn">sin</button>
-                <button type="button" id="arch-mod-tan" class="g4m-tgl g4m-preset-btn">tan</button>
-            </div>
-            <div style="display:flex; align-items:center; margin-bottom:10px;">
-                <span style="width:80px; font-size:12px; color:#333;">Strength</span>
-                <input type="range" id="arch-mod-strength" min="0" max="1" step="0.01" value="0.71" style="flex:1; margin:0 8px;">
-                <div id="arch-mod-strength-val" style="width:38px; text-align:right; font-size:11px; color:#333; background:#f5f5f5; border:1px solid #d0d0d0; padding:2px 4px;">0.71</div>
-            </div>
-            <div style="display:flex; align-items:center;">
-                <span style="width:80px; font-size:12px; color:#333;">Frequency</span>
-                <input type="range" id="arch-mod-freq" min="0.1" max="20" step="0.1" value="19.1" style="flex:1; margin:0 8px;">
-                <div id="arch-mod-freq-val" style="width:38px; text-align:right; font-size:11px; color:#333; background:#f5f5f5; border:1px solid #d0d0d0; padding:2px 4px;">19.1</div>
-            </div>
-        </div>
-
+        <!-- Inhalt nach Seite 1 verlagert (Connecting Lines, Modulation,
+             Farbe). Seite 2 bleibt vorerst leer für künftige Optionen. -->
     </div>
 </div>
 
@@ -2196,6 +2603,102 @@ function g4mRadioButtons() { return document.querySelectorAll('.radio-btn[data-m
    bzw. Archimedean-Modul, §6) und werden nur dort beschrieben. */
 let g4mState;   // Lese-Fassade — wird vom Store erzeugt
 
+/* ── Sitzungsübergreifende Persistenz (localStorage) ───────────────
+   Speichert die experimentier-relevanten Parameter aller Panels, damit
+   sie einen App-Neustart überdauern. Der Nutzer muss viel ausprobieren;
+   ein Reset bei jedem Start wäre mühsam. Gespeichert wird ein Schnapp-
+   schuss der persistierbaren Store-Teilbäume und Skalar-Schlüssel; beim
+   Start wird er über die Defaults gemischt (deep-merge), fehlende oder
+   neue Felder fallen auf den Default zurück (vorwärtskompatibel).
+   Robuste Auslegung: jeder Zugriff in try/catch, damit ein voller oder
+   gesperrter Speicher (privater Modus) die App nie blockiert. */
+const G4M_PERSIST = (function () {
+    const KEY = 'g4m_settings_v1';
+    // Nur diese Schlüssel werden persistiert (Parameter, nicht Laufzeit-
+    // /UI-Zustände wie offene Panels, Modus, Home-Abdeckungen).
+    const PERSIST_KEYS = [
+        'currentDisplayMode', 'canvasBackgroundColor', 'normalizationEnabled',
+        'archConnectingLines', 'archimedeanParams', 'archUseRandomColors',
+        'archDefaultColor', 'useRandomColors', 'defaultCurveColor',
+        'viewParams', 'superformulaParams', 'archModulation', 'randomModes'
+    ];
+    function isPlainObject(o) {
+        return o && typeof o === 'object' && !Array.isArray(o);
+    }
+    // saved tief über target legen, ohne unbekannte Defaults zu verlieren
+    function deepMerge(target, saved) {
+        if (!isPlainObject(saved)) return;
+        Object.keys(saved).forEach(function (k) {
+            if (isPlainObject(saved[k]) && isPlainObject(target[k])) {
+                deepMerge(target[k], saved[k]);
+            } else if (!isPlainObject(saved[k]) && k in target) {
+                target[k] = saved[k];
+            }
+        });
+    }
+    return {
+        PERSIST_KEYS: PERSIST_KEYS,
+        load: function () {
+            try {
+                const raw = localStorage.getItem(KEY);
+                return raw ? JSON.parse(raw) : null;
+            } catch (e) { return null; }
+        },
+        // Schnappschuss in den vorhandenen state-Defaults mischen
+        applyTo: function (state) {
+            const saved = this.load();
+            if (!saved) return false;
+            PERSIST_KEYS.forEach(function (k) {
+                if (!(k in saved)) return;
+                if (k === 'randomModes') {
+                    // dynamische Schlüssel (Slider-Ids) — direkt übernehmen,
+                    // nicht über deepMerge (das nur bekannte Keys schreibt)
+                    if (isPlainObject(saved.randomModes)) {
+                        Object.keys(saved.randomModes).forEach(function (id) {
+                            state.randomModes[id] = saved.randomModes[id] === true;
+                        });
+                    }
+                } else if (isPlainObject(state[k]) && isPlainObject(saved[k])) {
+                    deepMerge(state[k], saved[k]);
+                } else {
+                    state[k] = saved[k];
+                }
+            });
+            return true;
+        },
+        save: function (state) {
+            try {
+                const snap = {};
+                PERSIST_KEYS.forEach(function (k) {
+                    if (k in state) snap[k] = state[k];
+                });
+                localStorage.setItem(KEY, JSON.stringify(snap));
+            } catch (e) { /* Speicher voll/gesperrt — still ignorieren */ }
+        },
+        clear: function () {
+            try { localStorage.removeItem(KEY); } catch (e) {}
+        },
+        /* Letztes Bild (kompletter Kurven-Zustand) separat sichern, damit
+           der User beim Neustart zu „seinem" Bild zurückkehrt. Bewusst
+           getrennt vom Einstellungs-Schlüssel. Enthält die gezeichneten
+           Kurven inkl. Farben und Keimen sowie den Modus und die
+           Layer-Zahl, um exakt denselben Zustand wiederherzustellen. */
+        saveImage: function (data) {
+            try { localStorage.setItem('g4m_image_v1', JSON.stringify(data)); }
+            catch (e) { /* Speicher voll/gesperrt — still ignorieren */ }
+        },
+        loadImage: function () {
+            try {
+                const raw = localStorage.getItem('g4m_image_v1');
+                return raw ? JSON.parse(raw) : null;
+            } catch (e) { return null; }
+        },
+        clearImage: function () {
+            try { localStorage.removeItem('g4m_image_v1'); } catch (e) {}
+        }
+    };
+})();
+
 const g4mStore = (function () {
     const state = {
         activeDrawingMode: 'superformula',
@@ -2217,7 +2720,12 @@ const g4mStore = (function () {
                      fineMin: 15, fineMax: 16,
                      coarseMin: 1, coarseMax: 3000 },
             beta:  { min:  0,    max:  31 },
-            n:     { min:  1000, max:  1156 }
+            n:     { min:  1000, max:  1156 },
+            /* Optimizer (v153d): Größen-Modulator pro Kurve. Zieht je
+               Kurve einen Größenfaktor in % aus [min,max]; 100 % = Kurve
+               unverändert. enabled=false → keine Wirkung, die Parameter
+               bestimmen die Größe allein. Bereich 10–200 %. */
+            optimizer: { min: 10, max: 100, enabled: true }
         },
         archUseRandomColors: true,
         archDefaultColor: '#2196F3',
@@ -2258,6 +2766,12 @@ const g4mStore = (function () {
         // einzige Wahrheitsquelle; Radio-Klassen sind nur Anzeige
         randomModes: {}
     };
+
+    /* Gespeicherte Sitzung über die Defaults legen (falls vorhanden),
+       BEVOR die Lese-Fassade eingefroren wird — so sehen alle Leser
+       (Canvas, Visualisierung, UI-Init) sofort die zuletzt genutzten
+       Werte. */
+    G4M_PERSIST.applyTo(state);
 
     /* panels und randomModes sind vollständig store-privat: kein
        Lese- oder Schreibzugriff ausserhalb der Store-Methoden — auch
@@ -2304,7 +2818,47 @@ const g4mStore = (function () {
         setPanelOpenFlag:  function (id, open) { state.panels[id] = !!open; },
         isPanelOpenFlag:   function (id)       { return state.panels[id] === true; },
         setRandomModeFlag: function (id, r)    { state.randomModes[id] = !!r; },
-        isRandomModeFlag:  function (id)       { return state.randomModes[id] === true; }
+        isRandomModeFlag:  function (id)       { return state.randomModes[id] === true; },
+
+        /* Schmaler, kontrollierter Persistenz-Kanal für den sonst
+           fassaden-verborgenen randomModes-Teilbaum: export liefert eine
+           Kopie (keine lebende Referenz nach aussen), import schreibt die
+           gespeicherten Schalterzustände zurück. Damit bleibt die
+           Kapselung intakt, der Zustand wird aber speicherbar. */
+        exportRandomModes: function () {
+            const out = {};
+            Object.keys(state.randomModes).forEach(function (k) {
+                out[k] = state.randomModes[k] === true;
+            });
+            return out;
+        },
+        importRandomModes: function (obj) {
+            if (!obj || typeof obj !== 'object') return;
+            Object.keys(obj).forEach(function (k) {
+                state.randomModes[k] = obj[k] === true;
+            });
+        },
+
+        /* Persistenz: Wurde eine gespeicherte Sitzung gefunden? Und:
+           gespeicherte Werte erneut über den Live-State legen (z. B. am
+           Ende von init, nachdem resetToDefaults die Defaults gesetzt
+           hat) — danach gewinnt die gespeicherte Sitzung. Publiziert pro
+           Teilbaum ein Bus-Ereignis, sodass Anzeige und Auto-Save
+           konsistent bleiben. */
+        hasSaved: function () { return !!G4M_PERSIST.load(); },
+        restoreSaved: function () {
+            const saved = G4M_PERSIST.load();
+            if (!saved) return false;
+            G4M_PERSIST.applyTo(state);   // tiefes Mischen in den Live-State
+            // Bus-Ereignisse, damit Abonnenten (und Auto-Save) reagieren
+            ['archimedeanParams','viewParams','archModulation','superformulaParams']
+                .forEach(function (k) { g4mBus.emit('state', { key: k, value: state[k] }); });
+            ['currentDisplayMode','canvasBackgroundColor','normalizationEnabled',
+             'archConnectingLines','archUseRandomColors','archDefaultColor',
+             'useRandomColors','defaultCurveColor']
+                .forEach(function (k) { g4mBus.emit('state', { key: k, value: state[k] }); });
+            return true;
+        }
     };
 })();
 
@@ -2406,6 +2960,35 @@ const g4mBus = (function () {
         }
     };
 })();
+
+/* Auto-Speichern: jede Zustandsänderung (Slider, Toggle, Farbe, …)
+   wird gebündelt nach kurzer Ruhe in localStorage gesichert. Die
+   Entprellung verhindert hunderte Schreibvorgänge beim Ziehen eines
+   Reglers. Der Schreibzugriff läuft über G4M_PERSIST und ist gegen
+   Speicherfehler abgesichert. */
+const g4mScheduleSettingsSave = (function () {
+    let t = null;
+    return function () {
+        if (t) clearTimeout(t);
+        t = setTimeout(function () {
+            t = null;
+            G4M_PERSIST.save(g4mStateRawForSave());
+        }, 400);
+    };
+})();
+/* Liefert ein einfaches Objekt mit den persistierbaren Werten aus der
+   Lese-Fassade (die Getter geben die lebenden Referenzen zurück). */
+function g4mStateRawForSave() {
+    const out = {};
+    G4M_PERSIST.PERSIST_KEYS.forEach(function (k) {
+        if (k in g4mState) out[k] = g4mState[k];
+    });
+    // randomModes liegt fassaden-verborgen — über den Store-Kanal holen
+    out.randomModes = g4mStore.exportRandomModes();
+    return out;
+}
+g4mBus.on('state', g4mScheduleSettingsSave);
+g4mBus.on('randomMode', g4mScheduleSettingsSave);   // Random/Fixed-Schalter mitspeichern
 
 /* Zeichenmodus zentral wechseln — Konsumenten hören auf dem Bus mit */
 /* ── Befund 28: EIN Modus, EIN Mutator, EINE Optik ────────────────
@@ -2704,6 +3287,7 @@ const G4M_DEFAULTS = {
         alpha: { useFine: true, min: 15,   max: 16 },
         beta:  { min: 0,    max: 31 },
         n:     { min: 1000, max: 1156 },
+        optimizer: { min: 10, max: 100, enabled: true },
         randomColors: true,
         /* enabled:false (v150j): die Defaults laufen bei JEDEM Öffnen
            des F2-Panels (setArchDefaults in showArchimedeanPanel) —
@@ -3540,7 +4124,10 @@ function superformulaRadius(angle, param_a, param_b, m, n1, n2, n3) {
 
 // Erzeugt den Parametersatz einer Kurve; die Grenzen werden direkt aus
 // dem Boundaries-Panel gelesen (Min == Max => fester Wert)
-function generateSuperformulaParameters(size) {
+function generateSuperformulaParameters(maxSize) {
+    // F1 behält vorerst exakt den bisherigen Zufalls-Größentrick
+    // (10 %–100 % von maxSize). Der Optimizer kommt für F1 später.
+    const size = getRandomNumber(maxSize * 0.1, maxSize);
     const PARAM_DEFAULTS = { a: 1.0, b: 1.0, m: 5.0, n1: 0.2, n2: 0.2, n3: 0.2 };
     const p = {};
 
@@ -3864,9 +4451,11 @@ const G4M_PARAM_POOL_SIZE = sliderData['number-of-layers'].max;
    Sperren -> Hintergrund -> Parameter-Pool -> gestückelt zeichnen ->
    Token-Abschluss. Beide Generatoren (und künftige F3-F6) sind nur
    noch Registry-Dispatches auf diese eine Pipeline. */
-function runGeneration(rendererId) {
+function runGeneration(rendererId, opts) {
     const renderer = G4M_RENDERERS[rendererId];
-    if (renderer.prepare) renderer.prepare();
+    // Baby-Go generiert OHNE prepare (das Panel soll offen bleiben,
+    // kein Ansichtswechsel zur Canvas).
+    if (renderer.prepare && !(opts && opts.skipPrepare)) renderer.prepare();
 
     setBusy(true, G4M_TEXT.generatingCurves(renderer.label));   // modusabhängig (Befund 27)
 
@@ -3885,9 +4474,12 @@ function runGeneration(rendererId) {
         const numCurves = Math.round(g4mState.viewParams.numLayers);
 
         // Parameter zuerst vollständig erzeugen (günstig) ...
+        // Die Größen-Entscheidung liegt jetzt im jeweiligen Renderer
+        // (makeParams): F1 behält den bisherigen Zufalls-Größentrick,
+        // F2 nutzt den Optimizer. Übergeben wird nur die Bezugsgröße
+        // maxSize (= „volle" Größe, 100 %). (v153d)
         for (let i = 0; i < G4M_PARAM_POOL_SIZE; i++) {
-            const size   = getRandomNumber(maxSize * 0.1, maxSize);
-            const params = renderer.makeParams(size);
+            const params = renderer.makeParams(maxSize);
             allGeneratedParameters.push(params);
             if (i < numCurves) storedCurveParameters.push(params);
         }
@@ -3901,15 +4493,61 @@ function runGeneration(rendererId) {
             lastGeneratedTokenId = currentTokenNumber.toString().padStart(6, '0');
             saveTokenCounter();
             setBusy(false);
+            if (typeof g4mDrawVizResult === 'function') g4mDrawVizResult();   // Viz Result aktualisieren
+            if (typeof g4mSaveLastImage === 'function') g4mSaveLastImage();    // letztes Bild sichern
         });
     }, G4M_ANIM.PAINT_DEFER_MS);
 }
 
+/* ── Optimizer-Größe (Variante A) ─────────────────────────────────
+   Berechnet den size-Wert einer Kurve aus ihrem stabilen Keim (0…1)
+   und den aktuellen Optimizer-Werten. enabled=false → volle Größe
+   (maxSize). enabled=true → maxSize × Faktor%, Faktor = min + keim ×
+   (max−min). Da der Keim fest ist, ergibt dieselbe Reglerstellung
+   immer denselben size — beim Ziehen entsteht eine flüssige,
+   deterministische Änderung statt Flackern. */
+function g4mOptimizerSize(maxSize, seed, opt) {
+    if (!opt || !opt.enabled) return maxSize;
+    const factorPct = opt.min + (seed != null ? seed : 0) * (opt.max - opt.min);
+    return maxSize * (factorPct / 100);
+}
+
+/* Wendet die AKTUELLEN Parameterbereiche (a, b, α, β, N, Optimizer) in
+   Echtzeit auf das bereits generierte Bild an: Für jede gespeicherte
+   Archimedean-Kurve werden alle Formel-Werte aus ihren STABILEN Keimen
+   + den aktuellen Min/Max neu berechnet (g4mArchValsFromSeeds) und die
+   Größe über den Optimizer skaliert. Kein Neuwürfeln → flüssig, kein
+   Flackern. Danach Canvas + Viz Result neu zeichnen. */
+function g4mApplyArchLive() {
+    const p = g4mState.archimedeanParams;
+    if (!p) return;
+    const opt = p.optimizer || { min: 100, max: 100, enabled: false };
+    let touched = false;
+    [storedCurveParameters, allGeneratedParameters].forEach(function (pool) {
+        for (let i = 0; i < pool.length; i++) {
+            const c = pool[i];
+            if (!c || c._type !== 'archimedean' || !c._seeds) continue;
+            const v = g4mArchValsFromSeeds(c._seeds, p);
+            c.a = v.a; c.b = v.b; c.alpha = v.alpha; c.beta = v.beta; c.nSteps = v.nSteps;
+            const base = c._maxSizeRef || (Math.min(canvas.width, canvas.height) / 2 * 0.9);
+            c.size = g4mOptimizerSize(base, c._seeds.size, opt);
+            touched = true;
+        }
+    });
+    if (touched && storedCurveParameters.length > 0) {
+        redrawStoredImage();        // große Canvas live
+        g4mDrawVizResult();         // Viz Result live
+    }
+}
+/* Rückwärtskompatibler Alias — die Optimizer-Regler nutzen denselben
+   Echtzeit-Pfad wie alle anderen Parameter. */
+function g4mApplyOptimizerLive() { g4mApplyArchLive(); }
+
 // Main functions — beide Generatoren dispatchen auf die Pipeline
-function generateSuperformulas() {
+function generateSuperformulas(opts) {
     needsRegen = false;
     runGeneration(g4mState.activeDrawingMode === 'archimedean'
-        ? 'archimedean' : 'superformula');
+        ? 'archimedean' : 'superformula', opts);
 }
 
 // ── ARCHIMEDEAN SPIRAL GENERATOR ────────────────────────────────
@@ -3919,40 +4557,67 @@ function generateArchimedeanSpirals() {
 }
 
 // Parameter-Objekt für archimedische Spirale aus Panel-Slidern lesen
-function generateArchimedeanParameters(size) {
+function generateArchimedeanParameters(maxSize) {
     const p = g4mState.archimedeanParams || { a:{min:-2,max:2}, b:{min:0.1,max:0.8,useFine:true,fineMin:0.1,fineMax:0.8,coarseMin:-10,coarseMax:10}, alpha:{min:1,max:45,useFine:true,fineMin:1,fineMax:45,coarseMin:1,coarseMax:3000}, beta:{min:1,max:360}, n:{min:100,max:500} };
-    function rnd(mn, mx) { return mn === mx ? mn : mn + Math.random() * (mx - mn); }
-    function rndInt(mn, mx) { return Math.round(rnd(mn, mx)); }
 
-    const a = rnd(p.a.min, p.a.max);
-    // b: Fein oder Grob
-    const bMin = p.b.useFine ? p.b.fineMin : p.b.coarseMin;
-    const bMax = p.b.useFine ? p.b.fineMax : p.b.coarseMax;
-    const b    = rnd(bMin, bMax);
-    // alpha: Winkelschritt pro Punkt in Grad (wie Spiral Engine)
-    const aMin = p.alpha.useFine ? p.alpha.fineMin : p.alpha.coarseMin;
-    const aMax = p.alpha.useFine ? p.alpha.fineMax : p.alpha.coarseMax;
-    const alpha = rnd(aMin, aMax); // Grad pro Schritt
-    const beta  = rnd(p.beta.min, p.beta.max);
-    // n: Anzahl Schritte (aus Panel, unabhängig von Tool)
-    const nSteps = rndInt((p.n && p.n.min) || 100, (p.n && p.n.max) || 500);
+    /* Variante A: pro Kurve EIN stabiler Keim je Parameter (0…1). Der
+       Keim wird hier EINMAL gewürfelt und gespeichert; der konkrete
+       Wert entsteht zentral über g4mSeedVal(keim,min,max). Beim Ziehen
+       eines Reglers werden die Werte aus Keim + neuem Bereich NEU
+       berechnet (nicht neu gewürfelt) → flüssige Echtzeit ohne Flackern,
+       und das Bild bleibt aus seinen Keimen reproduzierbar. */
+    const seeds = {
+        size:  Math.random(),
+        a:     Math.random(),
+        b:     Math.random(),
+        alpha: Math.random(),
+        beta:  Math.random(),
+        n:     Math.random()
+    };
+
+    const size = g4mOptimizerSize(maxSize, seeds.size, p.optimizer || { min:100, max:100, enabled:false });
+    const vals = g4mArchValsFromSeeds(seeds, p);
 
     const randomLines  = g4mIsRandomMode('line-thickness');
     const randomSize   = g4mIsRandomMode('point-size');
-
     const lineWidth    = randomLines  ? getRandomNumber(0.5, 10) : g4mState.viewParams.lineWidth;
     const pointSize    = randomSize   ? getRandomInt(1, 20)      : g4mState.viewParams.pointSize;
 
     const color = (g4mState.archUseRandomColors !== false) ? getRandomColor() : (g4mState.archDefaultColor || '#2196F3');
 
     /* Punktdichte der Arch-Kurven steuert AUSSCHLIESSLICH nSteps
-       (eigener N-Slider im F2-Panel). Das frühere Duplikat-Feld
-       pointDensity entfällt (Befund 14) — es suggerierte, der
-       Tool-Panel-Slider wirke auch hier, was nie der Fall war.
-       Seit Befund 20 ist auch die verwaiste BERECHNUNG entfernt,
-       die nach Befund 14 zurückgeblieben war (totes pointDensity
-       samt g4mIsRandomMode('number-of-points')-Abfrage). */
-    return { a, b, alpha, beta, size, color, nSteps, lineWidth, pointSize, _type: 'archimedean' };
+       (eigener N-Slider im F2-Panel). */
+    return {
+        a: vals.a, b: vals.b, alpha: vals.alpha, beta: vals.beta, size,
+        color, nSteps: vals.nSteps, lineWidth, pointSize,
+        _type: 'archimedean',
+        _seeds: seeds, _maxSizeRef: maxSize,
+        _sizeSeed: seeds.size   // Rückwärtskompatibel zu g4mApplyOptimizerLive
+    };
+}
+
+/* Zentrale Keim→Wert-Abbildung (EINE Quelle, von Generierung,
+   Echtzeit-Update und Viz Result gemeinsam genutzt — so können Canvas
+   und Viz Result nie auseinanderlaufen). */
+function g4mSeedVal(seed, mn, mx) {
+    return mn + (seed != null ? seed : 0) * (mx - mn);
+}
+
+/* Berechnet aus den gespeicherten Keimen einer Kurve + den AKTUELLEN
+   Parameterbereichen (Store) die konkreten Formel-Werte. b und alpha
+   bilden den Keim auf den jeweils aktiven Fein-/Grob-Bereich ab. */
+function g4mArchValsFromSeeds(seeds, p) {
+    const bMin = p.b.useFine ? p.b.fineMin : p.b.coarseMin;
+    const bMax = p.b.useFine ? p.b.fineMax : p.b.coarseMax;
+    const aMin = p.alpha.useFine ? p.alpha.fineMin : p.alpha.coarseMin;
+    const aMax = p.alpha.useFine ? p.alpha.fineMax : p.alpha.coarseMax;
+    return {
+        a:     g4mSeedVal(seeds.a,     p.a.min, p.a.max),
+        b:     g4mSeedVal(seeds.b,     bMin, bMax),
+        alpha: g4mSeedVal(seeds.alpha, aMin, aMax),
+        beta:  g4mSeedVal(seeds.beta,  p.beta.min, p.beta.max),
+        nSteps: Math.round(g4mSeedVal(seeds.n, (p.n && p.n.min) || 100, (p.n && p.n.max) || 500))
+    };
 }
 
 // Archimedische Spirale zeichnen — identische Struktur wie drawSuperformula()
@@ -4074,6 +4739,43 @@ function g4mRenderInChunks(items, drawOne, onDone) {
     step();
 }
 
+/* Zeichnet das Gesamtbild (alle gespeicherten Kurven) in das kleine
+   „Result"-Viz-Fenster des F2-Panels — maßstäblich verkleinert auf die
+   Fenstergröße, damit es 1:1 wie die große Canvas aussieht. Wird beim
+   Generieren und bei Optimizer-Echtzeitänderungen aufgerufen. */
+function g4mDrawVizResult() {
+    const vc = document.getElementById('arch-viz-result');
+    if (!vc) return;
+    const vctx = vc.getContext('2d');
+    // Fenstergröße aus dem Layout übernehmen (Pixelpuffer = CSS-Größe)
+    const w = vc.parentElement.clientWidth, h = vc.parentElement.clientHeight;
+    if (w > 0 && h > 0 && (vc.width !== w || vc.height !== h)) { vc.width = w; vc.height = h; }
+
+    vctx.clearRect(0, 0, vc.width, vc.height);
+    vctx.fillStyle = g4mState.canvasBackgroundColor;
+    vctx.fillRect(0, 0, vc.width, vc.height);
+
+    if (!storedCurveParameters.length) return;
+
+    // Maßstab Viz/Haupt-Canvas — die Kurvengrößen sind in Pixeln der
+    // Haupt-Canvas; auf das kleine Fenster proportional herunterskalieren
+    const mainSize = Math.min(canvas.width, canvas.height) || 1;
+    const vizSize  = Math.min(vc.width, vc.height);
+    const scale    = vizSize / mainSize;
+    const cx = vc.width / 2, cy = vc.height / 2;
+
+    vctx.save();
+    vctx.translate(cx, cy);
+    vctx.scale(scale, scale);
+    vctx.translate(-cx, -cy);
+    for (let i = 0; i < storedCurveParameters.length; i++) {
+        const prm = storedCurveParameters[i];
+        if (!prm) continue;
+        g4mRendererFor(prm).draw(vctx, cx, cy, prm);
+    }
+    vctx.restore();
+}
+
 function redrawStoredImage() {
     if (storedCurveParameters.length === 0) return;
     
@@ -4094,6 +4796,40 @@ function redrawStoredImage() {
         g4mRendererFor(storedCurveParameters[i])
             .draw(ctx, centerX, centerY, storedCurveParameters[i]);
     }
+
+    // Viz Result mitführen — so wirken auch die Tool-Slider (Zoom, Pan,
+    // Rotation, Transparenz, Linien-/Punktgröße, Layer-Zahl …) in
+    // Echtzeit auf das Result-Fenster, nicht nur auf die Canvas.
+    if (typeof g4mDrawVizResult === 'function') g4mDrawVizResult();
+}
+
+/* ── Letztes Bild sichern / wiederherstellen ──────────────────────
+   Speichert den kompletten Kurven-Zustand (inkl. Farben und Keimen)
+   plus Modus und Layer-Zahl, damit der User beim Neustart sein letztes
+   Bild wiedersieht. Vorerst nur Archimedean (F1 folgt später, sobald
+   es ebenfalls Keime trägt). */
+function g4mSaveLastImage() {
+    try {
+        if (g4mState.activeDrawingMode !== 'archimedean') return;  // vorerst nur F2
+        if (!storedCurveParameters.length) return;
+        G4M_PERSIST.saveImage({
+            mode: g4mState.activeDrawingMode,
+            numLayers: g4mState.viewParams.numLayers,
+            curves: storedCurveParameters
+        });
+    } catch (e) { /* still ignorieren */ }
+}
+
+/* Stellt das gespeicherte Bild beim Start wieder her und zeichnet es.
+   Liefert true, wenn ein Bild geladen und gezeichnet wurde. */
+function g4mRestoreLastImage() {
+    const data = G4M_PERSIST.loadImage();
+    if (!data || !data.curves || !data.curves.length) return false;
+    if (data.mode !== 'archimedean') return false;   // vorerst nur F2
+    storedCurveParameters  = data.curves;
+    allGeneratedParameters = data.curves.slice();
+    redrawStoredImage();
+    return true;
 }
 
 /* Beschriftung des Drawing-Buttons sicher per DOM-API setzen —
@@ -4988,18 +5724,42 @@ function closeAllPanels(exceptPanelId) {
     });
 }
 
+/* ── Persistente Panel-Einstellungen (global, F1-F10) ───────────────
+   Die Parameter-Defaults eines Panels werden nur EINMAL angewandt
+   (beim ersten Öffnen). Danach bleiben die zuletzt vom Nutzer
+   eingestellten Werte erhalten, weil die Panels beim Schliessen nur
+   aus dem Sichtbereich geschoben (nicht zurückgesetzt) werden.
+   g4mPanelInitialized merkt sich pro Panel, ob die Defaults schon
+   gesetzt wurden. g4mInitPanelOnce() kapselt diese Logik für alle
+   Panels einheitlich. */
+const g4mPanelInitialized = {};
+function g4mInitPanelOnce(key, initFn) {
+    if (g4mPanelInitialized[key]) return false;   // bereits initialisiert → Werte behalten
+    g4mPanelInitialized[key] = true;
+    if (typeof initFn === 'function') initFn();
+    return true;
+}
+
+/* Setzt nur den modusabhängigen Canvas-Hintergrund — läuft bei JEDEM
+   Öffnen (auch nach dem ersten), da er von der gewählten Formel
+   abhängt und nicht zu den persistenten Parametern zählt. */
+function g4mApplyPanelCanvasBackground(bgColor) {
+    if (bgColor == null) return;
+    g4mStore.set('canvasBackgroundColor', bgColor);
+    updateCanvasBackground();
+}
+
 function setSuperformulaDefaults() {
     const d = G4M_DEFAULTS.superformulaPanel;
-    // Canvas-Hintergrund: weiss
-    g4mStore.set('canvasBackgroundColor', d.canvasBackground);
-    updateCanvasBackground();
     Object.keys(d.sliders).forEach(function (id) {
         if (sliders[id]) sliders[id].setValue(d.sliders[id]);
     });
 }
 
 function showSuperformulaPanel() {
-    setSuperformulaDefaults();
+    // Canvas-Hintergrund wird NICHT mehr beim Öffnen gesetzt — persistente
+    // Nutzerwahl. Parameter-Defaults nur beim ersten Öffnen.
+    g4mInitPanelOnce('superformula', setSuperformulaDefaults);
     closeAllPanels('superformel-panel');
     g4mSetDrawingMode('superformula');   // F1 wählt den Modus — wie F2-F6 (Befund 28)
     const panel = document.getElementById('superformel-panel');
@@ -5034,9 +5794,6 @@ function setArchDefaults() {
         if (sliders[id]) sliders[id].setValue(d.sliders[id]);
     });
 
-    // Canvas-Hintergrund: schwarz
-    g4mStore.set('canvasBackgroundColor', d.canvasBackground);
-    updateCanvasBackground();
     _archSlider('arch-param-a-min', d.a.min, 'arch-val-a-min', d.a.min.toFixed(1));
     _archSlider('arch-param-a-max', d.a.max, 'arch-val-a-max', d.a.max.toFixed(1));
 
@@ -5070,12 +5827,20 @@ function setArchDefaults() {
         p.n.min = d.n.min; p.n.max = d.n.max;
         _archSlider('arch-param-n-min', d.n.min, 'arch-val-n-min', String(d.n.min));
         _archSlider('arch-param-n-max', d.n.max, 'arch-val-n-max', String(d.n.max));
+
+        // Optimizer (Größen-Modulator, % )
+        if (!p.optimizer) p.optimizer = { min: 10, max: 100, enabled: true };
+        p.optimizer.min = d.optimizer.min; p.optimizer.max = d.optimizer.max;
+        p.optimizer.enabled = d.optimizer.enabled;
+        _archSlider('arch-param-optimizer-min', d.optimizer.min, 'arch-val-optimizer-min', Math.round(d.optimizer.min) + '%');
+        _archSlider('arch-param-optimizer-max', d.optimizer.max, 'arch-val-optimizer-max', Math.round(d.optimizer.max) + '%');
+        g4mSetBotModActive('arch-opt-on',  d.optimizer.enabled);
+        g4mSetBotModActive('arch-opt-off', !d.optimizer.enabled);
     });
 
     // Random Colors an
     g4mStore.set('archUseRandomColors', d.randomColors);
-    _archBtn('arch-color-random-on',  d.randomColors);
-    _archBtn('arch-color-random-off', !d.randomColors);
+    g4mSyncColorButtons();
 
     // Modulation (archModulation existiert im Store immer —
     // der frühere Existenz-Guard entfällt)
@@ -5085,17 +5850,20 @@ function setArchDefaults() {
         mod.strength = d.modulation.strength;
         mod.freq     = d.modulation.freq;
     });
-    _archBtn('arch-mod-on',  d.modulation.enabled);  _archBtn('arch-mod-off', !d.modulation.enabled);
-    _archBtn('arch-mod-cos', d.modulation.type === 'cos');
-    _archBtn('arch-mod-sin', d.modulation.type === 'sin');
-    _archBtn('arch-mod-tan', d.modulation.type === 'tan');
+    // Modulations-Buttons liegen jetzt in der untersten Reihe (eigene
+    // Aktiv-Optik g4m-arch-botmod-active statt g4m-on)
+    g4mSetBotModActive('arch-mod-on',  d.modulation.enabled);
+    g4mSetBotModActive('arch-mod-off', !d.modulation.enabled);
+    g4mSetBotModActive('arch-mod-cos', d.modulation.type === 'cos');
+    g4mSetBotModActive('arch-mod-sin', d.modulation.type === 'sin');
+    g4mSetBotModActive('arch-mod-tan', d.modulation.type === 'tan');
     _archSlider('arch-mod-strength', d.modulation.strength, 'arch-mod-strength-val', d.modulation.strength.toFixed(2));
     _archSlider('arch-mod-freq',     d.modulation.freq,     'arch-mod-freq-val',     d.modulation.freq.toFixed(1));
 
     // Verbindungslinien
     g4mStore.set('archConnectingLines', d.connectingLines);
-    _archBtn('arch-connect-on',  d.connectingLines);
-    _archBtn('arch-connect-off', !d.connectingLines);
+    g4mSetBotModActive('arch-connect-on',  d.connectingLines);
+    g4mSetBotModActive('arch-connect-off', !d.connectingLines);
 }
 
 // Hilfsfunktionen
@@ -5111,14 +5879,139 @@ function _archBtn(id, active) {
     const b = document.getElementById(id);
     if (b) b.classList.toggle('g4m-on', !!active);
 }
+/* Aktiv-Optik der untersten Modulations-Reihe (eigene Klasse statt
+   g4m-on, da andere Button-Form). */
+function g4mSetBotModActive(id, active) {
+    const b = document.getElementById(id);
+    if (b) b.classList.toggle('g4m-arch-botmod-active', !!active);
+}
 function _archShow(id, show) {
     const el = document.getElementById(id);
-    if (el) el.style.display = show ? 'block' : 'none';
+    if (!el) return;
+    // Block-Wrapper sind CSS-Grids — beim Einblenden 'grid' statt 'block'
+    const shownDisplay = el.classList.contains('g4m-arch-block') ? 'grid' : 'block';
+    el.style.display = show ? shownDisplay : 'none';
+}
+
+/* ── DOM aus dem (ggf. aus localStorage wiederhergestellten) Store
+   abgleichen ──────────────────────────────────────────────────────
+   Wird einmal beim Start aufgerufen, nachdem alle Bedienelemente
+   existieren. Schiebt die gespeicherten Werte in die Slider, Toggles,
+   Werteanzeigen und Farbwähler, damit die UI den Store widerspiegelt.
+   Nutzt dieselben Hilfsfunktionen wie die Defaults, daher kann nichts
+   auseinanderlaufen. Alle Zugriffe sind null-sicher. */
+function g4mSyncDomFromStore() {
+    // — Tool-Slider (Ansicht/Effekt) — setValue löst handleSliderChange
+    //   aus und hält Anzeige + Render konsistent
+    const vp = g4mState.viewParams;
+    const toolMap = {
+        'number-of-layers': vp.numLayers, 'number-of-points': vp.toolPoints,
+        'line-thickness': vp.lineWidth, 'point-size': vp.pointSize,
+        'transparency': vp.transparency, 'zoom': vp.zoom,
+        'pan-x': vp.panX, 'pan-y': vp.panY, 'rotation': vp.rotation,
+        'modulation-amplitude': vp.modAmplitude,
+        'modulation-frequency': vp.modFrequency,
+        'modulation-phase': vp.modPhase
+    };
+    Object.keys(toolMap).forEach(function (id) {
+        if (sliders[id] && toolMap[id] != null) sliders[id].setValue(toolMap[id]);
+    });
+
+    // — Superformel-Parametergrenzen (param-{name}-{min|max}) —
+    const sf = g4mState.superformulaParams;
+    SF_PARAM_NAMES.forEach(function (name) {
+        ['min', 'max'].forEach(function (type) {
+            if (!sf[name] || sf[name][type] == null) return;
+            const input = document.getElementById('param-' + name + '-' + type);
+            const disp  = document.getElementById('val-' + name + '-' + type);
+            const val   = sf[name][type];
+            if (input) input.value = val;
+            if (disp)  disp.textContent = (name === 'm') ? Math.round(val) : Number(val).toFixed(1);
+        });
+    });
+    if (typeof updateRangeFills === 'function') updateRangeFills();
+
+    // — Archimedean-Parameter —
+    const p = g4mState.archimedeanParams;
+    _archSlider('arch-param-a-min', p.a.min, 'arch-val-a-min', p.a.min.toFixed(1));
+    _archSlider('arch-param-a-max', p.a.max, 'arch-val-a-max', p.a.max.toFixed(1));
+
+    // b: beide Bereiche füllen, aktiven Fine/Coarse-Zustand setzen
+    _archSlider('arch-param-b-fine-min',   p.b.fineMin,   'arch-val-b-fine-min',   Number(p.b.fineMin).toFixed(2));
+    _archSlider('arch-param-b-fine-max',   p.b.fineMax,   'arch-val-b-fine-max',   Number(p.b.fineMax).toFixed(2));
+    _archSlider('arch-param-b-coarse-min', p.b.coarseMin, 'arch-val-b-coarse-min', Number(p.b.coarseMin).toFixed(1));
+    _archSlider('arch-param-b-coarse-max', p.b.coarseMax, 'arch-val-b-coarse-max', Number(p.b.coarseMax).toFixed(1));
+    _archBtn('arch-b-fine-btn', p.b.useFine);  _archBtn('arch-b-coarse-btn', !p.b.useFine);
+    _archShow('arch-b-fine', p.b.useFine);     _archShow('arch-b-coarse', !p.b.useFine);
+
+    // alpha: analog
+    _archSlider('arch-param-alpha-fine-min',   p.alpha.fineMin,   'arch-val-alpha-fine-min',   Math.round(p.alpha.fineMin) + '°');
+    _archSlider('arch-param-alpha-fine-max',   p.alpha.fineMax,   'arch-val-alpha-fine-max',   Math.round(p.alpha.fineMax) + '°');
+    _archSlider('arch-param-alpha-coarse-min', p.alpha.coarseMin, 'arch-val-alpha-coarse-min', Math.round(p.alpha.coarseMin) + '°');
+    _archSlider('arch-param-alpha-coarse-max', p.alpha.coarseMax, 'arch-val-alpha-coarse-max', Math.round(p.alpha.coarseMax) + '°');
+    _archBtn('arch-alpha-fine-btn', p.alpha.useFine);  _archBtn('arch-alpha-coarse-btn', !p.alpha.useFine);
+    _archShow('arch-alpha-fine', p.alpha.useFine);     _archShow('arch-alpha-coarse', !p.alpha.useFine);
+
+    // beta, n
+    _archSlider('arch-param-beta-min', p.beta.min, 'arch-val-beta-min', Math.round(p.beta.min) + '°');
+    _archSlider('arch-param-beta-max', p.beta.max, 'arch-val-beta-max', Math.round(p.beta.max) + '°');
+    _archSlider('arch-param-n-min', p.n.min, 'arch-val-n-min', String(Math.round(p.n.min)));
+    _archSlider('arch-param-n-max', p.n.max, 'arch-val-n-max', String(Math.round(p.n.max)));
+
+    // Optimizer (%) + On/Off
+    if (p.optimizer) {
+        _archSlider('arch-param-optimizer-min', p.optimizer.min, 'arch-val-optimizer-min', Math.round(p.optimizer.min) + '%');
+        _archSlider('arch-param-optimizer-max', p.optimizer.max, 'arch-val-optimizer-max', Math.round(p.optimizer.max) + '%');
+        g4mSetBotModActive('arch-opt-on',  p.optimizer.enabled);
+        g4mSetBotModActive('arch-opt-off', !p.optimizer.enabled);
+    }
+
+    // Random-Colors-Schalter + Standardfarbe (F2)
+    g4mSyncColorButtons();
+    const archColor = document.getElementById('arch-default-color');
+    if (archColor && g4mState.archDefaultColor) archColor.value = g4mState.archDefaultColor;
+
+    // Modulation (F2) — Buttons in der untersten Reihe
+    const mod = g4mState.archModulation;
+    g4mSetBotModActive('arch-mod-on',  mod.enabled);
+    g4mSetBotModActive('arch-mod-off', !mod.enabled);
+    g4mSetBotModActive('arch-mod-cos', mod.type === 'cos');
+    g4mSetBotModActive('arch-mod-sin', mod.type === 'sin');
+    g4mSetBotModActive('arch-mod-tan', mod.type === 'tan');
+    _archSlider('arch-mod-strength', mod.strength, 'arch-mod-strength-val', Number(mod.strength).toFixed(2));
+    _archSlider('arch-mod-freq',     mod.freq,     'arch-mod-freq-val',     Number(mod.freq).toFixed(1));
+
+    // Verbindungslinien (F2)
+    g4mSetBotModActive('arch-connect-on',  g4mState.archConnectingLines);
+    g4mSetBotModActive('arch-connect-off', !g4mState.archConnectingLines);
+
+    // Werte auf den Parameter-Quadraten (F2) aktualisieren
+    if (typeof g4mArchUpdateSqVals === 'function') g4mArchUpdateSqVals();
+
+    // — Random/Fixed-Umschalter pro Tool-Slider wiederherstellen —
+    //   Zustand liegt bereits im Store (restoreSaved); hier nur die
+    //   Radio-Optik nachziehen und die Slider-Freeze-Logik anwenden.
+    g4mRadioGroups().forEach(function (group) {
+        const sliderRow = group.closest('.slider-row');
+        const randomBtn = group.querySelector('[data-mode="random"]');
+        const fixedBtn  = group.querySelector('[data-mode="fixed"]');
+        if (!randomBtn || !fixedBtn || !sliderRow || !sliderRow.id) return;
+        clearActiveColor(randomBtn);
+        clearActiveColor(fixedBtn);
+        const isRandom = g4mIsRandomMode(sliderRow.id);
+        markActiveColor(isRandom ? randomBtn : fixedBtn, getRowColorClass(sliderRow));
+    });
+    if (typeof applyAllSliderFreezeStates === 'function') applyAllSliderFreezeStates();
+
+    // Canvas-Hintergrund nachziehen
+    if (typeof updateCanvasBackground === 'function') updateCanvasBackground();
 }
 
 function showArchimedeanPanel() {
-    // Defaults setzen — überschreibt eventuelle User-Änderungen
-    setArchDefaults();
+    // Canvas-Hintergrund wird NICHT mehr beim Öffnen gesetzt — die Farbe
+    // ist eine persistente Nutzerwahl (Start-Default kommt aus dem Store).
+    // Parameter-Defaults weiterhin nur beim ersten Öffnen.
+    g4mInitPanelOnce('archimedean', setArchDefaults);
     closeAllPanels('archimedean-panel');
     const panel = document.getElementById('archimedean-panel');
     if (!panel) return;
@@ -5145,6 +6038,9 @@ function showArchimedeanPanel() {
 
     // drawArchVisualization wird erst vom Archimedean-Modul gesetzt (§6)
     if (drawArchVisualization) setTimeout(drawArchVisualization, G4M_ANIM.ARCH_VIZ_DELAY_MS);
+    // Viz Result (Gesamtbild) beim Öffnen mitzeichnen, sobald das Fenster
+    // seine Größe hat
+    setTimeout(function () { if (typeof g4mDrawVizResult === 'function') g4mDrawVizResult(); }, G4M_ANIM.ARCH_VIZ_DELAY_MS);
 }
 
 function hideArchimedeanPanel() {
@@ -6364,20 +7260,83 @@ function archPaintPts(c, pts, w, h) {
     paintNormalizedPath(c, pts, w, h, { close: false, padding: 8 });
 }
 
+/* Baut einen ECHTEN Parametersatz für eine einzelne Kurve, bei der
+   alle Parameter auf ihrem Min- bzw. Max-Wert stehen (side: 'min'|'max').
+   b und alpha nehmen den aktiven Fein-/Grob-Wert. So zeigt die Vorschau
+   exakt das, was der Renderer bei diesen Extremwerten zeichnet. */
+function g4mArchEdgeParams(side) {
+    const p = g4mState.archimedeanParams;
+    const bMin = p.b.useFine ? p.b.fineMin : p.b.coarseMin;
+    const bMax = p.b.useFine ? p.b.fineMax : p.b.coarseMax;
+    const aMin = p.alpha.useFine ? p.alpha.fineMin : p.alpha.coarseMin;
+    const aMax = p.alpha.useFine ? p.alpha.fineMax : p.alpha.coarseMax;
+    const pick = function (lo, hi) { return side === 'min' ? lo : hi; };
+    return {
+        a:      pick(p.a.min, p.a.max),
+        b:      pick(bMin, bMax),
+        alpha:  pick(aMin, aMax),
+        beta:   pick(p.beta.min, p.beta.max),
+        nSteps: Math.round(pick((p.n && p.n.min) || 100, (p.n && p.n.max) || 500)),
+        // Größe = volle Bezugsgröße (1 Kurve, kein Optimizer nötig) —
+        // die Vorschau skaliert ohnehin auf ihr Fenster
+        size:   1,
+        color:  '#FFFFFF',
+        lineWidth: 1.2,
+        pointSize: 1,
+        _type:  'archimedean'
+    };
+}
+
+/* Min/Max-Vorschau: zeichnet je EINE echte Kurve (alle Parameter auf
+   Min bzw. Max) mit DEMSELBEN Renderer wie die Canvas, danach
+   proportional ins Fenster skaliert (paintNormalizedPath übernimmt das
+   Einpassen). So entspricht die Vorschau exakt dem realen Bild. */
 function archDrawViz() {
-    ['min', 'max'].forEach(function(t) {
+    ['min', 'max'].forEach(function (t) {
         const c = document.getElementById('arch-viz-' + t);
         if (!c) return;
         c.width  = c.parentElement.clientWidth  || 100;
         c.height = c.parentElement.clientHeight || 100;
         const vctx = c.getContext('2d');
-        vctx.fillStyle = '#000'; vctx.fillRect(0, 0, c.width, c.height);
-        const p = g4mState.archimedeanParams;
-        const pts = archCalcPts(p.a[t], p.b[t], p.alpha[t], p.beta[t], 400);
+        vctx.fillStyle = '#000';
+        vctx.fillRect(0, 0, c.width, c.height);
+
+        const ep = g4mArchEdgeParams(t);
+        // Punkte wie der echte Renderer: total = alpha × nSteps, dann
+        // auf das Fenster einpassen (paintNormalizedPath).
+        const pts = archCalcRealPts(ep);
         archPaintPts(vctx, pts, c.width, c.height);
     });
+    if (typeof g4mArchUpdateSqVals === 'function') g4mArchUpdateSqVals();
 }
 drawArchVisualization = archDrawViz;
+
+/* Berechnet die Spiralpunkte EXAKT wie drawArchimedeanSpiral
+   (Gesamtwinkel = alpha × nSteps, inkl. Modulation), liefert {x,y}
+   in mathematischen Einheiten — die Einpassung ins Vorschaufenster
+   macht paintNormalizedPath. Eine Quelle für die Formel: Wenn sich der
+   Renderer ändert, hier nachziehen. */
+function archCalcRealPts(prm) {
+    const betaRad  = prm.beta  * Math.PI / 180;
+    const alphaRad = prm.alpha * Math.PI / 180;
+    const nSteps   = Math.max(2, Math.round(prm.nSteps || 200));
+    const mod = g4mState.archModulation;
+    const pts = [];
+    for (let i = 0; i <= nSteps; i++) {
+        const theta = betaRad + i * alphaRad;
+        let r = prm.a + prm.b * theta;
+        if (mod && mod.enabled) {
+            let mv = 0;
+            const tt = theta * mod.freq;
+            if      (mod.type === 'sin') mv = mod.strength * Math.sin(tt);
+            else if (mod.type === 'cos') mv = mod.strength * Math.cos(tt);
+            else if (mod.type === 'tan') mv = mod.strength * Math.max(Math.min(Math.tan(tt), 1), -1);
+            r *= (1 + mv);
+        }
+        pts.push({ x: r * Math.cos(theta), y: r * Math.sin(theta) });
+    }
+    return pts;
+}
 
 /* Fein/Grob-UI eines Parameters synchronisieren (Buttons + sichtbarer
    Bereich) — gemeinsame Basis für Umschalter, Defaults und Presets */
@@ -6386,6 +7345,7 @@ function setFineCoarseUi(param, useFine) {
     _archBtn('arch-' + param + '-coarse-btn', !useFine);
     _archShow('arch-' + param + '-fine',  useFine);
     _archShow('arch-' + param + '-coarse', !useFine);
+    if (typeof g4mArchUpdateSqVals === 'function') g4mArchUpdateSqVals();
 }
 
 /* Fein/Grob-Umschalter — eine Fabrik statt zweifach duplizierter
@@ -6401,6 +7361,7 @@ function makeFineCoarseToggle(param) {
             p[param].max = useFine ? p[param].fineMax : p[param].coarseMax;
         });
         setFineCoarseUi(param, useFine);
+        g4mApplyArchLive();   // Echtzeit: Fein/Grob-Wechsel wirkt sofort
     }
     fineBtn.addEventListener('click',   function () { activate(true);  });
     coarseBtn.addEventListener('click', function () { activate(false); });
@@ -6483,8 +7444,7 @@ function applyArchPreset(d) {
         const cp = document.getElementById('arch-default-color');
         if (cp) cp.value = d.color.defaultColor;
     }
-    _archBtn('arch-color-random-on',  d.color.activeDot === 'on');
-    _archBtn('arch-color-random-off', d.color.activeDot === 'off');
+    g4mSyncColorButtons();
 
     archDrawViz();
 }
@@ -6504,7 +7464,9 @@ function initArchimedeanModule() {
         sl.addEventListener('input', function() {
             dv.textContent = fmt(this.value);
             if (updateFn) updateFn(parseFloat(this.value));
-            archDrawViz();
+            g4mArchUpdateSqVals();      // Quadrat-Werte mitführen
+            archDrawViz();              // Min/Max-Vorschaufenster
+            g4mApplyArchLive();         // Echtzeit: Canvas + Viz Result
         });
     }
 
@@ -6541,7 +7503,9 @@ function initArchimedeanModule() {
                 else         { p.alpha.coarseMin = deg; p.alpha.coarseMax = deg; }
                 p.alpha.min = deg; p.alpha.max = deg;
             });
+            g4mArchUpdateSqVals();
             archDrawViz();
+            g4mApplyArchLive();   // Echtzeit: Canvas + Viz Result
         });
     });
 
@@ -6550,6 +7514,48 @@ function initArchimedeanModule() {
     bindSlider('arch-param-beta-max', 'arch-val-beta-max', 0, function(v) { g4mStore.patchArch(function(p) { p.beta.max = v; }); });
     bindSlider('arch-param-n-min', 'arch-val-n-min', -1, function(v) { g4mStore.patchArch(function(p) { p.n.min = Math.round(v); }); });
     bindSlider('arch-param-n-max', 'arch-val-n-max', -1, function(v) { g4mStore.patchArch(function(p) { p.n.max = Math.round(v); }); });
+
+    // Optimizer: Min/Max in % (eigene Anzeige mit %-Suffix) + On/Off
+    (function () {
+        function bindPct(sliderId, dispId, setFn) {
+            const sl = document.getElementById(sliderId);
+            const dv = document.getElementById(dispId);
+            if (!sl || !dv) return;
+            dv.textContent = Math.round(sl.value) + '%';
+            sl.addEventListener('input', function () {
+                dv.textContent = Math.round(this.value) + '%';
+                setFn(Math.round(parseFloat(this.value)));
+                g4mArchUpdateSqVals();
+                g4mApplyOptimizerLive();   // Echtzeit: Canvas + Viz Result
+            });
+        }
+        bindPct('arch-param-optimizer-min', 'arch-val-optimizer-min',
+            function (v) { g4mStore.patchArch(function (p) { p.optimizer.min = v; }); });
+        bindPct('arch-param-optimizer-max', 'arch-val-optimizer-max',
+            function (v) { g4mStore.patchArch(function (p) { p.optimizer.max = v; }); });
+
+        const onBtn  = document.getElementById('arch-opt-on');
+        const offBtn = document.getElementById('arch-opt-off');
+        function setOpt(enabled) {
+            g4mStore.patchArch(function (p) { p.optimizer.enabled = enabled; });
+            g4mSetBotModActive('arch-opt-on',  enabled);
+            g4mSetBotModActive('arch-opt-off', !enabled);
+            g4mApplyOptimizerLive();   // Echtzeit: Canvas + Viz Result
+        }
+        if (onBtn)  onBtn.addEventListener('click',  function () { setOpt(true);  });
+        if (offBtn) offBtn.addEventListener('click', function () { setOpt(false); });
+
+        // Baby-Go: erzeugt ein neues Bild auf der Canvas, ohne das Panel
+        // zu schließen oder die Ansicht zu wechseln — beliebig oft klickbar.
+        const babyGo = document.getElementById('arch-baby-go');
+        if (babyGo) babyGo.addEventListener('click', function (e) {
+            e.stopPropagation();
+            // Falls noch Home-/Start-Abdeckungen aktiv sind, erst wegnehmen
+            if (g4mState.homeCoversOn) g4mHideHomeCovers();
+            // OHNE prepare → Panel bleibt offen, kein Wechsel zur Canvas
+            generateSuperformulas({ skipPrepare: true });
+        });
+    })();
 
     // Preset: Stern (viele kurze Spiralbögen)
     // Presets — nur noch Daten-Dispatch (siehe ARCH_PRESETS)
@@ -6574,70 +7580,106 @@ function initArchimedeanModule() {
     const modFreqSlider = document.getElementById('arch-mod-freq');
     const modFreqVal    = document.getElementById('arch-mod-freq-val');
 
+    // Aktiv-Optik der untersten Modulations-Reihe nachführen
+    function g4mSyncModBottomOptics() {
+        const mod = g4mState.archModulation || {};
+        if (modOnBtn)  modOnBtn.classList.toggle('g4m-arch-botmod-active',  !!mod.enabled);
+        if (modOffBtn) modOffBtn.classList.toggle('g4m-arch-botmod-active', !mod.enabled);
+        if (modCosBtn) modCosBtn.classList.toggle('g4m-arch-botmod-active', mod.type === 'cos');
+        if (modSinBtn) modSinBtn.classList.toggle('g4m-arch-botmod-active', mod.type === 'sin');
+        if (modTanBtn) modTanBtn.classList.toggle('g4m-arch-botmod-active', mod.type === 'tan');
+    }
+
     if (modOnBtn) modOnBtn.addEventListener('click', function() {
         g4mStore.patchArchModulation(function (mod) { mod.enabled = true; });
-        modOnBtn.classList.add('g4m-on');
-        if (modOffBtn) { modOffBtn.classList.remove('g4m-on'); }
+        g4mSyncModBottomOptics(); g4mArchUpdateSqVals();
+        archDrawViz(); g4mApplyArchLive();
     });
     if (modOffBtn) modOffBtn.addEventListener('click', function() {
         g4mStore.patchArchModulation(function (mod) { mod.enabled = false; });
-        modOffBtn.classList.add('g4m-on');
-        if (modOnBtn) { modOnBtn.classList.remove('g4m-on'); }
+        g4mSyncModBottomOptics(); g4mArchUpdateSqVals();
+        archDrawViz(); g4mApplyArchLive();
     });
     [[modCosBtn, 'cos'], [modSinBtn, 'sin'], [modTanBtn, 'tan']].forEach(function(pair) {
         if (!pair[0]) return;
         pair[0].addEventListener('click', function() {
             g4mStore.patchArchModulation(function (mod) { mod.type = pair[1]; });
-            [modCosBtn, modSinBtn, modTanBtn].forEach(function(b) {
-                if (b) { b.classList.remove('g4m-on'); }
-            });
-            pair[0].classList.add('g4m-on');
+            g4mSyncModBottomOptics(); g4mArchUpdateSqVals();
+            archDrawViz(); g4mApplyArchLive();
         });
     });
     if (modStrSlider) modStrSlider.addEventListener('input', function() {
-        const v = parseFloat(this.value);   // this.value VOR dem Callback sichern
+        const v = parseFloat(this.value);
         g4mStore.patchArchModulation(function (mod) { mod.strength = v; });
         if (modStrVal) modStrVal.textContent = v.toFixed(2);
+        archDrawViz(); g4mApplyArchLive();
     });
     if (modFreqSlider) modFreqSlider.addEventListener('input', function() {
-        const v = parseFloat(this.value);   // this.value VOR dem Callback sichern
+        const v = parseFloat(this.value);
         g4mStore.patchArchModulation(function (mod) { mod.freq = v; });
         if (modFreqVal) modFreqVal.textContent = v.toFixed(1);
+        archDrawViz(); g4mApplyArchLive();
     });
 
-    // Verbindungslinien Start → Ende
+    // Verbindungslinien Start → Ende (Buttons mit Aktiv-Optik wie Mod/Opt)
     const conOn  = document.getElementById('arch-connect-on');
     const conOff = document.getElementById('arch-connect-off');
     if (conOn && conOff) {
         conOn.addEventListener('click', function() {
             g4mStore.set('archConnectingLines', true);
-            conOn.classList.add('g4m-on');
-            conOff.classList.remove('g4m-on');
+            g4mSetBotModActive('arch-connect-on', true);
+            g4mSetBotModActive('arch-connect-off', false);
+            g4mArchUpdateSqVals(); g4mApplyArchLive();
         });
         conOff.addEventListener('click', function() {
             g4mStore.set('archConnectingLines', false);
-            conOff.classList.add('g4m-on');
-            conOn.classList.remove('g4m-on');
+            g4mSetBotModActive('arch-connect-off', true);
+            g4mSetBotModActive('arch-connect-on', false);
+            g4mArchUpdateSqVals(); g4mApplyArchLive();
         });
     }
 
-    // Farb-Buttons + Picker
+    // Farb-Buttons (On/Off = Random) + Farbwähler (Zelle 3)
     const onB  = document.getElementById('arch-color-random-on');
     const offB = document.getElementById('arch-color-random-off');
     if (onB && offB) {
         onB.addEventListener('click', function() {
-            onB.classList.add('g4m-on');
-            offB.classList.remove('g4m-on');
             g4mStore.set('archUseRandomColors', true);
+            g4mSyncColorButtons();
+            g4mArchUpdateSqVals();
         });
         offB.addEventListener('click', function() {
-            offB.classList.add('g4m-on');
-            onB.classList.remove('g4m-on');
             g4mStore.set('archUseRandomColors', false);
+            g4mSyncColorButtons();
+            g4mArchUpdateSqVals();
         });
     }
     const cp = document.getElementById('arch-default-color');
-    if (cp) cp.addEventListener('input', function() { g4mStore.set('archDefaultColor', this.value); });
+    if (cp) cp.addEventListener('input', function() {
+        g4mStore.set('archDefaultColor', this.value);
+        // Fixfarbe live anwenden, wenn Random aus ist
+        if (g4mState.archUseRandomColors === false) {
+            for (let i = 0; i < storedCurveParameters.length; i++) {
+                if (storedCurveParameters[i]) storedCurveParameters[i].color = this.value;
+            }
+            if (storedCurveParameters.length) { redrawStoredImage(); }
+        }
+    });
+    g4mSyncModBottomOptics();
+    g4mSyncColorButtons();
+}
+
+/* Hält die drei Color-Bedienelemente synchron zum Store: On/Off-Optik
+   (dunkles Aktiv-Blau) und die Farbzelle (feste Farbe bei Random Off,
+   4-Quadrate-Symbol bei Random On). */
+function g4mSyncColorButtons() {
+    const random = (g4mState.archUseRandomColors !== false);
+    g4mSetBotModActive('arch-color-random-on',  random);
+    g4mSetBotModActive('arch-color-random-off', !random);
+    const cell = document.querySelector('.g4m-arch-colorcell');
+    if (cell) cell.classList.toggle('g4m-arch-color-random', random);
+    const cp = document.getElementById('arch-default-color');
+    if (cp && g4mState.archDefaultColor) cp.value = g4mState.archDefaultColor;
 }
 
 /* §7 ─ INITIALISIERUNG (→ init.js) ──────────────────────────────── */
@@ -6670,6 +7712,88 @@ function initToolbarButtons() {
     if (fToggle) fToggle.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); g4mToggleArchFormula(e); }
     });
+
+    // ── Parameter-Quadrate (v152) ────────────────────────────────────
+    // Reine SELEKTOREN: Klick zeigt die zugehörige (unveränderte)
+    // Parameterzeile im Slider-Feld. Keine zweite Zustandshaltung — die
+    // Slider, Fine/Coarse-Schalter und Werte bleiben dieselben Elemente.
+    g4mArchSelectParam('a');                 // Startauswahl — nie leeres Feld
+    Object.keys(G4M_ARCH_SQ_MAP).forEach(function(param) {
+        const sq = document.getElementById('arch-sq-' + param);
+        if (sq) sq.addEventListener('click', function() { g4mArchSelectParam(param); });
+    });
+}
+
+/* Quadrat-ID-Stamm ↔ Parameterzeilen-ID-Stamm (v152) */
+const G4M_ARCH_SQ_MAP = { a: 'a', b: 'b', alpha: 'alpha', beta: 'beta', n: 'n', optimizer: 'optimizer', connect: 'connect', color: 'color', mod: 'mod' };
+
+/* Zeigt genau eine Parameterzeile im Slider-Feld; markiert das aktive
+   Quadrat (gleiche Optik wie g4m-sq-active im Tool-Panel). */
+function g4mArchSelectParam(param) {
+    document.querySelectorAll('#archimedean-panel .g4m-arch-sq')
+        .forEach(function(sq) { sq.classList.remove('g4m-arch-sq-active'); });
+    document.querySelectorAll('#archimedean-panel .g4m-arch-prow')
+        .forEach(function(row) { row.classList.remove('g4m-arch-prow-active'); });
+    const sq  = document.getElementById('arch-sq-' + param);
+    const row = document.getElementById('arch-prow-' + param);
+    if (sq)  sq.classList.add('g4m-arch-sq-active');
+    if (row) row.classList.add('g4m-arch-prow-active');
+    // Modulations-Buttons (Sin/Cos/Tan/On/Off) bilden das Grundraster:
+    // bei „mod" mit Inhalt, sonst leeres Raster (hellblau, Rahmen bleibt).
+    // Optimizer On/Off liegen in denselben Zellen 1-2 und werden NUR bei
+    // „optimizer" eingeblendet (visibility), sonst völlig unsichtbar,
+    // damit sie das Modulationsraster nicht verdecken. Baby-Go bleibt da.
+    const showMod = (param === 'mod');
+    const showOpt = (param === 'optimizer');
+    const showCon = (param === 'connect');
+    const showCol = (param === 'color');
+    document.querySelectorAll('.g4m-arch-reserve6 .g4m-arch-botmod')
+        .forEach(function (b) { b.classList.toggle('g4m-arch-mod-hidden', !showMod); });
+    document.querySelectorAll('.g4m-arch-reserve6 .g4m-arch-botopt')
+        .forEach(function (b) { b.style.visibility = showOpt ? 'visible' : 'hidden'; });
+    document.querySelectorAll('.g4m-arch-reserve6 .g4m-arch-botcon')
+        .forEach(function (b) { b.style.visibility = showCon ? 'visible' : 'hidden'; });
+    document.querySelectorAll('.g4m-arch-reserve6 .g4m-arch-botcol')
+        .forEach(function (b) { b.style.visibility = showCol ? 'visible' : 'hidden'; });
+    g4mArchUpdateSqVals();
+}
+
+/* Beide eingestellten Werte (Min / Max) auf den Parameter-Quadraten
+   spiegeln — gleiche Schrift/Farbe/Größe wie der Buchstabe (v153).
+   Liest die aktuell SICHTBAREN min/max aus dem Store (bei b und α
+   bereits auf Fein- bzw. Grob-Wert synchronisiert). Wird bei jeder
+   Werteänderung über archDrawViz() aufgerufen. */
+function g4mArchFmtPair(param) {
+    const p = g4mState.archimedeanParams;
+    if (!p) return '';
+    const d = p[param];
+    let lo, hi;
+    switch (param) {
+        case 'a':     lo = d.min.toFixed(1);        hi = d.max.toFixed(1);        break;
+        case 'b':     lo = d.min.toFixed(2);        hi = d.max.toFixed(2);        break;
+        case 'alpha': lo = Math.round(d.min) + '°'; hi = Math.round(d.max) + '°'; break;
+        case 'beta':  lo = Math.round(d.min) + '°'; hi = Math.round(d.max) + '°'; break;
+        case 'n':     lo = Math.round(d.min);       hi = Math.round(d.max);       break;
+        case 'optimizer': lo = Math.round(d.min) + '%'; hi = Math.round(d.max) + '%'; break;
+        default:      return '';
+    }
+    return 'Min. ' + lo + '\n' + 'Max. ' + hi;
+}
+function g4mArchUpdateSqVals() {
+    ['a', 'b', 'alpha', 'beta', 'n', 'optimizer'].forEach(function(param) {
+        const el = document.getElementById('arch-sqval-' + param);
+        if (el) el.textContent = g4mArchFmtPair(param);   // \n -> Zeilenumbruch via white-space
+    });
+    // Funktions-Quadrate: Statustext statt Min/Max
+    const cEl = document.getElementById('arch-sqval-connect');
+    if (cEl) cEl.textContent = g4mState.archConnectingLines ? 'On' : 'Off';
+    const colEl = document.getElementById('arch-sqval-color');
+    if (colEl) colEl.textContent = (g4mState.archUseRandomColors !== false) ? 'Random' : 'Fixed';
+    const mEl = document.getElementById('arch-sqval-mod');
+    if (mEl) {
+        const mod = g4mState.archModulation || {};
+        mEl.textContent = mod.enabled ? (String(mod.type || 'sin')) : 'Off';
+    }
 }
 
 /* ── Barrierefreiheit ─────────────────────────────────────────────
@@ -6813,6 +7937,27 @@ function init() {
     initNavigation();              // D-Pad-Pfeile, Go-Button-Verhalten
     initToolbarButtons();          // Toolbar-Klicks (F2-F6, Options, Formel)
     initAccessibility();           // ARIA-Rollen und -Beschriftungen
+
+    /* Sitzungsübergreifende Wiederherstellung (zuletzt): resetToDefaults
+       und die Modul-Inits haben oben die Defaults in Store und DOM
+       gesetzt. Liegt eine gespeicherte Sitzung vor, legen wir sie jetzt
+       darüber und gleichen die UI ab — so überdauern die zuletzt
+       genutzten Parameter den Neustart. Die einmaligen Panel-Defaults
+       (F1/F2) werden dann übersprungen, damit sie die wiederher-
+       gestellten Werte beim ersten Öffnen nicht überschreiben. */
+    if (g4mStore.hasSaved()) {
+        g4mStore.restoreSaved();
+        g4mSyncDomFromStore();
+        g4mPanelInitialized['superformula'] = true;
+        g4mPanelInitialized['archimedean']  = true;
+    }
+
+    /* Letztes Bild wiederherstellen: liegt ein gespeichertes Bild vor,
+       wird es jetzt gezeichnet (überschreibt den Start-Text auf der
+       Canvas). Beim allerersten Start gibt es keines → „Click Go"
+       bleibt stehen. Die Home-Abdeckungen liegen noch davor; sobald der
+       User sie mit «Go» wegzieht, sieht er sein letztes Bild. */
+    if (typeof g4mRestoreLastImage === 'function') g4mRestoreLastImage();
 }
 
 /* Initialisieren: das Skript steht am Body-Ende — bei
