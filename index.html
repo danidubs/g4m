@@ -166,9 +166,79 @@ Kontakt: dd@danidubs.ch
         }
 
         .bottom-btn {
-            grid-row: 12;
+            grid-row: 8;
             grid-column: span 2;
+            position: relative;
+            z-index: 2;   /* deckt die leere Sub-Zeile 8 der middle-content ab */
         }
+        /* Reserve-Reihe (u9): 6 Buttons à 2u, gleiche Optik wie tool-btn.
+           Liegt zwischen unterer Button-Zeile (u8) und Slider-Feld
+           (u10-12); deckt wie die Button-Zeile die darunterliegende
+           leere Sub-Zeile der middle-content ab. */
+        .reserve-btn {
+            grid-row: 9;
+            grid-column: span 2;
+            cursor: default;
+            position: relative;
+            z-index: 2;
+        }
+        /* Reserve-Buttons (noch ohne Funktion) bekommen keinen Hover —
+           konsistent mit den Reserve-Feldern im F2-Panel. */
+        .tool-btn.reserve-btn:hover { background-color: #e0e0e0; }
+
+        /* ── Random-On/Off-Schalter unter "Random Tools" (u9, Spalte 11-13)
+           Container = ein 2u-Feld; darin liegen 9 Paare gestapelt (je
+           ein Paar pro Random-fähigem Parameter) plus ein grauer Reserve-
+           Look ganz unten (für Parameter ohne Random). Jeweils EIN Paar
+           wird über z-index/Sichtbarkeit nach vorn geholt — analog zur
+           Zellteilung im F2-Panel. */
+        .g4m-rnd-stack {
+            position: relative;
+            z-index: 2;          /* deckt wie reserve-btn die leere Sub-Zeile ab */
+        }
+        .g4m-rnd-stack > * {
+            position: absolute;
+            inset: 0;
+        }
+        /* Grauer Reserve-Look (unterste Ebene, immer da). Über die
+           Paare gelegt, wenn der aktive Parameter kein Random kennt. */
+        .g4m-rnd-blank { z-index: 1; }
+        /* Ein On/Off-Paar = zwei 1u-Quadrate nebeneinander */
+        .g4m-rnd-pair {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            z-index: 0;                 /* versteckt; das aktive Paar hebt JS auf 5 */
+            visibility: hidden;
+        }
+        .g4m-rnd-pair.g4m-rnd-active {
+            z-index: 5;
+            visibility: visible;
+        }
+        .g4m-rnd-btn {
+            box-sizing: border-box;
+            background-color: #e0e0e0;
+            border: 1px solid #bdbdbd;
+            color: #666666;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(9px, calc(var(--u) * 0.269), 14px);
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: background-color 0.15s ease;
+        }
+        .g4m-rnd-btn:hover:not(.g4m-rnd-selected) { background-color: #d0d0d0; }
+        /* Nur das GEWÄHLTE Feld (g4m-rnd-selected) trägt die Gruppenfarbe
+           des Parameters — seit v153.1e in den KRÄFTIGEN Originaltönen
+           (Grün/Gelb/Blau, die pastellisierten Quadrat-Farben blieben
+           den Rasterflächen vorbehalten) mit weisser Schrift: gleiche
+           Aktiv-Logik wie On/Off/Sin/Cos/Tan auf F1/F2. */
+        .g4m-rnd-btn.g4m-rnd-selected { color: #ffffff; }
+        .g4m-rnd-btn.g4m-rnd-selected.g4m-rnd-sel-green  { background-color: #4CAF50; border-color: #3D8C40; }
+        .g4m-rnd-btn.g4m-rnd-selected.g4m-rnd-sel-orange { background-color: #FFB74D; border-color: #CC923E; }
+        .g4m-rnd-btn.g4m-rnd-selected.g4m-rnd-sel-blue   { background-color: #2196F3; border-color: #1A78C2; }
 
         /* F6-F10 + Vollbild-Slot: orientierungsabhängige Platzierung
            (v150f). Standard = Quer-/Desktop-Format: F1-F10 lückenlos,
@@ -191,9 +261,9 @@ Kontakt: dd@danidubs.ch
            rechnet alle Rahmen nach innen. */
         .middle-content {
             grid-column: 1 / 13;
-            grid-row: 2 / 12;
+            grid-row: 2 / 13;
             display: grid;
-            grid-template-rows: repeat(10, calc(var(--u)));
+            grid-template-rows: repeat(11, calc(var(--u)));
         }
 
         /* ── Parameter-Raster (v150k): 18 Quadrate à 2u x 2u ──
@@ -245,7 +315,20 @@ Kontakt: dd@danidubs.ch
         .g4m-param-editor.g4m-ed-green  { background-color: var(--g4m-grp-green); }
         .g4m-param-editor.g4m-ed-orange { background-color: var(--g4m-grp-orange); }
         .g4m-param-editor.g4m-ed-blue   { background-color: var(--g4m-grp-blue); }
-        .g4m-sq-active { box-shadow: inset 0 0 0 2px #333333; }
+        /* Aktives Parameter-Quadrat (v153.1f): kräftiger Original-
+           Gruppenton mit weisser Schrift — gleiche Aktiv-Logik wie die
+           Random-On/Off-Quadrate und die F1-/F2-Parameter-Quadrate.
+           Die frühere Innenkontur entfiel. */
+        .g4m-param-sq.g4m-sq-active.g4m-sq-green  { background-color: #4CAF50; }
+        .g4m-param-sq.g4m-sq-active.g4m-sq-orange { background-color: #FFB74D; }
+        .g4m-param-sq.g4m-sq-active.g4m-sq-blue   { background-color: #2196F3; }
+        .g4m-param-sq.g4m-sq-active .g4m-sq-label,
+        .g4m-param-sq.g4m-sq-active .g4m-sq-value { color: #ffffff; }
+        /* Hover für die anklickbaren Parameter-Quadrate (analog tool-btn /
+           nav-btn). Per filter, damit es über alle vier Hintergründe
+           (grau, grün, orange, blau) gleich wirkt. Die leeren Reserve-
+           Quadrate (g4m-sq-blank) sind ausgenommen. */
+        .g4m-param-sq:not(.g4m-sq-blank):hover { filter: brightness(0.93); }
         /* Random aktiv: ganzes Quadrat eingegraut — der angezeigte
            Wert wechselt ja bei jedem Go (User-Spezifikation v150k) */
         .g4m-sq-random { filter: grayscale(1); }
@@ -253,9 +336,12 @@ Kontakt: dd@danidubs.ch
         .g4m-sq-random .g4m-sq-value { opacity: 0.45; }
         .g4m-sq-blank { cursor: default; }
 
-        /* ── Editor-Zone (v150k): 12u x 4u, eine Zeile sichtbar ── */
+        /* ── Editor-Zone (v153c): 12u x 3u, eine Zeile sichtbar ──
+           Von 4u auf 3u verkleinert und 1u nach unten gerückt (Sub-Zeile
+           8-10 = u9-11). Dadurch wird Sub-Zeile 7 (u8) frei für die nach
+           oben gewanderte Button-Zeile; u12 trägt die neue Reserve-Reihe. */
         .g4m-param-editor {
-            grid-row: 7 / 11;
+            grid-row: 9 / 12;
             box-sizing: border-box;
             background-color: #e0e0e0;
             border: 1px solid #bdbdbd;
@@ -275,10 +361,15 @@ Kontakt: dd@danidubs.ch
         /* Vergrösserte Bedienung im Editor — fingertauglich */
         /* Rail bewusst fein (v150n, vorher 6px) — der grosse Griff
            allein traegt die Fingertauglichkeit */
-        .g4m-param-editor .slider-container { height: 2px; }
+        .g4m-param-editor .slider-container { height: var(--g4m-slider-rail-h); }
+        /* Gefüllter Track in der Strichstärke der Basislinie
+           (v153.1i): height 100% der Rail — einheitlich fein wie
+           die Füllschicht der F1-/F2-Rails. */
         .g4m-param-editor .slider-handle {
-            width:  min(30px, calc(var(--u) * 0.58));
-            height: min(30px, calc(var(--u) * 0.58));
+            /* Griffgrösse aus der EINEN Quelle (v153.1) — identisch mit
+               den nativen Range-Thumbs im F1-/F2-Slider-Feld. */
+            width:  var(--g4m-slider-handle);
+            height: var(--g4m-slider-handle);
         }
         /* Spaltengeometrie des Editors — EINE Quelle für Zeile UND
            Beschriftungs-Kopf, damit Eingabefeld, Radios und die
@@ -301,12 +392,6 @@ Kontakt: dd@danidubs.ch
             width: var(--g4m-val-w);
             min-width: 0;
         }
-        .g4m-param-editor .radio-header {
-            grid-template-columns: 1fr 48px var(--g4m-val-w);
-            padding: 0 20px;
-            height: auto;
-            margin-bottom: calc(var(--u) * 0.1);
-        }
         /* EINE Typografie für alle Beschriftungen in Raster und
            Editor (v150o): Button-Schriftgrösse, fett — vorher
            liefen Random/On/Off (11px), Wertefeld (15px) und die
@@ -314,8 +399,6 @@ Kontakt: dd@danidubs.ch
         .g4m-param-sq .g4m-sq-label,
         .g4m-param-sq .g4m-sq-value,
         .g4m-param-editor .slider-label,
-        .g4m-param-editor .radio-header,
-        .g4m-param-editor .radio-header-random,
         .g4m-param-editor .value-display,
         .g4m-param-editor .toggle-display {
             /* clamp mit Boden 10px (v150q) — ein Pixel unter den
@@ -332,37 +415,6 @@ Kontakt: dd@danidubs.ch
                Unterschied las sich wie ein anderer Schriftschnitt */
             color: #666666;
         }
-        /* On/Off exakt auf den Mittelachsen der beiden Radio-Punkte
-           (16px-Slots an Position 0 und 32 der 48px-Gruppe) */
-        .g4m-param-editor .radio-header-labels span {
-            width: 16px;
-            text-align: center;
-            overflow: visible;
-        }
-
-        .radio-header {
-            height: calc(var(--u) * 0.3);
-            display: grid;
-            grid-template-columns: 1fr 48px 50px;
-            align-items: center;
-            padding-right: 20px;
-            font-size: 11px;
-            color: #666666;
-            margin-bottom: calc(var(--u) * 0.1);
-            gap: 10px;
-        }
-
-        .radio-header-random {
-            text-align: right;
-            padding-right: 10px;
-        }
-
-        .radio-header-labels {
-            display: flex;
-            justify-content: space-between;
-            width: 48px;
-        }
-
         /* Im Editor kein 14-Zeilen-Raster mehr — die Zeilen liegen
            gestapelt, genau eine ist sichtbar (v150k) */
         .sliders-container {
@@ -470,6 +522,9 @@ Kontakt: dd@danidubs.ch
             -moz-user-select: text;
             -ms-user-select: text;
         }
+        /* Hover wie Fokus: Feld hellt auf Weiss auf (v153.1i) —
+           einheitlich mit den F1-/F2-Wertefeldern. */
+        .value-display:hover { background-color: #ffffff; }
         .value-display:focus {
             border-color: #4CAF50;
             background-color: #ffffff;
@@ -485,6 +540,8 @@ Kontakt: dd@danidubs.ch
             font-size: 11px;
             color: #666666;
         }
+        /* Normalization-Umschalter (ersetzt die Radios, v153d):
+           klickbarer On/Off-Text mit dezentem Button-Look. */
 
         /* Color groups */
         .slider-green .slider-track,
@@ -650,14 +707,28 @@ Kontakt: dd@danidubs.ch
         #display-mode-dropdown, #canvas-color-dropdown {
             width: calc(var(--u) * 2);
         }
+        /* u-Raster-Variante (v153.1i): exakt 4u hoch, Unterkante auf
+           der Button-Oberkante — genug Platz, nichts wird abgeschnitten.
+           Der Inhalt ist OBEN ausgerichtet (Eigenhöhe der Einträge,
+           keine Streckung/Zentrierung über die Rasterhöhe). */
+        #display-mode-dropdown.g4m-dd-4u,
+        #canvas-color-dropdown.g4m-dd-4u {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        #display-mode-dropdown.g4m-dd-4u > div,
+        #canvas-color-dropdown.g4m-dd-4u > div {
+            flex: 0 0 auto;
+            box-sizing: border-box;
+        }
 
-        /* Formel-Menü am Modus-Indikator (v150d): 10 übereinander
-           gestapelte Farb-Rechtecke (F1-F10), öffnet nach oben und
-           füllt die Panel-Höhe von der Oberkante des Indikators bis
-           zur Unterkante der F-Reihe. Breite/Höhe/Position setzt die
-           Build-Factory aus der Live-Messung des Tools-Panels;
-           Farben kommen je Eintrag aus var(--g4m-mode-color-*) —
-           dieselbe Quelle wie Aktiv-Buttons und Indikator. */
+        /* Formel-Menü am Modus-Indikator (v153.1i): weisses Feld im
+           Look der Canvas-/Drawing-Menüs — F1-F10 als EINE Spalte,
+           gleichmässig von oben nach unten verteilt (je 0.6u bei
+           6u Menühöhe). Die früheren Farbkacheln (2 Spalten, Modus-
+           Farben) entfielen. Geometrie (2u x 6u am u-Raster) setzt
+           createModeDropdown aus der Live-Messung. */
         #g4m-mode-dropdown {
             position: absolute;
             z-index: 1000;
@@ -667,21 +738,25 @@ Kontakt: dd@danidubs.ch
             background-color: #ffffff;
         }
         #g4m-mode-dropdown .g4m-mode-dd-item {
-            flex: 1;
-            border: 1px solid #bdbdbd;   /* feine Umrahmung wie tool-btn (v150f) */
-            box-sizing: border-box;
+            flex: 1;                       /* regelmässige Verteilung */
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
-            justify-content: center;
+            gap: 6px;
+            padding: 0 10px;
+            box-sizing: border-box;
             cursor: pointer;
-            color: #666666;   /* Einheitsgrau wie alle Buttons (v150p) */
+            background-color: #ffffff;     /* weisses Feld */
+            color: #666666;
             line-height: 1.1;
+            white-space: nowrap;
+            overflow: hidden;
         }
-        #g4m-mode-dropdown .g4m-mode-dd-item:hover { filter: brightness(0.93); }
-        #g4m-mode-dropdown .g4m-dd-fn   { font-weight: 600; font-size: min(13px, calc(var(--u) * 0.25)); }
-        #g4m-mode-dropdown .g4m-dd-name { font-size: min(11px, calc(var(--u) * 0.21)); }
-        #g4m-mode-dropdown .g4m-dd-active { box-shadow: inset 0 0 0 2px #333333; }
+        #g4m-mode-dropdown .g4m-mode-dd-item:hover { background-color: #f5f5f5; }
+        #g4m-mode-dropdown .g4m-dd-fn   { font-weight: 700; font-size: min(12px, calc(var(--u) * 0.23)); }
+        #g4m-mode-dropdown .g4m-dd-name { font-size: min(10px, calc(var(--u) * 0.19)); }
+        #g4m-mode-dropdown .g4m-dd-active { background-color: #f0f0f0; }
+        #g4m-mode-dropdown .g4m-dd-active .g4m-dd-fn { color: #333333; }
 
         #resolution-dropdown > div, #display-mode-dropdown > div, #canvas-color-dropdown > div {
             padding: min(8px, calc(var(--u) * 0.154));
@@ -694,6 +769,20 @@ Kontakt: dd@danidubs.ch
         #resolution-dropdown > div:hover, #display-mode-dropdown > div:hover, #canvas-color-dropdown > div:hover {
             background-color: #f0f0f0;
         }
+
+        /* Raster-Variante des Save-Image-Menüs (v153.1d): oben/unten an
+           Go- und Save-Image-Kante gespannt, die Einträge teilen die
+           Höhe gleichmässig unter sich auf. */
+        #resolution-dropdown.g4m-dd-grid {
+            display: flex;
+            flex-direction: column;
+        }
+        #resolution-dropdown.g4m-dd-grid > div {
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+        #resolution-dropdown.g4m-dd-grid > div > .g4m-dd-split { flex: 1; }
 
         /* Dropdown-Bausteine — das Aussehen liegt vollständig hier,
            das JS erzeugt nur Struktur und Verhalten */
@@ -727,6 +816,22 @@ Kontakt: dd@danidubs.ch
                EF9A9A, B0BEC5, 80CBC4, FFE082, A5D6A7, F48FB1. */
             --g4m-mode-color-superformula: #D9FFB2;
             --g4m-mode-color-archimedean:  #B1DAFA;
+            /* F2-Rasterlinien + Hover: gleiche Blau-Familie wie das Panel,
+               nur dunkler — analog zum Tool-Panel (hellgraue Felder mit
+               etwas dunkleren grauen Linien). */
+            --g4m-arch-line:  #7FB4E0;   /* Rasterlinien: dunkleres Panel-Blau */
+            --g4m-arch-hover: #9BCAF5;   /* Button-Hover: leicht abgedunkeltes Panel-Blau */
+            /* F1-Rasterlinien + Hover (v153.1): gleiche Grün-Familie wie
+               das Superformula-Panel, nur dunkler — exakt analog zu den
+               F2-Blau-Ableitungen darüber. */
+            --g4m-sf-line:  #A9D97B;     /* Rasterlinien: dunkleres Panel-Grün */
+            --g4m-sf-hover: #C9F096;     /* Button-Hover: leicht abgedunkeltes Panel-Grün */
+            /* ── EINE Quelle für die Slider-Optik (v153.1) ──────────────
+               Griffgrösse und Rail-Stärke aller Slider (Tool-Panel-Editor,
+               F1- und F2-Slider-Feld) — vorher liefen 30px (Tool), 18px
+               (F2) und 12px (F1, Basis-Thumb) auseinander. */
+            --g4m-slider-handle: min(30px, calc(var(--u) * 0.58));
+            --g4m-slider-rail-h: 2px;
             --g4m-mode-color-f3:  #FFDBA6;
             --g4m-mode-color-f4:  #E6C9EB;
             --g4m-mode-color-f5:  #F7CCCC;
@@ -783,20 +888,97 @@ Kontakt: dd@danidubs.ch
         }
         
         /* Superformel Panel Styles */
+        /* F1-PANEL-NEUGESTALTUNG (v153.1) — identisches Raster und
+           Look & Feel wie das F2-Panel (g4m-arch-v153): das Panel SELBST
+           ist das 12x12-Raster, alle Zellen nutzen die g4m-arch-*-
+           Klassen, nur in der Superformula-Modusfarbe (grün statt blau).
+             Reihe 1     (1u)  = Optimal-Boundaries (2u) · Titel (8u)
+                                 · Formula-Button (2u, öffnet Gielis-Panel)
+             Reihen 2-9  (8u)  = 6 Parameter-Quadrate a, b, m, n1-n3
+                                 (je 2u x 2u, Min/Max-Wertespiegel) ·
+                                 Funktions-Reihe (Color + Reserven + Go) ·
+                                 Min-/Max-/Result-Viz je 4u x 4u (schwarz)
+             Reihen 10-12 (3u) = Slider-Feld: EIN Regler-Paar (Min/Max)
+                                 für den jeweils AKTIVEN Parameter —
+                                 exakt wie im F2- und Tool-Panel. */
         #superformel-panel {
             position: fixed; 
             top: 0; 
             left: 0;
             width: calc(var(--u) * 12);
             height: calc(var(--u) * 12);
-            background-color: rgba(40, 200, 40, 0.95); 
+            background-color: var(--g4m-mode-color-superformula);
             transition: transform var(--g4m-anim-sub-panel, 0.55s) var(--g4m-panel-ease, ease-in-out); 
-            display: flex; 
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: repeat(12, 1fr);
+            padding: 0;
+            overflow: hidden;
             font-family: 'JetBrains Mono', monospace; 
             color: black;
             z-index: var(--g4m-z-resting, 10);
             transform: translateX(-100%);
+        }
+        /* F1-Zellen: gleiche Optik wie die F2-Zellen, nur die Grün-
+           Ableitungen statt der Blau-Ableitungen (v153.1). Baby-Go ist
+           ausgenommen — er behält sein Rot; die ID-Regel würde die
+           .g4m-arch-babygo-Klasse sonst überstimmen (Spezifität). */
+        #superformel-panel .g4m-arch-cell:not(.g4m-arch-babygo) {
+            background-color: var(--g4m-mode-color-superformula);
+            border-color: var(--g4m-sf-line);
+        }
+        #superformel-panel button.g4m-arch-cell:not(.g4m-arch-babygo):not(.g4m-arch-reserve):not(.g4m-arch-botmod-active):not(.g4m-arch-sq-active):hover {
+            background-color: var(--g4m-sf-hover);
+        }
+        /* Aktiv-Optik der untersten F1-Zellen-Reihe (v153.1d): dunkleres
+           Grün mit weisser Schrift — GLEICHE Farbintensität wie das
+           F2-Blau #5E8199 (beide ≈ HSL S 25 % / L 48 %), nur der Farbton
+           wechselt von Blau (204°) auf das Panel-Grün (90°). Gleiche
+           Spezifität wie die Zellregel darüber (1 ID + 2 Klassen) —
+           die spätere Position im Stylesheet entscheidet. */
+        #superformel-panel .g4m-arch-cell.g4m-arch-botmod-active {
+            background-color: #7A9A5C;   /* dunkleres, leicht «schmutziges» Panel-Grün */
+            color: #ffffff;
+            border-color: #62804A;
+        }
+        /* Aktives Parameter-Quadrat auf F1 (v153.1e): Grün-Pendant zur
+           F2-Blau-Regel oben — gleiche Spezifität wie die Zellregel,
+           spätere Position entscheidet. */
+        #superformel-panel .g4m-arch-sq.g4m-arch-sq-active {
+            background-color: #7A9A5C;
+            border-color: #62804A;
+        }
+        #superformel-panel .g4m-arch-viz { border-color: var(--g4m-sf-line); }
+        /* Reihe 1: Page-2-Button links, Formula rechts — Format und
+           Schrift wie Page-2-/Formula-Button des F2-Panels. */
+        #sf-options-btn.g4m-arch-cell,
+        #formula-button.g4m-arch-cell {
+            display: flex; align-items: center; justify-content: center;
+            font-size: clamp(10px, calc(var(--u) * 0.269), 14px);
+            font-weight: 700;
+            line-height: 1.2;
+            text-align: center;
+        }
+        #sf-options-btn.g4m-arch-cell   { grid-column: 1 / 3; }
+        #formula-button.g4m-arch-cell   { grid-column: 11 / 13; }
+        /* Optimal Boundaries (v153.1c): 2u x 1u in der untersten Zellen-
+           Reihe des reserve6-Blocks, direkt links vom Baby-Go. */
+        #optimal-boundaries-btn.g4m-arch-cell {
+            display: flex; align-items: center; justify-content: center;
+            font-size: clamp(9px, calc(var(--u) * 0.24), 13px);
+            font-weight: 700;
+            line-height: 1.15;
+            text-align: center;
+            padding: 0 2px;
+        }
+        /* erste Rasterzeile fest auf Reihe 1 — wie die F2-Quadrate */
+        #sf-sq-a, #sf-sq-b, #sf-sq-m, #sf-sq-n1, #sf-sq-n2, #sf-sq-n3 { grid-row: 1; }
+        /* Leeres Modulations-Grundraster (g4m-arch-mod-hidden) trägt auf
+           F1 die GRÜNEN Ableitungen — die generische Regel erzwingt sonst
+           das F2-Blau (!important; die ID gewinnt die Spezifität). */
+        #superformel-panel .g4m-arch-mod-hidden {
+            background-color: var(--g4m-mode-color-superformula) !important;
+            border-color: var(--g4m-sf-line) !important;
         }
 
 /* body.mode-* #fN-btn { … !important } entfiel (Befund 28): Die in
@@ -813,6 +995,7 @@ Kontakt: dd@danidubs.ch
 #superformel-panel[data-open="0"],
 #archimedean-panel[data-arch-open="0"],
 #arch-options-panel[data-arch-opts-open="0"],
+#sf-options-panel[data-sf-opts-open="0"],
 [data-panel-open="0"] {
     visibility: hidden !important;
     transition: transform var(--g4m-anim-sub-panel, 0.55s) var(--g4m-panel-ease, ease-in-out), visibility 0s linear calc(var(--g4m-anim-sub-panel, 0.55s) + 0.05s) !important;
@@ -820,6 +1003,7 @@ Kontakt: dd@danidubs.ch
 #superformel-panel[data-open="1"],
 #archimedean-panel[data-arch-open="1"],
 #arch-options-panel[data-arch-opts-open="1"],
+#sf-options-panel[data-sf-opts-open="1"],
 [data-panel-open="1"] { visibility: visible !important; }
 #archimedean-panel {
     position: fixed; 
@@ -1078,46 +1262,11 @@ input[type=color] {
     object-fit: contain;
     display: block;
 }
-#gielis-close-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: rgba(0,0,0,0.15);
-    color: #666666;   /* Einheitsgrau (v150p) */
-    border: none;
-    width: 30px;
-    height: 30px;
-    font-size: 16px;
-    line-height: 30px;
-    text-align: center;
-    cursor: pointer;
-    border-radius: 3px;
-}
-#gielis-close-btn:hover { background: rgba(0,0,0,0.3); }
+/* #gielis-close-btn entfiel (v153.1d) — Schliessen über Pfeil/Formula-Button */
 
-/* Optimal-Boundaries-Button im Superformel-Panel */
-#optimal-boundaries-btn {
-    /* liegt im gezoomten Panel: Zoom herausrechnen, damit der Button
-       gerendert exakt Info+Home entspricht (2 u breit, 1 u hoch) */
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: calc(var(--u) * 2 / var(--panel-scale, 1));
-    height: calc(var(--u) / var(--panel-scale, 1));
-    background-color: #C4FF8A;
-    border: none;
-    color: #666666;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 14px;
-    font-weight: 700;   /* fett wie alle Buttons (v150o) */
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.15s ease;
-}
-#optimal-boundaries-btn:hover  { background-color: #D5FFAB; }
-#optimal-boundaries-btn:active { background-color: var(--g4m-mode-color-superformula); }
+/* Optimal-Boundaries-Button: seit v153.1 eine normale Reihe-1-Zelle des
+   F1-Rasters (g4m-arch-cell) — Format, Hover und Schrift kommen aus den
+   gemeinsamen Zellregeln, die frühere absolute Sonderposition entfiel. */
 
 /* Go-Button-Schüttel-Animation (Klick blockiert während Gielis-Panel offen) */
 @keyframes shake {
@@ -1239,8 +1388,7 @@ html, body { overflow: hidden; }
     height: min(24px, calc(var(--u) * 0.4615));
 }
 
-.slider-label, .value-display, .toggle-display,
-.radio-header-random, .radio-header-labels {
+.slider-label, .value-display, .toggle-display {
     font-size: min(11px, calc(var(--u) * 0.2115));
 }
 .value-display {
@@ -1268,9 +1416,9 @@ html, body { overflow: hidden; }
     gap: min(10px, calc(var(--u) * 0.1923));
 }
 .slider-top-row.no-radio { grid-template-columns: 1fr var(--val-col); }
-.radio-header { grid-template-columns: 1fr var(--radio-col) var(--val-col); }
-.radio-group, .radio-header-labels { width: var(--radio-col); }
-#optimal-boundaries-btn { font-size: calc(min(14px, var(--u) * 0.269) / var(--panel-scale, 1)); }
+.radio-group { width: var(--radio-col); }
+/* #optimal-boundaries-btn: Zoom-Kompensation entfiel (v153.1) — als
+   normale Rasterzelle skaliert er mit dem Panel wie alle Zellen. */
 
 /* Während Viewport-Umbrüchen (Drehen, Vollbild, Resize) alle Overlay-
    Panels kurz verstecken — sonst sieht man sie über mehrere Resize-
@@ -1288,6 +1436,7 @@ body.g4m-no-anim #home-panel {
 body.g4m-no-anim #superformel-panel,
 body.g4m-no-anim #archimedean-panel,
 body.g4m-no-anim #arch-options-panel,
+body.g4m-no-anim #sf-options-panel,
 body.g4m-no-anim #arch-formula-panel,
 body.g4m-no-anim #gielis-formula-panel,
 body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
@@ -1387,22 +1536,18 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
            früheren Inline-Styles) Gleichstände gewinnen. Echte
            Einzelpositionierungen bleiben dokumentiert inline; die
            vollständige Auslagerung folgt mit dem Datei-Split. */
-        .g4m-flexrow-ind     { display: flex; align-items: center; padding-left: 30px; }
-        .g4m-flexrow-ind-mb  { display: flex; align-items: center; margin-bottom: 2px; padding-left: 30px; }
         .g4m-row-flex        { flex: 1; margin: 0 5px; }
         .g4m-param-label     { width: 40px; text-align: left; color: #666666; font-weight: bold; }
-        .g4m-param-label-30  { width: 30px; text-align: left; font-weight: bold; color: #666666; }
         .g4m-param-label-sm  { width: 30px; font-size: 11px; color: #666666; }
         .g4m-val-box         { width: 42px; text-align: right; font-size: 11px; color: #666666; background: #f5f5f5; border: 1px solid #d0d0d0; padding: 1px 4px; }
         .g4m-mini-btn        { flex: 1; font-size: 10px; padding: 2px; margin: 0; background: #f5f5f5; color: #666666; border: 1px solid #ccc; cursor: pointer; }
-        .g4m-abs-left-center { position: absolute; left: 0; top: 50%; transform: translateY(-50%); z-index: 2; }
 
-        .g4m-viz-section     { margin-bottom: 10px; position: relative; margin-top: 20px; }
-        .g4m-viz-section.g4m-first { margin-top: 0; }   /* erste Boundary-Zeile (a) ohne Abstand nach oben */
-        .g4m-val-box-sm      { width: 30px; }           /* schmale Wertebox der Boundary-Zeilen */
+        /* g4m-flexrow-ind(-mb), g4m-param-label-30, g4m-abs-left-center,
+           g4m-viz-section(.g4m-first), g4m-val-box-sm und g4m-viz-box
+           entfielen (v153.1): das alte kompakte F1-Boundary-Layout ist
+           durch die F2-Struktur (g4m-arch-prow/-block/-viz) ersetzt. */
         .g4m-flex-center     { display: flex; align-items: center; justify-content: center; }
         .g4m-param-name      { width: 30px; font-weight: bold; color: #666666; }
-        .g4m-viz-box         { width: 30%; aspect-ratio: 1/1; background-color: #000; position: relative; }
         .g4m-color-dot       { width: 16px; height: 16px; border-radius: 50%; cursor: pointer; border: 1px solid #666; }
         .g4m-seg-btn         { padding: 3px 12px; font-size: 11px; margin: 0; border: none; cursor: pointer; }
         .g4m-seg-btn-sm      { padding: 2px 8px; font-size: 10px; margin: 0; border: none; cursor: pointer; }
@@ -1443,12 +1588,19 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
         .g4m-arch-cell {
             box-sizing: border-box;
             background-color: var(--g4m-mode-color-archimedean);
-            border: 1px solid #bdbdbd;
+            border: 1px solid var(--g4m-arch-line);   /* Rasterlinien: dunkleres Panel-Blau statt Grau (analog Tool-Panel) */
             font-family: 'JetBrains Mono', monospace;
             color: #666666;
             margin: 0;
         }
         button.g4m-arch-cell { cursor: pointer; }
+        /* Hover-Effekt für alle anklickbaren F2-Felder: Hintergrund leicht
+           abdunkeln (analog Tool-Panel #e0e0e0 → #d0d0d0). Buttons mit
+           eigener Optik (Baby-Go, aktive Modulation, Farbwähler) schließen
+           wir aus, damit ihre eigenen Hover-/Aktiv-Zustände greifen. */
+        button.g4m-arch-cell:not(.g4m-arch-babygo):not(.g4m-arch-botmod-active):not(.g4m-arch-sq-active):not(.g4m-arch-colorcell):not(.g4m-arch-mod-hidden):not(.g4m-arch-reserve):hover {
+            background-color: var(--g4m-arch-hover);
+        }
 
         /* Kopf-/Fußreihe */
         .g4m-arch-top  { grid-row: 1; }
@@ -1553,7 +1705,23 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
             overflow-wrap: break-word;
         }
         .g4m-arch-sq .g4m-arch-sq-vals { white-space: pre-line; }
-        .g4m-arch-sq.g4m-arch-sq-active { box-shadow: inset 0 0 0 2px #333333; }
+        /* Aktives Parameter-Quadrat (v153.1e): trägt dieselbe Aktiv-
+           Farbe wie On/Off/Sin/Cos/Tan (dunkles Panel-Blau, weisse
+           Schrift) statt der früheren Innenkontur — EINE Aktiv-Optik
+           für alle Parameter-Buttons. F1 überschreibt mit Grün (s. u.). */
+        .g4m-arch-sq.g4m-arch-sq-active {
+            background-color: #5E8199;
+            border-color: #4C6B80;
+        }
+        .g4m-arch-sq.g4m-arch-sq-active .g4m-arch-sq-letter,
+        .g4m-arch-sq.g4m-arch-sq-active .g4m-arch-sq-vals { color: #ffffff; }
+        /* Fine/Coarse (Parameter-Umschalter im Slider-Feld): aktive
+           Seite in derselben Aktiv-Farbe statt Schwarz (v153.1e). */
+        #archimedean-panel .g4m-arch-segbtn.g4m-on {
+            background: #5E8199;
+            color: #ffffff;
+            border-color: #4C6B80;
+        }
         /* erste Rasterzeile fest auf Reihe 1 — deterministische Lage */
         #arch-sq-a, #arch-sq-b, #arch-sq-alpha, #arch-sq-beta, #arch-sq-n,
         #arch-sq-optimizer { grid-row: 1; }
@@ -1578,7 +1746,7 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
         .g4m-arch-mod-hidden {
             color: transparent !important;
             background-color: var(--g4m-mode-color-archimedean) !important;
-            border-color: #bdbdbd !important;
+            border-color: var(--g4m-arch-line) !important;
             cursor: default;
         }
 
@@ -1588,7 +1756,7 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
             box-sizing: border-box;
             grid-row: 3 / 5;
             background-color: #000;
-            border: 1px solid #bdbdbd;
+            border: 1px solid var(--g4m-arch-line);
             overflow: hidden;
         }
         .g4m-arch-viz-min { grid-column: 1 / 3; }   /* Spalten 1-2 (4u) */
@@ -1611,8 +1779,17 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
             grid-column: 1 / 13;
             grid-row: 10 / 13;
             overflow: hidden;
-            /* feste Geometrie für identische Rail-Y-Positionen (s. u.) */
-            --g4m-row-h: var(--g4m-arch-field-h);                 /* Höhe einer Rail-Zeile */
+            /* feste Geometrie für identische Rail-Y-Positionen (s. u.).
+               Zeilenhöhe = mindestens die gemeinsame Griffgrösse (v153.1),
+               damit der grosse Thumb die Nachbarzeile nicht überlappt. */
+            --g4m-row-h: max(var(--g4m-arch-field-h), var(--g4m-slider-handle));   /* Höhe einer Rail-Zeile */
+            /* Rail-Absenkung (v153.1b): das Min/Max-Paar rückt so weit
+               nach unten, dass die UNTERE Rail (Max) exakt auf der
+               y-Linie des Tool-Panel-Sliders liegt — gemessen bei
+               Referenz-u 60px: Tool-Rail-Mitte 663, Max-Rail-Mitte
+               635.2 → Differenz 27.8px = 0.463u. Gilt für F1 UND F2
+               (beide Editoren tragen diese Klasse). */
+            --g4m-rails-shift: calc(var(--u) * 0.463);
             --g4m-title-h: calc(var(--u) * 0.55);                 /* Titel-/Kopfzeile */
             --g4m-pad-x: calc(var(--u) * 0.55);                   /* Rand links/rechts */
             --g4m-pad-top: calc(var(--u) * 0.28);
@@ -1672,7 +1849,7 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
            linksbündig auf gleicher Höhe wie sonst die erste Rail. */
         .g4m-arch-optseg {
             position: absolute;
-            top: calc(var(--g4m-pad-top) + var(--g4m-title-h));
+            top: calc(var(--g4m-pad-top) + var(--g4m-title-h) + var(--g4m-rails-shift, 0px));
             left: var(--g4m-pad-x);
             justify-self: start !important;
             height: var(--g4m-row-h);
@@ -1704,6 +1881,8 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
             row-gap: 4px;
             align-items: center;
             width: 100%;
+            /* Absenkung auf die Tool-Slider-Linie (v153.1b) */
+            margin-top: var(--g4m-rails-shift, 0px);
         }
         .g4m-arch-block .g4m-arch-lbl-min   { grid-column: 1; grid-row: 1; justify-self: start; align-self: center; font-weight: 700; }
         .g4m-arch-block .g4m-arch-rail-min  { grid-column: 2; grid-row: 1; width: 100%; margin: 0; align-self: center; }
@@ -1724,7 +1903,9 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
         .g4m-arch-block-mod {
             grid-template-columns: calc(var(--u) * 1.5) 1fr var(--g4m-arch-field-w);
         }
-        /* Eingabefelder: feste, einheitliche Höhe, kompakt rechts */
+        /* Eingabefelder: feste, einheitliche Höhe, kompakt rechts.
+           Seit v153.1d editierbar — Cursor/Fokus wie das Tool-Panel-
+           Wertefeld (value-display). */
         .g4m-arch-block .g4m-val-box {
             box-sizing: border-box;
             min-width: var(--g4m-arch-field-w);
@@ -1732,6 +1913,15 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
             display: flex; align-items: center; justify-content: flex-end;
             padding: 0 4px;
             background: #f5f5f5; border: 1px solid #d0d0d0;
+            cursor: text;
+            outline: none;
+            user-select: text;
+            -webkit-user-select: text;
+        }
+        .g4m-arch-block .g4m-val-box:hover { background-color: #ffffff; }
+        .g4m-arch-block .g4m-val-box:focus {
+            border-color: #4CAF50;
+            background-color: #ffffff;
         }
         .g4m-arch-presets { display: flex; gap: 2px; margin-top: 3px; }
         .g4m-arch-presetbtn {
@@ -1743,17 +1933,63 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
             display: inline-flex; align-items: center; justify-content: center;
         }
         .g4m-arch-block input[type=range].g4m-row-flex { width: 100%; }
-        /* Größere, gut greifbare Schieberegler-Griffe im F2-Slider-Feld
-           (analog Tool-Panel-Optik). Gilt für die Parameter-Rails und die
-           Modulations-Slider. */
+        /* Schieberegler-Griffe im F1-/F2-Slider-Feld: Griffgrösse und
+           Rail-Stärke aus der EINEN Quelle (v153.1) — damit sind Tool-
+           Panel-, F1- und F2-Griffe pixelidentisch und die Rails überall
+           dieselbe feine graue 2px-Linie. Der Thumb wird über margin-top
+           exakt auf die Rail-Mitte zentriert; die Input-Höhe wächst auf
+           Griffgrösse, damit nichts abgeschnitten wird. */
+        .g4m-arch-editor input[type=range] {
+            height: var(--g4m-slider-handle);
+            background-size: 100% var(--g4m-slider-rail-h);
+        }
         .g4m-arch-editor input[type=range]::-webkit-slider-thumb {
-            width: 18px; height: 18px; margin-top: -8px;
+            width:  var(--g4m-slider-handle);
+            height: var(--g4m-slider-handle);
+            margin-top: calc((var(--g4m-slider-rail-h) - var(--g4m-slider-handle)) / 2);
             background: #666666;
         }
         .g4m-arch-editor input[type=range]::-moz-range-thumb {
-            width: 18px; height: 18px; background: #666666;
+            width:  var(--g4m-slider-handle);
+            height: var(--g4m-slider-handle);
+            background: #666666;
         }
-        .g4m-arch-editor input[type=range] { background-size: 100% 3px; }
+        /* Griff- und Füll-Farbe der F1-/F2-Rails (v153.1g): analog zum
+           Tool-Panel (Griff + gefüllter Track in der Button-Farbe der
+           Gruppe) nehmen die Panel-Rails die Aktivfarbe ihres Panels an
+           — F2 das dunkle Blau, F1 das dunkle Grün. Der GEFÜLLTE Teil
+           (bis zum Griff) liegt als eigene Farbschicht in DERSELBEN
+           Strichstärke wie die graue Basislinie (v153.1i, «nicht zu
+           grob») — seit der Track transparent ist (er übermalte die
+           Farbe), rendert auch die dünne Schicht rein. --fill-percent
+           speist die Schichtbreite (setRangeFill, EINE Quelle). */
+        #archimedean-panel .g4m-arch-editor input[type=range] {
+            background:
+                linear-gradient(#5E8199, #5E8199) left center / var(--fill-percent, 0%) var(--g4m-slider-rail-h) no-repeat,
+                linear-gradient(#9e9e9e, #9e9e9e) left center / 100% var(--g4m-slider-rail-h) no-repeat;
+        }
+        #archimedean-panel .g4m-arch-editor input[type=range]::-webkit-slider-thumb { background: #5E8199; }
+        #archimedean-panel .g4m-arch-editor input[type=range]::-moz-range-thumb    { background: #5E8199; }
+        #superformel-panel .g4m-arch-editor input[type=range] {
+            background:
+                linear-gradient(#7A9A5C, #7A9A5C) left center / var(--fill-percent, 0%) var(--g4m-slider-rail-h) no-repeat,
+                linear-gradient(#9e9e9e, #9e9e9e) left center / 100% var(--g4m-slider-rail-h) no-repeat;
+        }
+        #superformel-panel .g4m-arch-editor input[type=range]::-webkit-slider-thumb { background: #7A9A5C; }
+        #superformel-panel .g4m-arch-editor input[type=range]::-moz-range-thumb    { background: #7A9A5C; }
+        /* Der native Track (::-webkit-slider-runnable-track, Basisregel
+           §Slider) malt seine eigene graue 2px-Linie ÜBER den Element-
+           Hintergrund — sie übermalte die 4px-Farbschicht in der Mitte.
+           Auf den Panels wird der Track transparent gestellt; die graue
+           Basislinie liefert bereits die zweite Hintergrund-Schicht. */
+        #archimedean-panel .g4m-arch-editor input[type=range]::-webkit-slider-runnable-track,
+        #superformel-panel .g4m-arch-editor input[type=range]::-webkit-slider-runnable-track {
+            background: transparent;
+        }
+        #archimedean-panel .g4m-arch-editor input[type=range]::-moz-range-track,
+        #superformel-panel .g4m-arch-editor input[type=range]::-moz-range-track {
+            background: transparent;
+        }
         /* Kleiner roter Go-Button (Baby-Go): unterste Reihe, ganz rechts
            (Spalte 12 = 1u). Generiert ein Bild auf der Canvas, ohne das
            Panel zu schließen. Füllt seine 1u-Zelle wie die Edge-Buttons. */
@@ -1842,30 +2078,22 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
                          am Editor-Oberrand. Bei Zeilen ohne Random-
                          Radios (Zoom/Pan/Rotation, Normalization)
                          blendet g4mSelectParam sie aus. -->
-                    <div class="radio-header">
-                        <div class="radio-header-random">Random</div>
-                        <div class="radio-header-labels">
-                            <span>On</span>
-                            <span>Off</span>
-                        </div>
-                        <div></div>
-                    </div>
+                    <!-- Der frühere «Random On Off»-Beschriftungskopf
+                         entfiel (v153.1h): Random wird über die On/Off-
+                         Quadrate im Stack (Spalte 11-13) geschaltet und
+                         dort auch beschriftet — der Editor-Text war
+                         funktionslos geworden. -->
                     <!-- Die 13 Slider-Zeilen werden aus sliderData +
                          G4M_SLIDER_ROWS generiert (buildToolSliderRows, §2)
                          — EINE Quelle statt 13 Markup-Kopien (Befund 1) -->
 
                     <!-- Normalization row -->
                     <div class="normalization-row" id="normalization-row">
-                        <div class="slider-top-row">
+                        <div class="slider-top-row no-radio">
                             <div class="slider-label">Normalization (Make Visible on Canvas)</div>
-                            <div class="radio-group" style="margin-left: auto;">
-                                <!-- data-mode macht die Buttons für g4mRadioButtons()
-                                     sichtbar (Befund 19); Sonderbehandlung im
-                                     Click-Handler über .normalization-row -->
-                                <button type="button" class="radio-btn" data-mode="on"></button>
-                                <button type="button" class="radio-btn active-blue" data-mode="off"></button>
-                            </div>
-                            <div class="toggle-display" style="white-space: nowrap;">On / Off</div>
+                            <!-- On/Off-Text-Umschalter entfernt (v153.1h):
+                                 geschaltet wird über die On/Off-Quadrate im
+                                 Stack (Spalte 11-13) — wie bei allen anderen. -->
                         </div>
                     </div>
                 </div>
@@ -1886,7 +2114,25 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
             <button type="button" class="tool-btn bottom-btn" style="grid-column: 5 / 7;" id="drawing-btn">Drawing</button>
             <button type="button" class="tool-btn bottom-btn" style="grid-column: 7 / 9;">Filter</button>
             <button type="button" class="tool-btn bottom-btn" style="grid-column: 9 / 11;">Modulator</button>
-            <button type="button" class="tool-btn bottom-btn" style="grid-column: 11 / 13;">Random Tools</button>
+            <button type="button" id="g4m-random-caption" class="tool-btn bottom-btn" style="grid-column: 11 / 13;">Random</button>
+
+            <!-- Unterste Reihe (u12): 6 Reserve-Buttons à 2u. Frei
+                 geworden, nachdem das Slider-Feld auf 3u verkleinert und
+                 die obere Button-Zeile um 4u nach oben gerückt ist. -->
+            <button type="button" class="tool-btn reserve-btn" style="grid-column: 1 / 3;" aria-label="Reserve"></button>
+            <button type="button" class="tool-btn reserve-btn" style="grid-column: 3 / 5;" aria-label="Reserve"></button>
+            <button type="button" class="tool-btn reserve-btn" style="grid-column: 5 / 7;" aria-label="Reserve"></button>
+            <button type="button" class="tool-btn reserve-btn" style="grid-column: 7 / 9;" aria-label="Reserve"></button>
+            <button type="button" class="tool-btn reserve-btn" style="grid-column: 9 / 11;" aria-label="Reserve"></button>
+            <!-- Unter "Random Tools" (Spalte 11-13): zwei 1u-Quadrate
+                 On/Off als Random-Schalter des AKTIVEN Slider-Parameters.
+                 9 Paare (eines je Random-fähigem Parameter) liegen hier
+                 gestapelt auf z-index-Ebenen; g4mSelectParam blendet das
+                 zum aktiven Parameter passende ein (analog F2-Panel).
+                 Inhalt generiert buildRandomToggleStack (§2). -->
+            <div class="g4m-rnd-stack" id="g4m-rnd-stack" style="grid-row: 9; grid-column: 11 / 13;">
+                <div class="tool-btn reserve-btn g4m-rnd-blank" aria-hidden="true"></div>
+            </div>
         </div>
 
         <!-- Navigation Tool (Mitte) -->
@@ -1990,81 +2236,164 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
         </div>
     </div>
 
-<!-- Superformel-Panel: Random Boundaries -->
+<!-- Superformel-Panel (v153.1): Neuaufbau exakt im F2-Raster — das
+     Panel ist selbst das 12x12-Raster, alle Zellen nutzen die
+     g4m-arch-*-Klassen (EINE Optik-Quelle), nur in Grün. -->
 <div id="superformel-panel" data-open="0">
-    <!-- Header -->
-    <div style="display: flex; justify-content: center; align-items: center; padding: 10px 20px; 
-        background-color: var(--g4m-mode-color-superformula);">
-        <h2 style="margin: 0; font-size: 24px; color: #666666; text-align: center;">Superformula Random Boundaries</h2>
-        
-    </div>
-    
-    <!-- Slider Container in der Superformula-Modusfarbe (var, v150e) -->
-    <div style="flex: 1; padding: 15px; background-color: var(--g4m-mode-color-superformula); max-height: calc(100% - 64px); overflow: hidden;">
-        <!-- Visualisierungsbereich für MIN und MAX Parameter -->
-        <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 30px;">
-            <!-- Visualisierung für MIN-Werte -->
-            <div class="g4m-viz-box">
-                <canvas id="viz-min" style="position: absolute; top: 0; left: 0;"></canvas>
-                <!-- Fusszeile transparent: der schwarze Balken verdeckte
-                     hohe Kurven am unteren Boxrand (User-Feedback v150) -->
-                <div style="position: absolute; bottom: 0; left: 0; right: 0; color: white; 
-                    font-size: 12px; padding: 2px 5px 2px 10px; text-align: left;">Min</div>
+
+    <!-- ===== Reihe 1 (1u): Page 2 · Titel (4 Felder verbunden) · Formula ===== -->
+    <button type="button" id="sf-options-btn" class="g4m-arch-cell g4m-arch-top">Page 2</button>
+    <div class="g4m-arch-cell g4m-arch-top g4m-arch-title">Superformula Parameters</div>
+    <button type="button" id="formula-button" class="g4m-arch-cell g4m-arch-top" aria-label="Show Gielis formula">Formula</button>
+
+    <!-- ===== Reihen 2-9 (8u): Quadrate + Viz (Struktur = F2-Grid) ===== -->
+    <div class="g4m-arch-grid">
+        <!-- Rasterzeile 1: die 6 Parameter-Quadrate a, b, m, n1-n3.
+             Wertespiegel (Min/Max) hält g4mSfUpdateSqVals synchron. -->
+        <button type="button" class="g4m-arch-cell g4m-arch-sq" id="sf-sq-a">
+            <span class="g4m-arch-sq-letter">a</span>
+            <span class="g4m-arch-sq-vals" id="sf-sqval-a">Min. 0.5
+Max. 1.5</span>
+        </button>
+        <button type="button" class="g4m-arch-cell g4m-arch-sq" id="sf-sq-b">
+            <span class="g4m-arch-sq-letter">b</span>
+            <span class="g4m-arch-sq-vals" id="sf-sqval-b">Min. 0.5
+Max. 1.5</span>
+        </button>
+        <button type="button" class="g4m-arch-cell g4m-arch-sq" id="sf-sq-m">
+            <span class="g4m-arch-sq-letter">m</span>
+            <span class="g4m-arch-sq-vals" id="sf-sqval-m">Min. 3
+Max. 8</span>
+        </button>
+        <button type="button" class="g4m-arch-cell g4m-arch-sq" id="sf-sq-n1">
+            <span class="g4m-arch-sq-letter">n&#8321;</span>
+            <span class="g4m-arch-sq-vals" id="sf-sqval-n1">Min. 0.5
+Max. 1.5</span>
+        </button>
+        <button type="button" class="g4m-arch-cell g4m-arch-sq" id="sf-sq-n2">
+            <span class="g4m-arch-sq-letter">n&#8322;</span>
+            <span class="g4m-arch-sq-vals" id="sf-sqval-n2">Min. 0.5
+Max. 1.5</span>
+        </button>
+        <button type="button" class="g4m-arch-cell g4m-arch-sq" id="sf-sq-n3">
+            <span class="g4m-arch-sq-letter">n&#8323;</span>
+            <span class="g4m-arch-sq-vals" id="sf-sqval-n3">Min. 0.5
+Max. 1.5</span>
+        </button>
+
+        <!-- Funktions-Reihe (Rasterzeile 2) — Positionen EXAKT wie F2:
+             Spalte 1 bleibt leer (F2: Connect), 2 = Color, 3 = Modulation,
+             Spalten 4-6 = reserve6-Block (oben Sin/Cos/Tan, unten On/Off,
+             Farbzelle, Optimal Boundaries 2u links vom Baby-Go, Go). -->
+        <button type="button" class="g4m-arch-cell g4m-arch-fnsq g4m-arch-reserve" aria-label="Reserve"></button>
+        <button type="button" class="g4m-arch-cell g4m-arch-sq g4m-arch-fnsq" id="sf-sq-color">
+            <span class="g4m-arch-sq-letter">Color</span>
+            <span class="g4m-arch-sq-vals" id="sf-sqval-color">Random</span>
+        </button>
+        <button type="button" class="g4m-arch-cell g4m-arch-sq g4m-arch-fnsq" id="sf-sq-mod">
+            <span class="g4m-arch-sq-letter">Modulation</span>
+            <span class="g4m-arch-sq-vals" id="sf-sqval-mod">Off</span>
+        </button>
+        <div class="g4m-arch-fnsq g4m-arch-reserve6">
+            <!-- obere Reihe: Sin/Cos/Tan, je 2u breit — Zellen wie F2 -->
+            <button type="button" id="sf-mod-sin" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-restop g4m-arch-botmod g4m-arch-botmod-active" style="grid-column: 1 / 3;" aria-label="Modulation sine">Sin</button>
+            <button type="button" id="sf-mod-cos" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-restop g4m-arch-botmod" style="grid-column: 3 / 5;" aria-label="Modulation cosine">Cos</button>
+            <button type="button" id="sf-mod-tan" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-restop g4m-arch-botmod" style="grid-column: 5 / 7;" aria-label="Modulation tangent">Tan</button>
+            <!-- untere Reihe: On/Off (Zellen 1-2, wie F2) -->
+            <button type="button" id="sf-mod-on"  class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botmod" style="grid-column: 1 / 2;" aria-label="Modulation on">On</button>
+            <button type="button" id="sf-mod-off" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botmod g4m-arch-botmod-active" style="grid-column: 2 / 3;" aria-label="Modulation off">Off</button>
+            <!-- Color: Random On/Off (Zellen 1-2) + Farbwähler (Zelle 3),
+                 nur bei «color» sichtbar — Zellen exakt wie F2. -->
+            <button type="button" id="sf-color-random-on"  class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botcol g4m-arch-botmod-active" style="grid-column: 1 / 2; grid-row: 2; visibility: hidden;" aria-label="Random color on">On</button>
+            <button type="button" id="sf-color-random-off" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botcol" style="grid-column: 2 / 3; grid-row: 2; visibility: hidden;" aria-label="Random color off">Off</button>
+            <div class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botcol g4m-arch-colorcell" style="grid-column: 3 / 4; grid-row: 2; visibility: hidden;">
+                <input type="color" id="curve-default-color" value="#CE93D8" aria-label="Pick fixed curve color">
+                <span class="g4m-arch-color-quad" aria-hidden="true">
+                    <i></i><i></i><i></i><i></i>
+                </span>
             </div>
-            
-            <!-- Visualisierung für MAX-Werte -->
-            <div class="g4m-viz-box">
-                <canvas id="viz-max" style="position: absolute; top: 0; left: 0;"></canvas>
-                <div style="position: absolute; bottom: 0; left: 0; right: 0; color: white; 
-                    font-size: 12px; padding: 2px 5px 2px 10px; text-align: left;">Max</div>
-            </div>
-            
+            <button type="button" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-reserve" style="grid-column: 3 / 4;" aria-label="Reserve"></button>
+            <!-- Optimal Boundaries: 2u breit, 1u hoch, direkt LINKS vom Baby-Go -->
+            <button type="button" id="optimal-boundaries-btn" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot" style="grid-column: 4 / 6;">Optimal Boundaries</button>
+            <button type="button" id="sf-baby-go" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-babygo" style="grid-column: 6 / 7;" aria-label="Generate new image">Go</button>
         </div>
-    
-        <!-- Parameter-Zeilen (a, b, m, n1-n3) werden in §2 aus
-             G4M_SF_BOUNDARY_ROWS generiert (buildSfBoundaryRows)
-             — EINE Quelle statt 6 Markup-Kopien (Befund 10) -->
+
+        <!-- Rasterzeilen 3-4: Min-/Max-/Result-Viz je 4u x 4u (schwarz) —
+             Canvas-Ids viz-min/viz-max bleiben (drawVizFor, §5). -->
+        <div class="g4m-arch-viz g4m-arch-viz-min">
+            <canvas id="viz-min" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
+            <div class="g4m-arch-viz-label">Min</div>
+        </div>
+        <div class="g4m-arch-viz g4m-arch-viz-max">
+            <canvas id="viz-max" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
+            <div class="g4m-arch-viz-label">Max</div>
+        </div>
+        <div class="g4m-arch-viz g4m-arch-viz-result">
+            <canvas id="sf-viz-result" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
+            <div class="g4m-arch-viz-label">Result</div>
+        </div>
+    </div>
+
+    <!-- ===== Reihen 10-12 (3u): Slider-Feld =====
+         EIN Regler-Paar (Min/Max) für den aktiven Parameter — die
+         6 Parameterzeilen generiert buildSfBoundaryRows (§2) aus
+         G4M_SF_BOUNDARY_ROWS in die F2-Struktur (g4m-arch-prow/-block);
+         die Slider-/Wertefeld-Ids (param-X-min/max, val-X-min/max)
+         bleiben unverändert, alle Verbraucher (§5) laufen weiter. -->
+    <div class="g4m-arch-cell g4m-arch-editor">
         <div id="sf-boundaries-rows"></div>
 
-        <!-- Neue Farb-Sektion mit angepassten Beschriftungen und Layout -->
-        <div style="margin-top: 30px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; position: relative;">
-            <!-- Zentrierter Container mit 60% Breite -->
-            <div style="width: 60%; display: flex; align-items: center; justify-content: center;">
-                <!-- Radio Buttons (links) mit angepasster Reihenfolge -->
-                <div style="display: flex; align-items: center; margin-right: 30px;">
-                    <div style="color: #666666; margin-right: 10px;">Random</div>
-                    
-                    <div style="color: #666666; margin-right: 5px;">On</div>
-                    <div class="radio-container" style="display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; margin-right: 5px;">
-                        <button type="button" id="color-random-on" class="radio-btn active-green g4m-color-dot"></button>
-                    </div>
-                    
-                    <div style="color: #666666; margin: 0 5px;">Off</div>
-                    <div class="radio-container" style="display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; margin-left: 5px;">
-                        <button type="button" id="color-random-off" class="radio-btn g4m-color-dot"></button>
-                    </div>
-                </div>
-                
-                <!-- COLOR Label und Picker (rechts) -->
-                <div style="display: flex; align-items: center;">
-                    <div style="font-weight: bold; color: #666666; margin-right: 10px;">Color</div>
-                    <input type="color" id="curve-default-color" value="#CE93D8" style="width: 40px; height: 26px; cursor: pointer; border: none;">
-                </div>
-            </div>
-
-
-            
-            <!-- Formel-Button (rechts unten) -->
-            <div style="position: absolute; right: 5px; bottom: -30px;">
-                <button type="button" id="formula-button" style="background: none; border: none; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 24px; color: #666666;">{ ϕ π }</button>
-
+        <!-- Funktions-Zeile Color: nur Kopfzeile (wie F2) — die
+             Bedienung (On/Off + Farbwähler) liegt in den unteren
+             1u-Zellen des reserve6-Blocks, sichtbar bei «color». -->
+        <div class="g4m-arch-prow" id="sf-prow-color">
+            <div class="g4m-arch-phead">
+                <span class="g4m-note-text">Random for Color On or Off</span>
+                <span class="g4m-arch-seg-spacer"></span>
             </div>
         </div>
-        
+
+        <!-- Funktions-Zeile Modulation: Strength/Freq (Typ + On/Off
+             liegen wie bei F2 in der untersten Zellen-Reihe). -->
+        <div class="g4m-arch-prow" id="sf-prow-mod">
+            <div class="g4m-arch-phead">
+                <span class="g4m-note-text">Curve modulation</span>
+                <span class="g4m-arch-seg-spacer"></span>
+            </div>
+            <div class="g4m-arch-block g4m-arch-block-mod">
+                <span class="g4m-param-label-sm g4m-arch-lbl-min">Strength</span>
+                <input type="range" id="sf-mod-strength" min="0" max="1" step="0.01" value="0.71" class="g4m-row-flex g4m-arch-rail-min">
+                <div id="sf-mod-strength-val" class="g4m-val-box g4m-arch-field-min">0.71</div>
+                <span class="g4m-param-label-sm g4m-arch-lbl-max">Freq</span>
+                <input type="range" id="sf-mod-freq" min="0.1" max="20" step="0.1" value="19.1" class="g4m-row-flex g4m-arch-rail-max">
+                <div id="sf-mod-freq-val" class="g4m-val-box g4m-arch-field-max">19.1</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SUPERFORMULA OPTIONS PANEL — Page 2 des F1-Panels,           -->
+<!-- exakt analog arch-options-panel (Seite 2 vorerst leer).      -->
+<!-- ============================================================ -->
+<div id="sf-options-panel" data-sf-opts-open="0" style="
+    position: fixed; top: 0; left: 0;
+    width: calc(var(--u) * 12); height: calc(var(--u) * 12);
+    background-color: var(--g4m-mode-color-superformula);
+    transition: transform var(--g4m-anim-sub-panel, 0.55s) var(--g4m-panel-ease, ease-in-out);
+    display: flex; flex-direction: column;
+    font-family: 'JetBrains Mono', monospace; color: black;
+    z-index: var(--g4m-z-resting, 10); transform: translateX(-100%); overflow: hidden;">
+
+    <div style="position:relative; display:flex; align-items:center; justify-content:center; padding:10px 20px;
+        background-color:var(--g4m-mode-color-superformula); min-height:50px;">
+        <h2 style="margin:0; font-size:20px; color:#666666; text-align:center;">Superformula Options</h2>
     </div>
 
-    <!-- Optimal-Boundaries-Button: bündig unten links, Format wie Info+Home zusammen -->
-    <button type="button" id="optimal-boundaries-btn">Optimal Boundaries</button>
+    <div style="flex:1; padding:20px; background-color:var(--g4m-mode-color-superformula); overflow:hidden;">
+        <!-- Seite 2 bleibt vorerst leer für künftige Optionen —
+             gleiche Auslegung wie beim Archimedean-Pendant. -->
+    </div>
 </div>
 <!-- ================================================================ -->
 <!-- ARCHIMEDEAN SPIRAL PANEL - analog zu superformel-panel          -->
@@ -2072,7 +2401,7 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
 <div id="archimedean-panel" class="g4m-arch-v153" data-arch-open="0">
 
     <!-- ===== Reihe 1 (1u): Page-2 · Titel (4 Felder verbunden) · Formula ===== -->
-    <button type="button" id="arch-options-btn" class="g4m-arch-cell g4m-arch-top">→ Page 2</button>
+    <button type="button" id="arch-options-btn" class="g4m-arch-cell g4m-arch-top">Page 2</button>
     <div class="g4m-arch-cell g4m-arch-top g4m-arch-title">Archimedean Spiral Parameters</div>
     <button type="button" id="arch-formula-toggle" class="g4m-arch-cell g4m-arch-top" role="button" tabindex="0" aria-label="Open formula panel">Formula</button>
 
@@ -2131,7 +2460,7 @@ Max. 100%</span>
              Lines, 2=Farbe, 3=Modulation, 4-6=Reserve. Bedienung erfolgt
              im verkleinerten Slider-Feld darunter (Klick = aktive Zeile). -->
         <button type="button" class="g4m-arch-cell g4m-arch-sq g4m-arch-fnsq" id="arch-sq-connect">
-            <span class="g4m-arch-sq-letter">Connect</span>
+            <span class="g4m-arch-sq-letter">Close Curve</span>
             <span class="g4m-arch-sq-vals" id="arch-sqval-connect">Off</span>
         </button>
         <button type="button" class="g4m-arch-cell g4m-arch-sq g4m-arch-fnsq" id="arch-sq-color">
@@ -2158,8 +2487,8 @@ Max. 100%</span>
             <button type="button" id="arch-opt-on"  class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botopt g4m-arch-botmod-active" style="grid-column: 1 / 2; grid-row: 2; visibility: hidden;" aria-label="Optimizer on">On</button>
             <button type="button" id="arch-opt-off" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botopt" style="grid-column: 2 / 3; grid-row: 2; visibility: hidden;" aria-label="Optimizer off">Off</button>
             <!-- Connecting Line On/Off: gleiche Zellen, nur bei „connect" sichtbar -->
-            <button type="button" id="arch-connect-on"  class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botcon" style="grid-column: 1 / 2; grid-row: 2; visibility: hidden;" aria-label="Connecting lines on">On</button>
-            <button type="button" id="arch-connect-off" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botcon g4m-arch-botmod-active" style="grid-column: 2 / 3; grid-row: 2; visibility: hidden;" aria-label="Connecting lines off">Off</button>
+            <button type="button" id="arch-connect-on"  class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botcon" style="grid-column: 1 / 2; grid-row: 2; visibility: hidden;" aria-label="Close curve on">On</button>
+            <button type="button" id="arch-connect-off" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botcon g4m-arch-botmod-active" style="grid-column: 2 / 3; grid-row: 2; visibility: hidden;" aria-label="Close curve off">Off</button>
             <!-- Color: Random On/Off (Zellen 1-2) + Farbwähler (Zelle 3),
                  nur bei „color" sichtbar. Zelle 3 zeigt die feste Farbe
                  (Random Off) bzw. 4 bunte Quadrate (Random On). -->
@@ -2171,9 +2500,9 @@ Max. 100%</span>
                     <i></i><i></i><i></i><i></i>
                 </span>
             </div>
-            <button type="button" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot" style="grid-column: 3 / 4;" aria-label="Reserve"></button>
-            <button type="button" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot" style="grid-column: 4 / 5;" aria-label="Reserve"></button>
-            <button type="button" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot" style="grid-column: 5 / 6;" aria-label="Reserve"></button>
+            <button type="button" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-reserve" style="grid-column: 3 / 4;" aria-label="Reserve"></button>
+            <button type="button" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-reserve" style="grid-column: 4 / 5;" aria-label="Reserve"></button>
+            <button type="button" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-reserve" style="grid-column: 5 / 6;" aria-label="Reserve"></button>
             <button type="button" id="arch-baby-go" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-babygo" style="grid-column: 6 / 7;" aria-label="Generate new image">Go</button>
         </div>
     </div>
@@ -2330,14 +2659,14 @@ Max. 100%</span>
              untersten Reihe). -->
         <div class="g4m-arch-prow" id="arch-prow-connect">
             <div class="g4m-arch-phead">
-                <span class="g4m-note-text">Connecting line start → end</span>
+                <span class="g4m-note-text">connection line from startpoint to endpoint of spiral</span>
                 <span class="g4m-arch-seg-spacer"></span>
             </div>
         </div>
 
         <div class="g4m-arch-prow" id="arch-prow-color">
             <div class="g4m-arch-phead">
-                <span class="g4m-note-text">Random for Color on or off</span>
+                <span class="g4m-note-text">Random for Color On or Off</span>
                 <span class="g4m-arch-seg-spacer"></span>
             </div>
         </div>
@@ -2409,7 +2738,8 @@ Max. 100%</span>
     visibility: hidden;">
     <div style="display:flex; justify-content:center; align-items:center; padding:10px 20px; background-color:var(--g4m-mode-color-archimedean); min-height:50px; position:relative;">
         <h2 style="margin:0; font-size:20px; color:#666666; text-align:center;">Archimedean Formula</h2>
-        <button type="button" id="arch-formula-close-btn" aria-label="Close formula panel" style="position:absolute; right:15px; background:none; border:none; font-size:24px; cursor:pointer; color:#666666; line-height:1;">→</button>
+        <!-- Schliessen-Pfeil entfernt (v153.1d): das Panel schliesst
+             über den rechten D-Pad-Pfeil bzw. den Formula-Button. -->
     </div>
     <div style="flex:1; padding:20px; background-color:var(--g4m-mode-color-archimedean); display:flex; flex-direction:column; justify-content:center; align-items:center;">
         <div style="font-size:22px; color:#333; text-align:center; margin-bottom:20px;">
@@ -2528,7 +2858,8 @@ Max. 100%</span>
     <!-- Dateiname enthält bewusst 'trasnparent' — so heisst die Datei
          auf dem Server (geprüft, Befund 4). Lade-Fallback in §7. -->
     <img src="Johan_Gielis_Panel_trasnparent.png" alt="Johan Gielis Superformula">
-    <button type="button" id="gielis-close-btn" title="Close">✕</button>
+    <!-- Schliessen-Button entfernt (v153.1d): das Panel schliesst
+         über den rechten D-Pad-Pfeil bzw. den Formula-Button. -->
 </div>
 
 <script>
@@ -2620,7 +2951,7 @@ const G4M_PERSIST = (function () {
         'currentDisplayMode', 'canvasBackgroundColor', 'normalizationEnabled',
         'archConnectingLines', 'archimedeanParams', 'archUseRandomColors',
         'archDefaultColor', 'useRandomColors', 'defaultCurveColor',
-        'viewParams', 'superformulaParams', 'archModulation', 'randomModes'
+        'viewParams', 'superformulaParams', 'archModulation', 'sfModulation', 'randomModes'
     ];
     function isPlainObject(o) {
         return o && typeof o === 'object' && !Array.isArray(o);
@@ -2758,6 +3089,10 @@ const g4mStore = (function () {
             n3: { current: 1.0, min: 0.1, max: 10.0 }
         },
         archModulation: { enabled: false, type: 'sin', strength: 0.71, freq: 19.1 },   // aus bis zur User-Entscheidung (v150j)
+        /* Superformula-Modulation (v153.1c): analog archModulation —
+           moduliert den Superformel-Radius r(θ) mit Sin/Cos/Tan.
+           Gleiche Defaults, aus bis zur User-Entscheidung. */
+        sfModulation: { enabled: false, type: 'sin', strength: 0.71, freq: 19.1 },
 
         // Offen-Zustand aller Overlay-Panels (Panel-Id -> bool)
         panels: {},
@@ -2812,6 +3147,7 @@ const g4mStore = (function () {
         patchArch:               patchSubtree('archimedeanParams'),
         patchViewParams:         patchSubtree('viewParams'),
         patchArchModulation:     patchSubtree('archModulation'),
+        patchSfModulation:       patchSubtree('sfModulation'),
         patchSuperformulaParams: patchSubtree('superformulaParams'),
 
         // Store-private Flags (panels/randomModes sind fassaden-verborgen)
@@ -2851,7 +3187,7 @@ const g4mStore = (function () {
             if (!saved) return false;
             G4M_PERSIST.applyTo(state);   // tiefes Mischen in den Live-State
             // Bus-Ereignisse, damit Abonnenten (und Auto-Save) reagieren
-            ['archimedeanParams','viewParams','archModulation','superformulaParams']
+            ['archimedeanParams','viewParams','archModulation','sfModulation','superformulaParams']
                 .forEach(function (k) { g4mBus.emit('state', { key: k, value: state[k] }); });
             ['currentDisplayMode','canvasBackgroundColor','normalizationEnabled',
              'archConnectingLines','archUseRandomColors','archDefaultColor',
@@ -2874,6 +3210,7 @@ const G4M_PANELS = {
     'superformel-panel':    { openAttr: 'data-open',           side: 'canvas', zoomed: true  },
     'archimedean-panel':    { openAttr: 'data-arch-open',      side: 'canvas', zoomed: true  },
     'arch-options-panel':   { openAttr: 'data-arch-opts-open', side: 'canvas', zoomed: true  },
+    'sf-options-panel':     { openAttr: 'data-sf-opts-open',   side: 'canvas', zoomed: true  },
     /* Aktiv-Farben der F-Buttons liegen im Stylesheet
        (#fN-btn.g4m-btn-active) — nicht mehr hier (Befund 9) */
     'f3-panel':             { openAttr: 'data-panel-open',     side: 'canvas', zoomed: true  },
@@ -2989,6 +3326,13 @@ function g4mStateRawForSave() {
 }
 g4mBus.on('state', g4mScheduleSettingsSave);
 g4mBus.on('randomMode', g4mScheduleSettingsSave);   // Random/Fixed-Schalter mitspeichern
+g4mBus.on('randomMode', function (e) {
+    // On/Off-Quadrate unter "Random Tools" mit jeder Random-Änderung
+    // (Editor-Radios, Defaults, Sitzungswiederherstellung) abgleichen.
+    if (e && e.sliderId && typeof g4mUpdateRandomToggle === 'function') {
+        g4mUpdateRandomToggle(e.sliderId);
+    }
+});
 
 /* Zeichenmodus zentral wechseln — Konsumenten hören auf dem Bus mit */
 /* ── Befund 28: EIN Modus, EIN Mutator, EINE Optik ────────────────
@@ -3089,11 +3433,14 @@ const sliderData = {
    Bewusst KEINE transitionend-Listener als Alternative: unterbrochene
    Transitionen feuern das Ereignis nicht — Timeouts können dagegen
    nicht hängen bleiben. */
-/* Build-Stempel (v151s, Diagnose-Werkzeug): erscheint im Tab-Titel
+/* Build-Stempel (Diagnose-Werkzeug): erscheint im Tab-Titel
    und in der Konsole — sofort sichtbar, ob ein Gerät eine gecachte
    Altversion spielt ("gleiche Datei, anderes Verhalten" ist fast
-   immer "nicht dieselbe Datei"). Bei jedem Patch hochzählen. */
-const G4M_BUILD = 'v151s';
+   immer "nicht dieselbe Datei"). Bei jedem Patch hochzählen.
+   v153.0: Neue Nummerierung ab hier. Stempel war seit v151s nicht
+   mehr nachgeführt worden (Datei intern bis v153d gepatcht) —
+   ab jetzt wieder synchron mit dem Dateinamen halten. */
+const G4M_BUILD = 'v153.0';
 document.title = document.title + ' · ' + G4M_BUILD;
 console.log('g4m build', G4M_BUILD);
 
@@ -3368,6 +3715,13 @@ const G4M_SLIDER_ROWS = [
     { id: 'rotation', color: 'blue', label: 'Rotation', radio: false }
 ];
 
+/* IDs der Random-fähigen Parameter (radio !== false). Früh definiert,
+   damit g4mSelectParam/applySliderFreezeState es nutzen können (v153d). */
+const G4M_RANDOM_CAPABLE_IDS = new Set(
+    G4M_SLIDER_ROWS.filter(function (r) { return r.radio !== false; })
+                   .map(function (r) { return r.id; })
+);
+
 /* Anzeigeformat eines Slider-Werts — identische Semantik wie
    formatDisplayValue() in createSlider (DISPLAY_FORMATS-basiert) */
 function g4mFormatSliderValue(id, value) {
@@ -3390,28 +3744,16 @@ function buildToolSliderRows() {
         rowEl.id = row.id;
 
         const top = document.createElement('div');
-        top.className = 'slider-top-row' + (row.radio === false ? ' no-radio' : '');
+        top.className = 'slider-top-row no-radio';   // ohne Radios: 2-Spalten (Label/Wert)
 
         const label = document.createElement('div');
         label.className = 'slider-label';
         label.textContent = row.label;
         top.appendChild(label);
 
-        if (row.radio !== false) {
-            const group = document.createElement('div');
-            group.className = 'radio-group';
-            const rnd = document.createElement('button');
-            rnd.type = 'button';   // explizit — kein implizites submit (Befund 22)
-            rnd.className = 'radio-btn';
-            rnd.setAttribute('data-mode', 'random');
-            const fix = document.createElement('button');
-            fix.type = 'button';
-            fix.className = 'radio-btn active-' + row.color;   // Start: Fixed aktiv
-            fix.setAttribute('data-mode', 'fixed');
-            group.appendChild(rnd);
-            group.appendChild(fix);
-            top.appendChild(group);
-        }
+        // Random/Fixed-Radios entfernt (v153d) — die Steuerung läuft jetzt
+        // über die On/Off-Quadrate unter "Random Tools". Alle Zeilen werden
+        // wie zuvor die radiolosen behandelt (Spaltenlayout no-radio).
 
         const display = document.createElement('div');
         display.className = 'value-display';
@@ -3470,14 +3812,20 @@ function g4mSelectParam(id) {
             editor.classList.toggle('g4m-ed-' + c, sq.classList.contains('g4m-sq-' + c));
         });
     }
-    // Random/On/Off-Kopf nur zeigen, wenn die Zeile Random-Radios hat
-    // (Zoom/Pan/Rotation sind radiolos; bei Normalization bedeuten
-    // die Punkte On/Off — die Random-Überschrift wäre dort falsch)
-    const header = document.querySelector('.g4m-param-editor .radio-header');
-    if (header && row) {
-        const hasRandom = !!row.querySelector('.radio-btn[data-mode="random"]');
-        header.style.visibility = hasRandom ? 'visible' : 'hidden';
-    }
+    // "Random / On / Off"-Kopf nur bei Random-fähigen Parametern zeigen
+    // (Zoom/Pan/Rotation nicht; Normalization auch nicht). Radios entfernt
+    // (v153d) — Random-Fähigkeit kommt jetzt aus der Parameter-Liste.
+    // Der «Random On Off»-Editor-Kopf entfiel (v153.1h) — die
+    // «Random»-Beschriftung lebt allein beim Stack (s. u.).
+    /* «Random»-Beschriftung über den On/Off-Quadraten (v153.1h): nur
+       sichtbar, wenn das aktive Paar wirklich RANDOM steuert. Schalten
+       die Quadrate stattdessen etwas ein/aus (z. B. Normalization),
+       wäre «Random» darüber irreführend — Zelle bleibt leer. */
+    const rndCaption = document.getElementById('g4m-random-caption');
+    if (rndCaption) rndCaption.style.visibility = g4mIsRandomCapable(id) ? 'visible' : 'hidden';
+    // On/Off-Schalter unter "Random Tools": passendes Paar einblenden
+    // (bei Parametern ohne Random bleibt der graue Reserve-Look).
+    if (typeof g4mShowRandomToggleFor === 'function') g4mShowRandomToggleFor(id);
 }
 function buildParamGrid() {
     const grid = document.getElementById('g4m-param-grid');
@@ -3541,20 +3889,127 @@ function buildParamGrid() {
 }
 buildParamGrid();
 
+/* ── Random-On/Off-Schalter-Stapel (unter "Random Tools") ─────────
+   Ein On/Off-Paar je Random-fähigem Parameter (alle mit radio !== false
+   in G4M_SLIDER_ROWS — die 9 grün/orange-Parameter). Die Paare liegen
+   gestapelt im selben 2u-Feld; g4mSelectParam() hebt das zum aktiven
+   Parameter passende hervor. Klick schreibt den Random-Zustand über die
+   bestehende zentrale Senke (g4mSetRandomMode → Bus → Editor-Radios,
+   Slider-Freeze, Quadrat-Grau) — keine zweite Zustandshaltung. */
+function g4mRandomCapableRows() {
+    return G4M_SLIDER_ROWS.filter(function (r) { return r.radio !== false; });
+}
+/* Schnelltest, ob ein Parameter Random kennt (ersetzt die frühere
+   Erkennung über vorhandene Radio-Buttons). G4M_RANDOM_CAPABLE_IDS wird
+   früh (direkt nach G4M_SLIDER_ROWS) definiert, damit g4mSelectParam es
+   schon beim ersten buildParamGrid()-Lauf nutzen kann (kein TDZ). */
+function g4mIsRandomCapable(id) { return G4M_RANDOM_CAPABLE_IDS.has(id); }
+function buildRandomToggleStack() {
+    const stack = document.getElementById('g4m-rnd-stack');
+    if (!stack) return;
+    g4mRandomCapableRows().forEach(function (row) {
+        const pair = document.createElement('div');
+        pair.className = 'g4m-rnd-pair';
+        pair.id = 'g4m-rnd-pair-' + row.id;
+
+        function makeBtn(isOn) {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'g4m-rnd-btn ' + (isOn ? 'g4m-rnd-on' : 'g4m-rnd-off')
+                        + ' g4m-rnd-sel-' + row.color;
+            b.textContent = isOn ? 'On' : 'Off';
+            b.setAttribute('aria-label',
+                (isOn ? 'Random on' : 'Random off') + ' for ' + g4mShortParamLabel(row.label));
+            b.addEventListener('click', function () {
+                // On = Random an, Off = Fixed. Zustand über die zentrale
+                // Senke; Slider-Freeze und Quadrat-Grau ziehen mit.
+                g4mSetRandomMode(row.id, isOn);
+                handleRandomModeChange(row.id, isOn);
+                const sliderRow = document.getElementById(row.id);
+                if (sliderRow) applySliderFreezeState(sliderRow);
+                g4mUpdateRandomToggle(row.id);
+            });
+            return b;
+        }
+        pair.appendChild(makeBtn(true));    // links: On
+        pair.appendChild(makeBtn(false));   // rechts: Off
+        stack.appendChild(pair);
+    });
+
+    /* Normalization-Paar (v153.1h): gleiche On/Off-Quadrate wie die
+       Random-Paare (blaue Gruppe), schaltet aber Normalization DIREKT —
+       der frühere kleine On/Off-Text im Slider-Feld entfiel. Die
+       Aktiv-Optik pflegt g4mUpdateRandomToggle (Sonderfall). */
+    const normPair = document.createElement('div');
+    normPair.className = 'g4m-rnd-pair';
+    normPair.id = 'g4m-rnd-pair-normalization-row';
+    function makeNormBtn(isOn) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'g4m-rnd-btn ' + (isOn ? 'g4m-rnd-on' : 'g4m-rnd-off') + ' g4m-rnd-sel-blue';
+        b.textContent = isOn ? 'On' : 'Off';
+        b.setAttribute('aria-label', isOn ? 'Normalization on' : 'Normalization off');
+        b.addEventListener('click', function () { setNormalization(isOn); });
+        return b;
+    }
+    normPair.appendChild(makeNormBtn(true));
+    normPair.appendChild(makeNormBtn(false));
+    stack.appendChild(normPair);
+}
+buildRandomToggleStack();
+// Stapel entsteht nach dem ersten g4mSelectParam (in buildParamGrid);
+// daher das initial gewählte Paar jetzt nachziehen.
+g4mShowRandomToggleFor(G4M_SLIDER_ROWS[0].id);
+
+/* Aktiv-Optik eines Paares an den aktuellen Random-Zustand angleichen:
+   das gewählte Feld (On bei Random, sonst Off) trägt die Gruppenfarbe. */
+function g4mUpdateRandomToggle(id) {
+    const pair = document.getElementById('g4m-rnd-pair-' + id);
+    if (!pair) return;
+    /* Sonderfall Normalization (v153.1h): das Paar spiegelt den
+       Normalization-Zustand, nicht einen Random-Modus. */
+    const isOn = (id === 'normalization-row')
+        ? !!g4mState.normalizationEnabled
+        : g4mIsRandomMode(id);
+    const onBtn  = pair.querySelector('.g4m-rnd-on');
+    const offBtn = pair.querySelector('.g4m-rnd-off');
+    if (onBtn)  onBtn.classList.toggle('g4m-rnd-selected', isOn);
+    if (offBtn) offBtn.classList.toggle('g4m-rnd-selected', !isOn);
+}
+
+/* Das zum aktiven Parameter passende Paar nach vorn holen; bei Parametern
+   ohne Random bleibt der graue Reserve-Look sichtbar. Wird von
+   g4mSelectParam aufgerufen. */
+function g4mShowRandomToggleFor(id) {
+    const stack = document.getElementById('g4m-rnd-stack');
+    if (!stack) return;
+    stack.querySelectorAll('.g4m-rnd-pair').forEach(function (p) {
+        p.classList.remove('g4m-rnd-active');
+    });
+    const pair = document.getElementById('g4m-rnd-pair-' + id);
+    if (pair) {
+        pair.classList.add('g4m-rnd-active');
+        g4mUpdateRandomToggle(id);
+    }
+}
+
 /* ── Generierung der Superformula-Boundary-Zeilen ─────────────────
-   Die 6 strukturgleichen Parameterblöcke (a, b, m, n1–n3) entstehen
+   Die 6 strukturgleichen Parameterzeilen (a, b, m, n1–n3) entstehen
    aus dieser Datenliste — EINE Quelle statt 6 Markup-Kopien
    (Befund 10, gleiches Muster wie G4M_SLIDER_ROWS oben).
-   Die erzeugten IDs (param-X-min/max, val-X-min/max) sind identisch
-   mit dem früheren Markup; alle Verbraucher (§5) bleiben unverändert.
+   Seit v153.1 erzeugt der Generator die F2-Struktur (g4m-arch-prow →
+   phead + g4m-arch-block): genau EINE Zeile ist sichtbar (die des
+   aktiven Parameter-Quadrats), Rails und Felder liegen damit pixel-
+   identisch zum F2-Slider-Feld. Die erzeugten IDs (param-X-min/max,
+   val-X-min/max) sind unverändert; alle Verbraucher (§5) laufen weiter.
    DOM-Aufbau über createElement/textContent, kein innerHTML. */
 const G4M_SF_BOUNDARY_ROWS = [
-    { param: 'a',  label: 'a',  min: 0.1, max: 5,  step: 0.1, defMin: 0.5, defMax: 1.5 },
-    { param: 'b',  label: 'b',  min: 0.1, max: 5,  step: 0.1, defMin: 0.5, defMax: 1.5 },
-    { param: 'm',  label: 'm',  min: 0,   max: 20, step: 1,   defMin: 3,   defMax: 8   },
-    { param: 'n1', label: 'n\u2081', min: 0.1, max: 10, step: 0.1, defMin: 0.5, defMax: 1.5 },
-    { param: 'n2', label: 'n\u2082', min: 0.1, max: 10, step: 0.1, defMin: 0.5, defMax: 1.5 },
-    { param: 'n3', label: 'n\u2083', min: 0.1, max: 10, step: 0.1, defMin: 0.5, defMax: 1.5 }
+    { param: 'a',  note: 'Parameter a [0.1 \u2026 5.0]',        min: 0.1, max: 5,  step: 0.1, defMin: 0.5, defMax: 1.5 },
+    { param: 'b',  note: 'Parameter b [0.1 \u2026 5.0]',        min: 0.1, max: 5,  step: 0.1, defMin: 0.5, defMax: 1.5 },
+    { param: 'm',  note: 'Parameter m \u00b7 symmetry [0 \u2026 20]', min: 0, max: 20, step: 1, defMin: 3, defMax: 8 },
+    { param: 'n1', note: 'Parameter n\u2081 [0.1 \u2026 10.0]', min: 0.1, max: 10, step: 0.1, defMin: 0.5, defMax: 1.5 },
+    { param: 'n2', note: 'Parameter n\u2082 [0.1 \u2026 10.0]', min: 0.1, max: 10, step: 0.1, defMin: 0.5, defMax: 1.5 },
+    { param: 'n3', note: 'Parameter n\u2083 [0.1 \u2026 10.0]', min: 0.1, max: 10, step: 0.1, defMin: 0.5, defMax: 1.5 }
 ];
 
 function buildSfBoundaryRows() {
@@ -3565,48 +4020,50 @@ function buildSfBoundaryRows() {
     // dezimale mit einer Nachkommastelle
     function fmt(row, v) { return row.step >= 1 ? String(v) : v.toFixed(1); }
 
-    G4M_SF_BOUNDARY_ROWS.forEach(function (row, idx) {
-        const section = document.createElement('div');
-        section.className = 'g4m-viz-section' + (idx === 0 ? ' g4m-first' : '');
+    G4M_SF_BOUNDARY_ROWS.forEach(function (row) {
+        const prow = document.createElement('div');
+        prow.className = 'g4m-arch-prow';
+        prow.id = 'sf-prow-' + row.param;
 
-        // Parameterbezeichnung mittig zwischen den Tracks
-        const labelWrap = document.createElement('div');
-        labelWrap.className = 'g4m-abs-left-center';
-        const labelSpan = document.createElement('span');
-        labelSpan.className = 'g4m-param-label-30';
-        labelSpan.textContent = row.label;
-        labelWrap.appendChild(labelSpan);
-        section.appendChild(labelWrap);
+        // Kopfzeile: Notiz links, rechts der Höhen-Spacer (kein Fine/Coarse)
+        const head = document.createElement('div');
+        head.className = 'g4m-arch-phead';
+        const note = document.createElement('span');
+        note.className = 'g4m-note-text';
+        note.textContent = row.note;
+        const spacer = document.createElement('span');
+        spacer.className = 'g4m-arch-seg-spacer';
+        head.appendChild(note);
+        head.appendChild(spacer);
+        prow.appendChild(head);
 
-        // Min- und Max-Zeile sind strukturgleich
-        [['min', 'Min', 'g4m-flexrow-ind-mb', row.defMin],
-         ['max', 'Max', 'g4m-flexrow-ind',    row.defMax]].forEach(function (side) {
-            const line = document.createElement('div');
-            line.className = side[2];
-
+        // Block: Min- und Max-Zeile sind strukturgleich (Label · Rail · Feld)
+        const block = document.createElement('div');
+        block.className = 'g4m-arch-block';
+        [['min', 'Min', 'g4m-arch-lbl-min', 'g4m-arch-rail-min', 'g4m-arch-field-min', row.defMin],
+         ['max', 'Max', 'g4m-arch-lbl-max', 'g4m-arch-rail-max', 'g4m-arch-field-max', row.defMax]].forEach(function (side) {
             const cap = document.createElement('span');
-            cap.className = 'g4m-param-label';
+            cap.className = 'g4m-param-label-sm ' + side[2];
             cap.textContent = side[1];
-            line.appendChild(cap);
+            block.appendChild(cap);
 
             const input = document.createElement('input');
             input.type = 'range';
             input.id = 'param-' + row.param + '-' + side[0];
             input.min = row.min; input.max = row.max;
-            input.step = row.step; input.value = side[3];
-            input.className = 'g4m-row-flex';
-            line.appendChild(input);
+            input.step = row.step; input.value = side[5];
+            input.className = 'g4m-row-flex ' + side[3];
+            block.appendChild(input);
 
             const box = document.createElement('div');
             box.id = 'val-' + row.param + '-' + side[0];
-            box.className = 'g4m-val-box g4m-val-box-sm';
-            box.textContent = fmt(row, side[3]);
-            line.appendChild(box);
-
-            section.appendChild(line);
+            box.className = 'g4m-val-box ' + side[4];
+            box.textContent = fmt(row, side[5]);
+            block.appendChild(box);
         });
+        prow.appendChild(block);
 
-        host.appendChild(section);
+        host.appendChild(prow);
     });
 }
 buildSfBoundaryRows();
@@ -3834,18 +4291,15 @@ function markActiveColor(btn, colorClass) {
     btn.setAttribute('aria-checked', 'true');
 }
 
-/* Zustand + Button-Optik der Normalisierung in EINER Funktion.
-   Wird vom Click-Handler UND von applyArchPreset() aufgerufen —
-   kein simulierter .click() mehr nötig (Schichtverletzung). */
+/* Zustand + Optik der Normalisierung in EINER Funktion — einziger
+   Schreibpfad für den Normalization-Zustand (Toggle-Klick; früher
+   auch applyArchPreset, in v153.0 mit den Presets entfernt). Radios
+   entfernt (v153d) — der On/Off-Text-Button zeigt jetzt den Zustand. */
 function setNormalization(enabled) {
-    const row = document.querySelector('.normalization-row');
-    if (row) {
-        const buttons = row.querySelectorAll('.radio-btn');
-        buttons.forEach(clearActiveColor);
-        const target = buttons[enabled ? 0 : 1];
-        if (target) markActiveColor(target, 'active-blue');
-    }
+    /* On/Off-Quadrate im Stack nachziehen (v153.1h) — der frühere
+       Text-Toggle im Slider-Feld entfiel. */
     g4mStore.set('normalizationEnabled', enabled);
+    if (typeof g4mUpdateRandomToggle === 'function') g4mUpdateRandomToggle('normalization-row');
     const g4mSqNorm = document.getElementById('g4m-sqval-normalization-row');
     if (g4mSqNorm) g4mSqNorm.textContent = enabled ? 'On' : 'Off';   // Quadrat-Spiegel (v150k)
     if (storedCurveParameters.length > 0) {
@@ -3853,38 +4307,13 @@ function setNormalization(enabled) {
     }
 }
 
-// Radio button handling
-/* Frische Abfrage statt Snapshot (Befund 19). Die Registrierung
-   läuft nach buildToolSliderRows() (§2), erfasst also auch die
-   generierten Zeilen. [data-mode] schliesst die F1-Farb-Punkte aus
-   (eigene Handler in initCurveColorControls). */
-g4mRadioButtons().forEach(btn => {
-    btn.addEventListener('click', function() {
-        const group = this.parentElement;
-        const sliderRow = this.closest('.slider-row');
-        const normalizationRow = this.closest('.normalization-row');
-        
-        // Handle normalization toggle — Zustand+Optik zentral
-        if (normalizationRow) {
-            const buttons = normalizationRow.querySelectorAll('.radio-btn');
-            const index = Array.from(buttons).indexOf(this);
-            setNormalization(index === 0);
-            return;
-        }
-        
-        // Toggle active state
-        group.querySelectorAll('.radio-btn').forEach(clearActiveColor);
-        markActiveColor(this, getRowColorClass(sliderRow));
-        
-        // Handle random mode for regular sliders
-        const isRandom = this.dataset.mode === 'random';
-        if (sliderRow && sliderRow.id) {
-            g4mSetRandomMode(sliderRow.id, isRandom);   // Zustand zuerst
-            handleRandomModeChange(sliderRow.id, isRandom);
-            applySliderFreezeState(sliderRow);
-        }
-    });
-});
+/* Der frühere Normalization-Text-Toggle entfiel (v153.1h) — geschaltet
+   wird über das On/Off-Paar im Stack (buildRandomToggleStack, §2). */
+
+// Radio-Button-Klick-Handler entfernt (v153d): die Slider-Random/Fixed-
+// Radios und die Normalization-Radios gibt es nicht mehr. Random/Fixed
+// läuft über die On/Off-Quadrate unter "Random Tools"; Normalization
+// über das On/Off-Paar im Stack (buildRandomToggleStack, v153.1h).
 
 // Slider change handlers
 /* Tool-Slider -> Store-Schlüssel: welche Slider Ansichts-/Effekt-
@@ -4236,6 +4665,23 @@ function renderByDisplayMode(ctx, points, color, params, closedLines) {
     }
 }
 
+/* ── Superformula-Modulation (v153.1c) ────────────────────────────
+   Moduliert den Superformel-Radius r(θ) — EXAKT die Formel des
+   Archimedean-Pendants (archCalcRealPts): r' = r · (1 + s·f(θ·freq)),
+   Tan hart auf [-1, 1] begrenzt. Greift im Renderer UND in der
+   Viz-Vorschau, damit beide dasselbe Bild zeigen. NaN/Infinity
+   passieren unverändert — die bestehenden Guards bleiben wirksam. */
+function g4mApplySfModulation(r, theta) {
+    const mod = g4mState.sfModulation;
+    if (!mod || !mod.enabled) return r;
+    const tt = theta * mod.freq;
+    let mv = 0;
+    if      (mod.type === 'sin') mv = mod.strength * Math.sin(tt);
+    else if (mod.type === 'cos') mv = mod.strength * Math.cos(tt);
+    else if (mod.type === 'tan') mv = mod.strength * Math.max(Math.min(Math.tan(tt), 1), -1);
+    return r * (1 + mv);
+}
+
 function drawSuperformula(ctx, centerX, centerY, params) {
     ctx.save();
     applyViewTransform(ctx, centerX, centerY);
@@ -4248,7 +4694,11 @@ function drawSuperformula(ctx, centerX, centerY, params) {
     // Erste Durchgang: Punkte berechnen und Min/Max finden
     for (let i = 0; i < params.pointDensity; i++) {
         const angle = i * (2 * Math.PI / params.pointDensity);
-        const radius = superformulaRadius(angle, params.param_a, params.param_b, params.m, params.n1, params.n2, params.n3);
+        // Superformula-Modulation (v153.1c) direkt auf den Radius
+        const radius = g4mApplySfModulation(
+            superformulaRadius(angle, params.param_a, params.param_b, params.m, params.n1, params.n2, params.n3),
+            angle
+        );
         
         if (radius !== Infinity && !isNaN(radius)) {
             minRadius = Math.min(minRadius, radius);
@@ -4414,6 +4864,12 @@ function prepareArchimedeanGeneration() {
     }
 }
 
+/* Superformula-Pendant (v153.1c): schliesst NUR das Page-2-Panel —
+   das Verhalten des Haupt-Panels beim Haupt-Go bleibt unverändert. */
+function prepareSuperformulaGeneration() {
+    if (g4mIsPanelOpen('sf-options-panel')) hideSfOptionsPanel();
+}
+
 /* ── Renderer-Registry ────────────────────────────────────────────
    DER Erweiterungspunkt für neue Zeichenmodi (F3-F6): ein Eintrag =
    makeParams (Parameter einer Kurve erzeugen) + draw (eine Kurve
@@ -4425,8 +4881,10 @@ const G4M_RENDERERS = {
     superformula: {
         label: 'superformulas',   // Busy-Text-Baustein (Befund 27)
         makeParams: generateSuperformulaParameters,
-        draw: drawSuperformula
-        // kein prepare nötig — Modus-Optik zentral (Befund 28)
+        draw: drawSuperformula,
+        // Nur Page 2 schliessen (v153.1c, analog Arch) — das Haupt-
+        // Panel behält sein bisheriges Verhalten beim Haupt-Go.
+        prepare: prepareSuperformulaGeneration
     },
     archimedean: {
         label: 'Archimedean spirals',   // Busy-Text-Baustein (Befund 27)
@@ -4633,14 +5091,11 @@ function drawArchimedeanSpiral(ctx, centerX, centerY, params) {
     const nSteps   = Math.max(2, Math.round(params.nSteps || 200));  // nur nSteps — siehe Befund 14
     const toolPoints = Math.max(2, g4mState.viewParams.toolPoints);
 
-    // Schritt 1: Spirale mit nSteps Wachstumsschritten berechnen
-    const rawPts = [];
-    let minR = Infinity, maxR = -Infinity;
-    for (let i = 0; i <= nSteps; i++) {
-        const theta = betaRad + i * alphaRad;
+    /* Radius an der Stelle θ — EINE Quelle für Längenmessung und
+       Zeichenpunkte (v153.1h), inkl. Kurvenmodulation
+       r *= (1 + stärke · f(θ · frequenz)). */
+    function radiusAt(theta) {
         let r = params.a + params.b * theta;
-
-        // Kurvenmodulation: radius *= (1 + stärke · f(θ · frequenz))
         const mod = g4mState.archModulation;
         if (mod && mod.enabled) {
             let mv = 0;
@@ -4650,20 +5105,35 @@ function drawArchimedeanSpiral(ctx, centerX, centerY, params) {
             else if (mod.type === 'tan') mv = mod.strength * Math.max(Math.min(Math.tan(t), 1), -1);
             r *= (1 + mv);
         }
+        return r;
+    }
 
+    // Schritt 1: Radius-Spannweite über die nSteps Wachstumsschritte
+    // messen (Grundlage der Normalization — unverändert volle Auflösung)
+    let minR = Infinity, maxR = -Infinity;
+    for (let i = 0; i <= nSteps; i++) {
+        const r = radiusAt(betaRad + i * alphaRad);
         if (isFinite(r)) {
             minR = Math.min(minR, Math.abs(r));
             maxR = Math.max(maxR, Math.abs(r));
         }
-        rawPts.push({ theta, r });
     }
 
-    // Schritt 2: Kurve mit toolPoints Auflösung einteilen (wie Superformula)
-    // toolPoints bestimmt nur die Zeichenauflösung, nicht die Spirallänge
+    /* Schritt 2 (v153.1h): Zeichenpunkte DIREKT und exakt gleichmässig
+       über den gesamten Winkelbereich berechnen. Zuvor wurden sie per
+       GERUNDETEM Index-Resampling aus den nSteps-Punkten gepickt —
+       die Rundung erzeugte ungleiche Winkelschritte, die sich bei
+       Unterabtastung (toolPoints ≪ nSteps, z. B. 53 Zeichenpunkte für
+       eine Spirale mit dutzenden Windungen) als Zickzack-«Zacken»
+       zeigten. toolPoints bestimmt weiterhin NUR die Zeichenauflösung,
+       nicht die Spirallänge; bei sehr wenigen Punkten über viele
+       Windungen bleibt ein (jetzt gleichmässiges) Unterabtastungs-
+       Muster — Abhilfe: Number of Points erhöhen. */
+    const totalAngle = nSteps * alphaRad;
     const displayPts = [];
     for (let i = 0; i < toolPoints; i++) {
-        const idx = Math.round(i / (toolPoints - 1) * (rawPts.length - 1));
-        displayPts.push(rawPts[Math.min(idx, rawPts.length - 1)]);
+        const theta = betaRad + (i / (toolPoints - 1)) * totalAngle;
+        displayPts.push({ theta, r: radiusAt(theta) });
     }
 
     // Skalierung (identisch zu drawSuperformula)
@@ -4739,12 +5209,16 @@ function g4mRenderInChunks(items, drawOne, onDone) {
     step();
 }
 
-/* Zeichnet das Gesamtbild (alle gespeicherten Kurven) in das kleine
-   „Result"-Viz-Fenster des F2-Panels — maßstäblich verkleinert auf die
-   Fenstergröße, damit es 1:1 wie die große Canvas aussieht. Wird beim
-   Generieren und bei Optimizer-Echtzeitänderungen aufgerufen. */
+/* Zeichnet das Gesamtbild (alle gespeicherten Kurven) in die kleinen
+   „Result"-Viz-Fenster der Panels (F2 und seit v153.1 auch F1) —
+   maßstäblich verkleinert auf die Fenstergröße, damit es 1:1 wie die
+   große Canvas aussieht. Wird beim Generieren und bei Optimizer-
+   Echtzeitänderungen aufgerufen. EIN Maler für beide Fenster. */
 function g4mDrawVizResult() {
-    const vc = document.getElementById('arch-viz-result');
+    ['arch-viz-result', 'sf-viz-result'].forEach(g4mDrawVizResultInto);
+}
+function g4mDrawVizResultInto(canvasId) {
+    const vc = document.getElementById(canvasId);
     if (!vc) return;
     const vctx = vc.getContext('2d');
     // Fenstergröße aus dem Layout übernehmen (Pixelpuffer = CSS-Größe)
@@ -4876,24 +5350,16 @@ function resetToDefaults(generateImage = true) {
     sliders['pan-y'].setValue(defaults.panY);
     sliders['rotation'].setValue(defaults.rotation);
     
-    // Set radio buttons with correct colors
-    g4mRadioGroups().forEach(group => {   // frische Abfrage (Befund 19)
-        const sliderRow = group.closest('.slider-row');
-        const randomBtn = group.querySelector('[data-mode="random"]');
-        const fixedBtn = group.querySelector('[data-mode="fixed"]');
-        if (!randomBtn || !fixedBtn) return; // z. B. Normalization-Row (hat keine data-mode-Buttons)
-        
-        clearActiveColor(randomBtn);
-        clearActiveColor(fixedBtn);
-        
-        // Zustand zuerst (Single Source of Truth), Klassen nur als Anzeige.
-        // point-size ist laut defaults 'fixed' und bleibt es hier wie zuvor.
+    // Random/Fixed-Zustand der Slider setzen (Radios entfernt v153d —
+    // Zustand direkt aus den Defaults in den Store, Optik folgt über
+    // applyAllSliderFreezeStates / On-Off-Quadrate).
+    g4mRandomCapableRows().forEach(function (r) {
         const isRandom =
-            (sliderRow && sliderRow.id === 'number-of-points' && defaults.densityMode === 'random') ||
-            (sliderRow && sliderRow.id === 'line-thickness'  && defaults.lineSizeMode === 'random');
-        if (sliderRow && sliderRow.id) g4mSetRandomMode(sliderRow.id, isRandom);
-        markActiveColor(isRandom ? randomBtn : fixedBtn, getRowColorClass(sliderRow));
+            (r.id === 'number-of-points' && defaults.densityMode === 'random') ||
+            (r.id === 'line-thickness'  && defaults.lineSizeMode === 'random');
+        g4mSetRandomMode(r.id, isRandom);
     });
+    if (typeof applyAllSliderFreezeStates === 'function') applyAllSliderFreezeStates();
     
     if (generateImage) {
         generateSuperformulas();
@@ -4902,7 +5368,12 @@ function resetToDefaults(generateImage = true) {
 
 // Funktion zum Anwenden der guten Defaults auf die Slider
 function applyGoodDefaults() {
-  // Superformel-Parameter-Slider aktualisieren
+  /* Optimal Boundaries (v153.1d): setzt AUSSCHLIESSLICH die sechs
+     Superformula-Parametergrenzen (a, b, m, n1-n3) auf ihre
+     "optimalen" Werte. Die früheren Zugriffe auf die Tool-Panel-
+     Slider (Layer, Punkte, Strichstärke, Punktgröße, Transparenz),
+     die Random/Fixed-Modi und den Anzeige-Modus entfielen — der
+     Button darf das Tool-Panel nicht verstellen (User-Spezifikation). */
   const parameters = SF_PARAM_NAMES;
   const types = ['min', 'max'];
   
@@ -4919,6 +5390,9 @@ function applyGoodDefaults() {
       // Setze den Slider-Wert auf den guten Default
       const value = goodDefaults.superformulaParams[param][type];
       input.value = value;
+      // Gefüllten Track-Teil nachführen (v153.1) — input.value löst
+      // kein input-Ereignis aus, die Füllung bliebe sonst stehen
+      if (typeof setRangeFill === 'function') setRangeFill(input);
       
       // Aktualisiere die Wert-Anzeige
       valueDisplay.textContent = param === 'm' ? 
@@ -4931,87 +5405,17 @@ function applyGoodDefaults() {
     });
   });
   
-  // Darstellungsparameter aktualisieren
-  if (sliders['number-of-layers']) {
-    sliders['number-of-layers'].setValue(goodDefaults.displayParams.numCurves);
-  }
-  
-  if (sliders['number-of-points']) {
-    sliders['number-of-points'].setValue(goodDefaults.displayParams.pointDensity);
-  }
-  
-  if (sliders['line-thickness']) {
-    sliders['line-thickness'].setValue(goodDefaults.displayParams.lineWidth);
-  }
-  
-  if (sliders['point-size']) {
-    sliders['point-size'].setValue(goodDefaults.displayParams.pointSize);
-  }
-  
-  if (sliders['transparency']) {
-    sliders['transparency'].setValue(goodDefaults.displayParams.transparency);
-  }
-  
-  // Radio-Buttons für Random/Fixed anpassen
-  g4mRadioGroups().forEach(group => {   // frische Abfrage (Befund 19)
-    const sliderRow = group.closest('.slider-row');
-    if (!sliderRow) return;
-    
-    const rowId = sliderRow.id;
-    const randomBtn = group.querySelector('[data-mode="random"]');
-    const fixedBtn = group.querySelector('[data-mode="fixed"]');
-    
-    if (!randomBtn || !fixedBtn) return;
-    
-    clearActiveColor(randomBtn);
-    clearActiveColor(fixedBtn);
-    
-    // Random-Modus laut Defaults aktiv? Sonst Fixed-Modus setzen.
-    const d = goodDefaults.displayParams;
-    const isRandom =
-        (rowId === 'number-of-points' && d.densityMode   === 'random') ||
-        (rowId === 'line-thickness'  && d.lineSizeMode  === 'random') ||
-        (rowId === 'point-size'      && d.pointSizeMode === 'random');
-    g4mSetRandomMode(rowId, isRandom);   // Zustand zuerst
-    
-    markActiveColor(isRandom ? randomBtn : fixedBtn, getRowColorClass(sliderRow));
-    
-    // Optik übernimmt applyAllSliderFreezeStates() am Funktionsende
-  });
-  
-  // Display-Modus anpassen, falls notwendig
-  g4mStore.set('currentDisplayMode', goodDefaults.displayParams.displayMode);
-  
   // Visualisierungen aktualisieren
   drawMinVisualization();
   drawMaxVisualization();
-  
-  applyAllSliderFreezeStates();
 }
 
 
-// Radio-Buttons mit den zur Spalte passenden Farbklassen initialisieren
+// Start-Zustand der Random/Fixed-Steuerung (Radios entfernt v153d):
+// alle Slider im Fixed-Modus; Normalization-Default kommt aus dem Store.
 function initializeRadioButtonColors() {
-    g4mRadioGroups().forEach(group => {   // frische Abfrage (Befund 19)
-        const sliderRow = group.closest('.slider-row');
-        const normalizationRow = group.closest('.normalization-row');
-        
-        if (normalizationRow) {
-            // Für Normalization: zweiter Button (OFF) ist standardmäßig aktiv
-            const buttons = group.querySelectorAll('.radio-btn');
-            if (buttons[1]) {
-                markActiveColor(buttons[1], 'active-blue');
-            }
-            return;
-        }
-        
-        const fixedBtn = group.querySelector('[data-mode="fixed"]');
-        if (!fixedBtn) return;
-        
-        // Startzustand explizit: alle Slider im Fixed-Modus
-        if (sliderRow && sliderRow.id) g4mSetRandomMode(sliderRow.id, false);
-        clearActiveColor(fixedBtn);
-        markActiveColor(fixedBtn, getRowColorClass(sliderRow));
+    g4mRandomCapableRows().forEach(function (r) {
+        g4mSetRandomMode(r.id, false);   // Start: Fixed
     });
 }
 
@@ -5146,20 +5550,25 @@ function createModeDropdown() {
     const anchor = document.getElementById('g4m-mode-indicator');
     if (!anchor || !toolsContainer) return;
     g4mToggleDropdown('g4m-mode-dropdown', anchor, function (dropdown, close) {
-        // Geometrie aus der Live-Messung: 1 u = Panel-Höhe / 12
+        /* Geometrie aus der Live-Messung: 1 u = Panel-Höhe / 12.
+           EINE Spalte in Indikatorbreite (2u), 6u hoch — F1-F10
+           verteilen sich gleichmässig (CSS flex). Top-verankert
+           (Unterkante = Indikator-Oberkante, rechnerisch exakt am
+           u-Raster — wie Canvas-/Drawing-Menü, v153.1i). */
         const panelRect = toolsContainer.getBoundingClientRect();
         const u = panelRect.height / 12;
         const aRect = anchor.getBoundingClientRect();
         dropdown.style.left   = aRect.left + 'px';
-        dropdown.style.bottom = (window.innerHeight - aRect.top) + 'px';
+        dropdown.style.top    = (aRect.top - u * 6) + 'px';
+        dropdown.style.bottom = 'auto';
         dropdown.style.width  = aRect.width + 'px';
-        dropdown.style.height = (u * 10) + 'px';
+        dropdown.style.height = (u * 6) + 'px';
 
         Object.keys(G4M_MODE_BUTTONS).forEach(function (mode) {
             const item = document.createElement('div');
             item.className = 'g4m-mode-dd-item' +
                 (g4mState.activeDrawingMode === mode ? ' g4m-dd-active' : '');
-            item.style.backgroundColor = 'var(--g4m-mode-color-' + mode + ')';
+            // Farbkacheln entfielen (v153.1i) — weisses Feld wie Canvas/Drawing
 
             const fn = document.createElement('span');
             fn.className = 'g4m-dd-fn';
@@ -5181,6 +5590,28 @@ function createModeDropdown() {
 
 function createResolutionDropdown() {
     g4mToggleDropdown('resolution-dropdown', document.getElementById('download-btn'), function (dropdown, close) {
+        /* u-Raster-Geometrie (v153.1d, nur Querformat): das Pull-up-
+           Menü richtet sich an den Rasterkanten aus — Oberkante bündig
+           mit der Oberkante des Go-Buttons, links und unten wie bisher
+           (linke Kante / Oberkante des Save-Image-Buttons), rechte
+           Kante bündig mit der rechten Kante des Color-Quadrats der
+           Panels (= Canvas-Linke + 4u). Die vier Einträge füllen die
+           Rasterhöhe gleichmässig (Flex). Im Hochformat (Nav liegt
+           horizontal, Go und Save Image auf gleicher Höhe) bleibt die
+           bisherige inhaltsgetriebene Geometrie. */
+        if (!g4mIsPortrait()) {
+            const go = document.getElementById('generate-btn');
+            const cv = canvasContainer ? canvasContainer.getBoundingClientRect() : null;
+            if (go && cv && cv.width > 0) {
+                const goTop = go.getBoundingClientRect().top;
+                const u     = cv.width / 12;
+                const left  = parseFloat(dropdown.style.left) || 0;
+                dropdown.style.top   = goTop + 'px';
+                dropdown.style.width = Math.round(cv.left + 4 * u - left) + 'px';
+                dropdown.classList.add('g4m-dd-grid');
+            }
+        }
+
         const options = [
             { value: '72', label: '72 dpi (screen, JPG)', size: '20KB - 90KB' },
             { value: '300', label: '300 dpi (standard, JPG)', size: '300KB - 2MB' },
@@ -5362,6 +5793,22 @@ document.getElementById('download-btn').addEventListener('click', downloadImage)
 document.getElementById('drawing-btn').addEventListener('click', function () {
     const drawingBtn = this;
     g4mToggleDropdown('display-mode-dropdown', drawingBtn, function (dropdown, close) {
+        /* u-Raster-Geometrie (v153.1i): exakt 4u hoch, Unterkante
+           bündig auf der Button-Oberkante — genug Platz für alle
+           Einträge, nichts wird abgeschnitten; Inhalt oben bündig
+           (CSS g4m-dd-4u). Verankert über TOP (= Button-Oberkante
+           − 4u) statt bottom/innerHeight — die bottom-Rechnung gegen
+           die Fensterhöhe konnte je nach Viewport Subpixel-
+           Abweichungen zur Rasterlinie erzeugen. */
+        const toolsRect = toolsContainer ? toolsContainer.getBoundingClientRect() : null;
+        if (toolsRect && toolsRect.height > 0) {
+            const u = toolsRect.height / 12;
+            const bRect = drawingBtn.getBoundingClientRect();
+            dropdown.style.top    = (bRect.top - u * 4) + 'px';
+            dropdown.style.bottom = 'auto';
+            dropdown.style.height = (u * 4) + 'px';
+            dropdown.classList.add('g4m-dd-4u');
+        }
         G4M_DISPLAY_MODES.forEach(function (mode) {
             const item = document.createElement('div');
             if (g4mState.currentDisplayMode === mode.value) item.className = 'g4m-dd-active';
@@ -5384,6 +5831,17 @@ document.getElementById('drawing-btn').addEventListener('click', function () {
 document.getElementById('canvas-btn').addEventListener('click', function () {
     const canvasBtn = this;
     g4mToggleDropdown('canvas-color-dropdown', canvasBtn, function (dropdown, close) {
+        /* u-Raster-Geometrie (v153.1i): 4u hoch, top-basiert
+           verankert, Inhalt oben bündig — siehe Drawing-Menü. */
+        const toolsRect = toolsContainer ? toolsContainer.getBoundingClientRect() : null;
+        if (toolsRect && toolsRect.height > 0) {
+            const u = toolsRect.height / 12;
+            const bRect = canvasBtn.getBoundingClientRect();
+            dropdown.style.top    = (bRect.top - u * 4) + 'px';
+            dropdown.style.bottom = 'auto';
+            dropdown.style.height = (u * 4) + 'px';
+            dropdown.classList.add('g4m-dd-4u');
+        }
         // Preset-Farben (nur Schwarz und Weiss) — Labels aus G4M_TEXT (Befund 17)
         const presetColors = [
             { value: '#000000', label: G4M_TEXT.colorBlack },
@@ -5567,7 +6025,11 @@ function calculateSuperformulaPoints(a, b, m, n1, n2, n3, pointCount) {
     
     for (let i = 0; i < pointCount; i++) {
         const angle = i * (2 * Math.PI / pointCount);
-        const radius = superformulaRadius(angle, a, b, m, n1, n2, n3);
+        // Modulation wie im Renderer (v153.1c) — Vorschau = echtes Bild
+        const radius = g4mApplySfModulation(
+            superformulaRadius(angle, a, b, m, n1, n2, n3),
+            angle
+        );
         
         if (radius === Infinity || isNaN(radius)) {
             // Ungültigen Punkt überspringen
@@ -5658,8 +6120,30 @@ function initializeSuperformPanel() {
     // Range-Inputs (a, b, m, n1-n3) einmalig binden — mit Min/Max-Kopplung
     initPanelRangeInputs();
 
-    // Farbsteuerung des Panels (Random On/Off + Picker)
+    // Farbsteuerung des Panels (Random On/Off + Farbzelle, wie F2)
     initCurveColorControls();
+
+    // Modulations-Steuerung (v153.1c): Sin/Cos/Tan, On/Off, Strength/Freq
+    initSfModulationControls();
+
+    // Parameter-Quadrate (v153.1): reine Selektoren wie im F2-Panel —
+    // Klick zeigt die zugehörige Zeile im Slider-Feld. Startauswahl a,
+    // damit das Feld nie leer ist (analog g4mArchSelectParam('a')).
+    g4mSfSelectParam('a');
+    G4M_SF_SQ_PARAMS.concat(['color', 'mod']).forEach(function (param) {
+        const sq = document.getElementById('sf-sq-' + param);
+        if (sq) sq.addEventListener('click', function () { g4mSfSelectParam(param); });
+    });
+
+    // Baby-Go (v153.1, analog F2): erzeugt ein neues Bild auf der
+    // Canvas, ohne das Panel zu schließen — beliebig oft klickbar.
+    const sfGo = document.getElementById('sf-baby-go');
+    if (sfGo) sfGo.addEventListener('click', function (e) {
+        e.stopPropagation();
+        // Falls noch Home-/Start-Abdeckungen aktiv sind, erst wegnehmen
+        if (g4mState.homeCoversOn) g4mHideHomeCovers();
+        generateSuperformulas({ skipPrepare: true });
+    });
 
     // "Optimal Boundaries"-Button
     const obBtn = document.getElementById('optimal-boundaries-btn');
@@ -5773,6 +6257,12 @@ function showSuperformulaPanel() {
     g4mSetPanelSlide(panel, 'translateX(0)');
     g4mSetPanelOpen('superformel-panel', true);
     setTimeout(drawSuperformulaVisualizations, G4M_ANIM.VIZ_DELAY_MS);
+    // Viz Result (Gesamtbild) beim Öffnen mitzeichnen, sobald das
+    // Fenster seine Größe hat (v153.1, analog showArchimedeanPanel)
+    setTimeout(function () { if (typeof g4mDrawVizResult === 'function') g4mDrawVizResult(); }, G4M_ANIM.VIZ_DELAY_MS);
+    // Rail-Absenkung auf die Tool-Slider-Linie nachmessen (v153.1b) —
+    // nach dem Layout des platzierten Panels (Fahrt ist nur X-Achse)
+    requestAnimationFrame(function () { g4mAlignRailsToTool('superformel-panel'); });
     updateArrowVisibility();
 }
 
@@ -5985,23 +6475,29 @@ function g4mSyncDomFromStore() {
     g4mSetBotModActive('arch-connect-on',  g4mState.archConnectingLines);
     g4mSetBotModActive('arch-connect-off', !g4mState.archConnectingLines);
 
+    // — Superformula-Modulation + Farbsteuerung (F1, v153.1c) —
+    const sfMod = g4mState.sfModulation;
+    if (sfMod) {
+        if (typeof g4mSyncSfModOptics === 'function') g4mSyncSfModOptics();
+        _archSlider('sf-mod-strength', sfMod.strength, 'sf-mod-strength-val', Number(sfMod.strength).toFixed(2));
+        _archSlider('sf-mod-freq',     sfMod.freq,     'sf-mod-freq-val',     Number(sfMod.freq).toFixed(1));
+    }
+    if (typeof g4mSyncSfColorButtons === 'function') g4mSyncSfColorButtons();
+
     // Werte auf den Parameter-Quadraten (F2) aktualisieren
     if (typeof g4mArchUpdateSqVals === 'function') g4mArchUpdateSqVals();
+    // ... und auf den F1-Quadraten (v153.1c)
+    if (typeof g4mSfUpdateSqVals === 'function') g4mSfUpdateSqVals();
 
-    // — Random/Fixed-Umschalter pro Tool-Slider wiederherstellen —
-    //   Zustand liegt bereits im Store (restoreSaved); hier nur die
-    //   Radio-Optik nachziehen und die Slider-Freeze-Logik anwenden.
-    g4mRadioGroups().forEach(function (group) {
-        const sliderRow = group.closest('.slider-row');
-        const randomBtn = group.querySelector('[data-mode="random"]');
-        const fixedBtn  = group.querySelector('[data-mode="fixed"]');
-        if (!randomBtn || !fixedBtn || !sliderRow || !sliderRow.id) return;
-        clearActiveColor(randomBtn);
-        clearActiveColor(fixedBtn);
-        const isRandom = g4mIsRandomMode(sliderRow.id);
-        markActiveColor(isRandom ? randomBtn : fixedBtn, getRowColorClass(sliderRow));
-    });
+    // — Random/Fixed-Zustand pro Tool-Slider wiederherstellen —
+    //   Zustand liegt bereits im Store (restoreSaved). Radios entfernt
+    //   (v153d): nur Slider-Freeze und die On/Off-Quadrate nachziehen.
     if (typeof applyAllSliderFreezeStates === 'function') applyAllSliderFreezeStates();
+    if (typeof g4mShowRandomToggleFor === 'function') {
+        const activeSq = document.querySelector('.g4m-param-sq.g4m-sq-active');
+        const activeId = activeSq ? activeSq.id.replace(/^g4m-sq-/, '') : null;
+        if (activeId) g4mShowRandomToggleFor(activeId);
+    }
 
     // Canvas-Hintergrund nachziehen
     if (typeof updateCanvasBackground === 'function') updateCanvasBackground();
@@ -6041,6 +6537,8 @@ function showArchimedeanPanel() {
     // Viz Result (Gesamtbild) beim Öffnen mitzeichnen, sobald das Fenster
     // seine Größe hat
     setTimeout(function () { if (typeof g4mDrawVizResult === 'function') g4mDrawVizResult(); }, G4M_ANIM.ARCH_VIZ_DELAY_MS);
+    // Rail-Absenkung auf die Tool-Slider-Linie nachmessen (v153.1b)
+    requestAnimationFrame(function () { g4mAlignRailsToTool('archimedean-panel'); });
 }
 
 function hideArchimedeanPanel() {
@@ -6115,8 +6613,16 @@ function showArchFormulaPanel() {
     g4mSetPanelOpen('arch-formula-panel', true);
     // Schritt 1: Panel anheben über Canvas-Tools (40) — wie GIELIS_ELEVATED (50)
     panel.style.zIndex = String(G4M_Z.FORMULA_SHOWN);
-    // Schritt 2: F2-Panel darüber — wie FORMULA_ELEVATED (60)
-    if (archPanel) archPanel.style.zIndex = String(G4M_Z.CARRIER_ABOVE);
+    if (g4mIsPanelOpen('arch-options-panel')) {
+        /* Page 2 offen (v153.1g): Formel-Fahrt gleitet UNTER der
+           offenen Page 2 durch — siehe showGielisPanel. */
+        const opts = document.getElementById('arch-options-panel');
+        if (opts) opts.style.zIndex = String(G4M_Z.CARRIER_ABOVE + 1);
+        if (archPanel) archPanel.style.zIndex = String(G4M_Z.SLIDING);
+    } else {
+        // Schritt 2: F2-Panel darüber — wie FORMULA_ELEVATED (60)
+        if (archPanel) archPanel.style.zIndex = String(G4M_Z.CARRIER_ABOVE);
+    }
     // Schritt 3: Animation starten, dann Pfeile aktualisieren
     requestAnimationFrame(function() {
         requestAnimationFrame(function() {
@@ -6158,21 +6664,40 @@ function g4mToggleArchFormula(e) {
 function showArchOptionsPanel() {
     const panel = document.getElementById('arch-options-panel');
     if (!panel) return;
+    /* Z-Choreografie (v153.1g): identisch zu showSfOptionsPanel —
+       Page 2 immer auf OPTIONS (unter Tool-Panel/Formel-Panel), der
+       Träger wird bei stationär offenem Formel-Panel abgesenkt. */
+    if (isArchFormulaPanelOpen()) {
+        const carrier = document.getElementById('archimedean-panel');
+        if (carrier) carrier.style.zIndex = String(G4M_Z.SLIDING);
+    }
     g4mSetPanelOpen('arch-options-panel', true);
     g4mPlacePanelOverCanvas(panel);
     panel.style.zIndex    = String(G4M_Z.OPTIONS);
     g4mSetPanelSlide(panel, 'translateX(0)');
+    // Nach der Landung über die Formel-Fahrtebene heben — siehe showSfOptionsPanel (v153.1g)
+    setTimeout(function () {
+        if (g4mIsPanelOpen('arch-options-panel') && isArchFormulaPanelOpen()) {
+            panel.style.zIndex = String(G4M_Z.CARRIER_ABOVE + 1);
+        }
+    }, G4M_ANIM.AFTER_SUB_PANEL_MS);
     updateArrowVisibility();
 }
 
 function hideArchOptionsPanel() {
     const panel = document.getElementById('arch-options-panel');
     if (!panel) return;
-    panel.style.zIndex    = String(G4M_Z.OPTIONS);
+    // Für die Ausfahrt auf OPTIONS absenken — siehe hideSfOptionsPanel (v153.1g)
+    panel.style.zIndex = String(G4M_Z.OPTIONS);
     g4mSetPanelSlide(panel, g4mHiddenTransform('canvas'));
     setTimeout(function() {
         g4mSetPanelOpen('arch-options-panel', false);
         panel.style.zIndex = String(G4M_Z.RESTING);
+        // Trägerebene wiederherstellen — siehe hideSfOptionsPanel (v153.1g)
+        if (isArchFormulaPanelOpen()) {
+            const carrier = document.getElementById('archimedean-panel');
+            if (carrier) carrier.style.zIndex = String(G4M_Z.CARRIER_ABOVE);
+        }
         updateArrowVisibility();
     }, G4M_ANIM.AFTER_SUB_PANEL_MS);
 }
@@ -6185,6 +6710,79 @@ function g4mToggleArchOptions(e) {
         hideArchOptionsPanel();
     } else {
         showArchOptionsPanel();
+    }
+}
+
+/* ── SF-Options-Panel (Page 2 des F1-Panels, v153.1c) ─────────────
+   Exakte Klone der Arch-Options-Pendants — gleiche Fahrt, gleiche
+   Z-Ebene, gleiche Pfeil-Integration. Seite 2 ist vorerst leer. */
+function isSfOptionsPanelOpen() {
+    return g4mIsPanelOpen('sf-options-panel');
+}
+
+function showSfOptionsPanel() {
+    const panel = document.getElementById('sf-options-panel');
+    if (!panel) return;
+    /* Z-Choreografie (v153.1g): Page 2 fährt IMMER auf OPTIONS (35)
+       ein — UNTER dem Tool-Panel (40) und UNTER dem Formel-Panel (50),
+       aber ÜBER dem F1-Träger. Ist das Formel-Panel offen, liegt der
+       Träger auf CARRIER_ABOVE (60) und würde Page 2 verdecken —
+       da das Formel-Panel dann STATIONÄR offen steht (die 60 dient
+       nur seiner Ein-/Ausfahrt hinter der Trägerkante), wird der
+       Träger auf SLIDING (30) abgesenkt statt Page 2 anzuheben.
+       hideSfOptionsPanel stellt CARRIER_ABOVE wieder her, solange
+       das Formel-Panel noch offen ist. */
+    if (isGielisPanelOpen()) {
+        const carrier = document.getElementById('superformel-panel');
+        if (carrier) carrier.style.zIndex = String(G4M_Z.SLIDING);
+    }
+    g4mSetPanelOpen('sf-options-panel', true);
+    g4mPlacePanelOverCanvas(panel);
+    panel.style.zIndex    = String(G4M_Z.OPTIONS);
+    g4mSetPanelSlide(panel, 'translateX(0)');
+    /* Nach der Landung (v153.1g): steht das Formel-Panel offen, wird
+       Page 2 über dessen Fahrtebene (50) gehoben — eine spätere
+       Formel-AUSFAHRT gleitet dann ebenfalls UNTER Page 2 durch. */
+    setTimeout(function () {
+        if (g4mIsPanelOpen('sf-options-panel') && isGielisPanelOpen()) {
+            panel.style.zIndex = String(G4M_Z.CARRIER_ABOVE + 1);
+        }
+    }, G4M_ANIM.AFTER_SUB_PANEL_MS);
+    updateArrowVisibility();
+}
+
+function hideSfOptionsPanel() {
+    const panel = document.getElementById('sf-options-panel');
+    if (!panel) return;
+    /* Für die Ausfahrt auf OPTIONS (35) absenken (v153.1g): die Fahrt
+       kreuzt den Tools-Bereich und gehört UNTER Tool-Panel (40) und
+       Formel-Panel (50); der Träger liegt in allen Kombinationen
+       tiefer (30/10), Page 2 bleibt also über der Canvas sichtbar. */
+    panel.style.zIndex = String(G4M_Z.OPTIONS);
+    g4mSetPanelSlide(panel, g4mHiddenTransform('canvas'));
+    setTimeout(function() {
+        g4mSetPanelOpen('sf-options-panel', false);
+        panel.style.zIndex = String(G4M_Z.RESTING);
+        /* Trägerebene wiederherstellen (v153.1g): steht das Formel-
+           Panel noch offen, gehört der Träger zurück auf CARRIER_ABOVE,
+           damit die spätere Formel-Ausfahrt hinter seiner Kante
+           verschwindet (wie beim Öffnen des Formel-Panels). */
+        if (isGielisPanelOpen()) {
+            const carrier = document.getElementById('superformel-panel');
+            if (carrier) carrier.style.zIndex = String(G4M_Z.CARRIER_ABOVE);
+        }
+        updateArrowVisibility();
+    }, G4M_ANIM.AFTER_SUB_PANEL_MS);
+}
+
+function g4mToggleSfOptions(e) {
+    if (e) e.stopPropagation();
+    const panel = document.getElementById('sf-options-panel');
+    if (!panel) return;
+    if (g4mIsPanelOpen('sf-options-panel')) {
+        hideSfOptionsPanel();
+    } else {
+        showSfOptionsPanel();
     }
 }
 function g4mToggleArchimedean(e) {
@@ -6535,19 +7133,125 @@ function updateRangeFills() {
     });
 }
 
+/* ── Magnetische Min/Max-Kopplung: delegiert und zustandslos (v153.1f)
+   Die frühere Paar-Kopplung hielt GEFANGENE Element-Referenzen pro
+   Listener — der User beobachtete, dass die Magnetwirkung im Verlauf
+   der Bedienung verloren gehen kann. Diese Fassung ist strukturell
+   unverwundbar: EIN Capture-Listener je Slider-Feld (F1 UND F2)
+   fängt jedes input-Ereignis ab und sucht den Partner-Regler ZUM
+   EREIGNISZEITPUNKT frisch im DOM (gleicher g4m-arch-block, andere
+   Rail) — keine Referenz kann veralten, keine spätere Neubindung
+   oder Ersetzung eines Reglers kann die Kopplung aushebeln.
+   · Capture-Phase: läuft VOR allen Ziel-Listenern — unabhängig von
+     deren Registrierung und Reihenfolge.
+   · Der mitgezogene Partner bekommt Wert + dispatchtes input-Ereignis;
+     seine eigenen Listener (Anzeige, Store, Viz, Live, Füllung)
+     laufen unverändert. Bei Gleichstand greift die Bedingung nicht
+     mehr — die Kette terminiert.
+   · Modulations-Blöcke (Strength/Freq, g4m-arch-block-mod) sind
+     KEINE Min/Max-Paare und bleiben ausgenommen. */
+function g4mInitRangeCoupling() {
+    /* Seit v153.1g auf DOKUMENT-Ebene statt pro Editor: selbst ein
+       kompletter Austausch des Editor-Elements könnte die Kopplung
+       damit nicht mehr trennen — das Dokument überlebt alles. Die
+       Editor-Zugehörigkeit wird zum Ereigniszeitpunkt geprüft. */
+    if (document._g4mCoupled) return;   // idempotent
+    document._g4mCoupled = true;
+    document.addEventListener('input', function (e) {
+        const t = e.target;
+        if (!t || t.tagName !== 'INPUT' || t.type !== 'range') return;
+        if (!t.closest('.g4m-arch-editor')) return;
+        const isMin = t.classList.contains('g4m-arch-rail-min');
+        const isMax = t.classList.contains('g4m-arch-rail-max');
+        if (!isMin && !isMax) return;
+        const block = t.closest('.g4m-arch-block');
+        if (!block || block.classList.contains('g4m-arch-block-mod')) return;
+        const partner = block.querySelector(isMin ? '.g4m-arch-rail-max' : '.g4m-arch-rail-min');
+        if (!partner || partner === t) return;
+        const v  = parseFloat(t.value);
+        const pv = parseFloat(partner.value);
+        if (isNaN(v) || isNaN(pv)) return;
+        if (isMin ? v > pv : v < pv) {
+            partner.value = t.value;
+            partner.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    }, true);
+}
+
+/* ── Editierbare Wertefelder der F1-/F2-Slider (v153.1d) ──────────
+   Jedes Wertefeld neben einer Rail wird zum Eingabefeld: getippter
+   Wert wird geparst (Dezimalkomma erlaubt, Einheiten wie ° / %
+   werden ignoriert), auf Min/Max begrenzt, auf den Step gerundet
+   und in den Slider geschrieben. Das dispatchte input-Ereignis
+   lässt die BESTEHENDEN Listener laufen — Anzeige-Formatierung,
+   Store-Patch, Viz, Live-Render, magnetische Kopplung und Track-
+   Füllung bleiben eine Quelle. Eingabe-Härtung wie beim Tool-Panel-
+   Wertefeld (kein HTML aus der Zwischenablage, nur Ziffern). Die
+   Paarung Input↔Feld folgt der DOM-Nachbarschaft: in jedem
+   g4m-arch-block folgt das g4m-val-box direkt auf sein input. */
+function g4mInitValBoxEditing() {
+    document.querySelectorAll('.g4m-arch-block input[type=range]').forEach(function (inp) {
+        const box = inp.nextElementSibling;
+        if (!box || !box.classList.contains('g4m-val-box')) return;
+        if (box._g4mEditable) return;   // idempotent
+        box._g4mEditable = true;
+
+        box.contentEditable = 'true';
+        box.spellcheck = false;
+        box.setAttribute('role', 'textbox');
+        if (!box.getAttribute('aria-label')) {
+            box.setAttribute('aria-label', (inp.id || 'value').replace(/-/g, ' '));
+        }
+
+        box.addEventListener('paste', function (e) {
+            e.preventDefault();
+            const clip = (e.clipboardData || window.clipboardData);
+            const text = clip ? clip.getData('text/plain') : '';
+            this.textContent = text.replace(/[^\d.,\-]/g, '');
+        });
+        box.addEventListener('beforeinput', function (e) {
+            if (e.inputType === 'insertText' && e.data && /[^\d.,\-]/.test(e.data)) {
+                e.preventDefault();
+            }
+        });
+
+        function commit() {
+            const clean = box.textContent.replace(/,/g, '.').replace(/[^\d.\-]/g, '');
+            let v = parseFloat(clean);
+            if (isNaN(v)) {
+                // Ungültig: Anzeige über den bestehenden Listener zurückformatieren
+                inp.dispatchEvent(new Event('input', { bubbles: true }));
+                return;
+            }
+            const min  = parseFloat(inp.min);
+            const max  = parseFloat(inp.max);
+            const step = parseFloat(inp.step) || 1;
+            v = Math.max(min, Math.min(max, v));
+            v = Math.round(v / step) * step;
+            v = parseFloat(v.toFixed(6));   // Fliesskomma-Reste kappen
+            inp.value = v;
+            inp.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        box.addEventListener('blur', commit);
+        box.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); box.blur(); }
+        });
+    });
+}
+
 /* ====================================================================
    SLIDER-FREEZE: Random-Modus deaktiviert den Slider
    ==================================================================== */
 function applySliderFreezeState(sliderRow) {
-    if (!sliderRow) return;
-    const radioButtons = sliderRow.querySelectorAll('.radio-btn');
-    if (radioButtons.length !== 2) return; // nur Zeilen mit Random/Fixed
+    if (!sliderRow || !sliderRow.id) return;
+    // Random-fähig? Früher an 2 Radio-Buttons erkannt; jetzt an der
+    // Parameter-Liste (radio !== false). Zoom/Pan/Rotation sind es nicht.
+    if (!g4mIsRandomCapable(sliderRow.id)) return;
 
-    const randomBtn   = sliderRow.querySelector('.radio-btn[data-mode="random"]');
     const handle       = sliderRow.querySelector('.slider-handle');
     const container    = sliderRow.querySelector('.slider-container');
     const valueDisplay = sliderRow.querySelector('.value-display');
-    if (!randomBtn || !handle || !container) return;
+    if (!handle || !container) return;
 
     // Zustand statt DOM-Klassen lesen — die UI ist Produkt des Zustands,
     // nicht dessen Quelle
@@ -6636,28 +7340,115 @@ function initPanelRangeInputs() {
     });
 }
 
-/* ── Farbsteuerung im Superformula-Panel ─────────────────────────── */
+/* ── Farbsteuerung im Superformula-Panel (v153.1c) ────────────────
+   Exakt das F2-Muster: On/Off-Zellen + Farbzelle in der untersten
+   reserve6-Reihe (sichtbar bei gewähltem Color-Quadrat). Der Store
+   bleibt die einzige Wahrheitsquelle (useRandomColors,
+   defaultCurveColor); die Optik hält g4mSyncSfColorButtons nach. */
+function g4mSyncSfColorButtons() {
+    const random = (g4mState.useRandomColors !== false);
+    g4mSetBotModActive('sf-color-random-on',  random);
+    g4mSetBotModActive('sf-color-random-off', !random);
+    const cell = document.querySelector('#superformel-panel .g4m-arch-colorcell');
+    if (cell) cell.classList.toggle('g4m-arch-color-random', random);
+    const cp = document.getElementById('curve-default-color');
+    if (cp && g4mState.defaultCurveColor) cp.value = g4mState.defaultCurveColor;
+}
+
 function initCurveColorControls() {
-    const onButton  = document.getElementById('color-random-on');
-    const offButton = document.getElementById('color-random-off');
+    const onButton  = document.getElementById('sf-color-random-on');
+    const offButton = document.getElementById('sf-color-random-off');
     const picker    = document.getElementById('curve-default-color');
 
     if (onButton && offButton) {
         onButton.addEventListener('click', function() {
-            onButton.classList.add('active-green');
-            offButton.classList.remove('active-green');
             g4mStore.set('useRandomColors', true);
+            g4mSyncSfColorButtons();
+            g4mSfUpdateSqVals();
         });
         offButton.addEventListener('click', function() {
-            offButton.classList.add('active-green');
-            onButton.classList.remove('active-green');
             g4mStore.set('useRandomColors', false);
+            g4mSyncSfColorButtons();
+            g4mSfUpdateSqVals();
         });
     }
     if (picker) {
         g4mStore.set('defaultCurveColor', picker.value);
-        picker.addEventListener('input', function() { g4mStore.set('defaultCurveColor', this.value); });
+        picker.addEventListener('input', function() {
+            g4mStore.set('defaultCurveColor', this.value);
+            // Fixfarbe live anwenden, wenn Random aus ist (analog F2)
+            if (g4mState.useRandomColors === false) {
+                for (let i = 0; i < storedCurveParameters.length; i++) {
+                    if (storedCurveParameters[i]) storedCurveParameters[i].color = this.value;
+                }
+                if (storedCurveParameters.length) { redrawStoredImage(); }
+            }
+        });
     }
+    g4mSyncSfColorButtons();
+}
+
+/* ── Modulations-Steuerung im Superformula-Panel (v153.1c) ────────
+   Buttons und Slider EXAKT an den F2-Positionen (Sin/Cos/Tan oben,
+   On/Off unten, Strength/Freq im Slider-Feld). Zustand: sfModulation
+   im Store; Wirkung: g4mApplySfModulation im Renderer (§3). Jede
+   Änderung wirkt live auf Viz-Vorschau, Canvas und Result-Fenster. */
+function g4mSyncSfModOptics() {
+    const mod = g4mState.sfModulation || {};
+    g4mSetBotModActive('sf-mod-on',  !!mod.enabled);
+    g4mSetBotModActive('sf-mod-off', !mod.enabled);
+    g4mSetBotModActive('sf-mod-cos', mod.type === 'cos');
+    g4mSetBotModActive('sf-mod-sin', mod.type === 'sin');
+    g4mSetBotModActive('sf-mod-tan', mod.type === 'tan');
+}
+
+function initSfModulationControls() {
+    function applyLive() {
+        g4mSyncSfModOptics();
+        g4mSfUpdateSqVals();
+        drawSuperformulaVisualizations();   // Min/Max-Vorschau
+        redrawStoredImage();                // Canvas + Result live
+    }
+
+    const onBtn  = document.getElementById('sf-mod-on');
+    const offBtn = document.getElementById('sf-mod-off');
+    if (onBtn) onBtn.addEventListener('click', function() {
+        g4mStore.patchSfModulation(function (mod) { mod.enabled = true; });
+        applyLive();
+    });
+    if (offBtn) offBtn.addEventListener('click', function() {
+        g4mStore.patchSfModulation(function (mod) { mod.enabled = false; });
+        applyLive();
+    });
+    [['sf-mod-sin', 'sin'], ['sf-mod-cos', 'cos'], ['sf-mod-tan', 'tan']].forEach(function (pair) {
+        const btn = document.getElementById(pair[0]);
+        if (!btn) return;
+        btn.addEventListener('click', function() {
+            g4mStore.patchSfModulation(function (mod) { mod.type = pair[1]; });
+            applyLive();
+        });
+    });
+
+    const strSlider = document.getElementById('sf-mod-strength');
+    const strVal    = document.getElementById('sf-mod-strength-val');
+    if (strSlider) strSlider.addEventListener('input', function() {
+        const v = parseFloat(this.value);
+        g4mStore.patchSfModulation(function (mod) { mod.strength = v; });
+        if (strVal) strVal.textContent = v.toFixed(2);
+        drawSuperformulaVisualizations();
+        redrawStoredImage();
+    });
+    const freqSlider = document.getElementById('sf-mod-freq');
+    const freqVal    = document.getElementById('sf-mod-freq-val');
+    if (freqSlider) freqSlider.addEventListener('input', function() {
+        const v = parseFloat(this.value);
+        g4mStore.patchSfModulation(function (mod) { mod.freq = v; });
+        if (freqVal) freqVal.textContent = v.toFixed(1);
+        drawSuperformulaVisualizations();
+        redrawStoredImage();
+    });
+
+    g4mSyncSfModOptics();
 }
 
 /* ====================================================================
@@ -6683,10 +7474,22 @@ function showGielisPanel() {
     if (!panel) return;
     positionGielisPanel();
 
-    // Z-Hierarchie: Formula-Panel anheben (60), Gielis darunter (50),
-    // Navigation bleibt zuoberst (70) — identisch zum Arch-Formel-Panel
     const formulaPanel = document.getElementById('superformel-panel');
-    if (formulaPanel) formulaPanel.style.zIndex = String(G4M_Z.CARRIER_ABOVE);
+    if (g4mIsPanelOpen('sf-options-panel')) {
+        /* Page 2 offen (v153.1g): das Formel-Panel soll auf seiner
+           Fahrt über die Canvas-Fläche UNTER der offenen Page 2
+           durchgleiten. Dazu wird Page 2 (stationär, deckt die
+           Canvas-Fläche komplett) ÜBER die Formel-Fahrt gehoben und
+           der Träger tief gehalten — die klassische Träger-Anhebung
+           (Kante als Sichtblende) übernimmt hier Page 2 selbst. */
+        const opts = document.getElementById('sf-options-panel');
+        if (opts) opts.style.zIndex = String(G4M_Z.CARRIER_ABOVE + 1);
+        if (formulaPanel) formulaPanel.style.zIndex = String(G4M_Z.SLIDING);
+    } else {
+        // Z-Hierarchie: Träger anheben (60), Gielis darunter (50),
+        // Navigation bleibt zuoberst (70) — identisch zum Arch-Formel-Panel
+        if (formulaPanel) formulaPanel.style.zIndex = String(G4M_Z.CARRIER_ABOVE);
+    }
     panel.style.visibility = 'visible';
     panel.style.zIndex = String(G4M_Z.FORMULA_SHOWN);
     g4mSetPanelOpen('gielis-formula-panel', true);
@@ -6723,13 +7526,8 @@ function initGielisPanel() {
             if (isGielisPanelOpen()) { hideGielisPanel(); } else { showGielisPanel(); }
         });
     }
-    const closeBtn = document.getElementById('gielis-close-btn');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            hideGielisPanel();
-        });
-    }
+    // gielis-close-btn entfiel (v153.1d) — Schliessen über den rechten
+    // D-Pad-Pfeil, den Formula-Button oder Escape (unten).
     // ESC schließt das Panel
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && isGielisPanelOpen()) hideGielisPanel();
@@ -7071,6 +7869,14 @@ function repositionOpenPanels() {
     if (isSuperformulaPanelOpen()) g4mPlacePanelOverCanvas(document.getElementById('superformel-panel'));
     if (isArchimedeanPanelOpen())  g4mPlacePanelOverCanvas(document.getElementById('archimedean-panel'));
     if (isArchOptionsPanelOpen())  g4mPlacePanelOverCanvas(document.getElementById('arch-options-panel'));
+    if (isSfOptionsPanelOpen())    g4mPlacePanelOverCanvas(document.getElementById('sf-options-panel'));
+    /* Rail-Absenkung nachmessen (v153.1b): die Tool-Slider-Linie ist
+       nicht rein u-proportional — nach jedem Layoutwechsel neu bündig
+       stellen. Nach dem Layout (rAF), Platzierung kann verzögert sein. */
+    requestAnimationFrame(function () {
+        if (isSuperformulaPanelOpen()) g4mAlignRailsToTool('superformel-panel');
+        if (isArchimedeanPanelOpen())  g4mAlignRailsToTool('archimedean-panel');
+    });
     const fid = openFPanelId();
     if (fid) g4mPlacePanelOverCanvas(document.getElementById(fid + '-panel'));
 
@@ -7128,6 +7934,7 @@ function updateArrowVisibility() {
 
     // Oberstes Canvas-Panel bestimmt den anderen Pfeil
     if (isArchOptionsPanelOpen())       { showCanvasClose = true; controlling = 'arch-options'; }
+    else if (isSfOptionsPanelOpen())    { showCanvasClose = true; controlling = 'sf-options'; }
     else if (isArchimedeanPanelOpen())  { showCanvasClose = !isArchFormulaPanelOpen(); controlling = 'archimedean-panel'; }
     else if (openFPanelId())            { showCanvasClose = true; controlling = openFPanelId() + '-panel'; }
     else if (isSuperformulaPanelOpen()) { showCanvasClose = !isGielisPanelOpen(); controlling = 'formula-panel'; }
@@ -7187,6 +7994,7 @@ function handleLeftArrowClick(e) {
 
     // Priorität: Options (Page 2) > Archimedean > F3-F6 > Superformula > Home
     if (isArchOptionsPanelOpen())  { hideArchOptionsPanel(); return; }
+    if (isSfOptionsPanelOpen())    { hideSfOptionsPanel(); return; }
     if (isArchFormulaPanelOpen())  { return; } // rechtes Formel-Panel: rechter Pfeil schließt
     if (isArchimedeanPanelOpen())  { hideArchimedeanPanel(); return; }
     const fid = openFPanelId();
@@ -7367,87 +8175,14 @@ function makeFineCoarseToggle(param) {
     coarseBtn.addEventListener('click', function () { activate(false); });
 }
 
-/* ── Presets: reine Daten ─────────────────────────────────────────
-   Ein neues Preset ist nur noch ein Eintrag hier — applyArchPreset()
-   setzt Zustand (Store-Patch), Slider, Anzeigen und Umschalter. */
-const ARCH_PRESETS = {
-    // Stern aus vielen kurzen Spiralbögen
-    stern: {
-        a: [0, 2],                                  // leicht variierender Startabstand
-        b:     { useFine: true,  range: [0.1, 0.5] },
-        alpha: { useFine: true,  range: [5, 30] },  // kurze Bögen
-        beta:  [1, 360],                            // alle Richtungen
-        layers: 30, points: 200,
-        color: { random: true, activeDot: 'on' }
-    },
-    // Stern aus EINER Spirale (a negativ -> Selbstüberschneidung)
-    stern1: {
-        a: [-3, -3],                                // Start jenseits des Zentrums
-        b:     { useFine: true,  range: [0.15, 0.15] },
-        alpha: { useFine: false, range: [720, 3600] },  // mehrere Umdrehungen
-        beta:  [1, 1],
-        layers: 1, points: 500,
-        // Altverhalten bewusst beibehalten: Zustand bleibt 'random',
-        // die UI zeigt den Aus-Punkt und Weiss als Standardfarbe
-        color: { random: true, defaultColor: '#ffffff', activeDot: 'off' }
-    }
-};
-
-function applyArchPreset(d) {
-    g4mStore.patchArch(function (p) {
-        p.a.min = d.a[0]; p.a.max = d.a[1];
-
-        p.b.useFine = d.b.useFine;
-        if (d.b.useFine) { p.b.fineMin   = d.b.range[0]; p.b.fineMax   = d.b.range[1]; }
-        else             { p.b.coarseMin = d.b.range[0]; p.b.coarseMax = d.b.range[1]; }
-        p.b.min = d.b.range[0]; p.b.max = d.b.range[1];
-
-        p.alpha.useFine = d.alpha.useFine;
-        if (d.alpha.useFine) { p.alpha.fineMin   = d.alpha.range[0]; p.alpha.fineMax   = d.alpha.range[1]; }
-        else                 { p.alpha.coarseMin = d.alpha.range[0]; p.alpha.coarseMax = d.alpha.range[1]; }
-        p.alpha.min = d.alpha.range[0]; p.alpha.max = d.alpha.range[1];
-
-        p.beta.min = d.beta[0]; p.beta.max = d.beta[1];
-    });
-
-    // a
-    _archSlider('arch-param-a-min', d.a[0], 'arch-val-a-min', d.a[0].toFixed(1));
-    _archSlider('arch-param-a-max', d.a[1], 'arch-val-a-max', d.a[1].toFixed(1));
-
-    // b — aktive Seite (Fein/Grob) synchronisieren
-    const bSide = d.b.useFine ? 'fine' : 'coarse';
-    setFineCoarseUi('b', d.b.useFine);
-    _archSlider('arch-param-b-' + bSide + '-min', d.b.range[0], 'arch-val-b-' + bSide + '-min', d.b.range[0].toFixed(2));
-    _archSlider('arch-param-b-' + bSide + '-max', d.b.range[1], 'arch-val-b-' + bSide + '-max', d.b.range[1].toFixed(2));
-
-    // alpha — aktive Seite synchronisieren
-    const aSide = d.alpha.useFine ? 'fine' : 'coarse';
-    setFineCoarseUi('alpha', d.alpha.useFine);
-    _archSlider('arch-param-alpha-' + aSide + '-min', d.alpha.range[0], 'arch-val-alpha-' + aSide + '-min', d.alpha.range[0] + '°');
-    _archSlider('arch-param-alpha-' + aSide + '-max', d.alpha.range[1], 'arch-val-alpha-' + aSide + '-max', d.alpha.range[1] + '°');
-
-    // beta
-    _archSlider('arch-param-beta-min', d.beta[0], 'arch-val-beta-min', d.beta[0] + '°');
-    _archSlider('arch-param-beta-max', d.beta[1], 'arch-val-beta-max', d.beta[1] + '°');
-
-    // Normalisierung AN — jede Spirale auf Canvas-Grösse skaliert.
-    // Direkter Aufruf statt simuliertem Button-Klick (Befund 7).
-    setNormalization(true);
-
-    if (sliders['number-of-layers']) sliders['number-of-layers'].setValue(d.layers);
-    if (sliders['number-of-points']) sliders['number-of-points'].setValue(d.points);
-
-    // Farben
-    g4mStore.set('archUseRandomColors', d.color.random);
-    if (d.color.defaultColor) {
-        g4mStore.set('archDefaultColor', d.color.defaultColor);
-        const cp = document.getElementById('arch-default-color');
-        if (cp) cp.value = d.color.defaultColor;
-    }
-    g4mSyncColorButtons();
-
-    archDrawViz();
-}
+/* ── Presets entfernt (v153.0) ────────────────────────────────────
+   ARCH_PRESETS (stern, stern1) und applyArchPreset() waren toter
+   Code: die zugehörigen Buttons #arch-preset-stern/-stern1 existieren
+   im HTML nicht mehr, damit war der gesamte Block unerreichbar.
+   Bei Wiedereinführung von Presets: Datenobjekt + Dispatcher aus
+   v152 (g4m_152_34_5_.html) übernehmen — die dort verwendeten Helfer
+   (_archSlider, setFineCoarseUi, setNormalization, g4mSyncColorButtons,
+   archDrawViz) existieren alle weiterhin. */
 
 function initArchimedeanModule() {
     // Hilfsfunktion: Slider + Anzeige koppeln
@@ -7557,17 +8292,8 @@ function initArchimedeanModule() {
         });
     })();
 
-    // Preset: Stern (viele kurze Spiralbögen)
-    // Presets — nur noch Daten-Dispatch (siehe ARCH_PRESETS)
-    const sternBtn = document.getElementById('arch-preset-stern');
-    if (sternBtn) sternBtn.addEventListener('click', function () {
-        applyArchPreset(ARCH_PRESETS.stern);
-    });
-
-    const stern1Btn = document.getElementById('arch-preset-stern1');
-    if (stern1Btn) stern1Btn.addEventListener('click', function () {
-        applyArchPreset(ARCH_PRESETS.stern1);
-    });
+    // Preset-Listener entfernt (v153.0): #arch-preset-stern/-stern1
+    // gibt es im HTML nicht mehr — die Guards liefen ins Leere.
 
     // Modulation
     const modOnBtn  = document.getElementById('arch-mod-on');
@@ -7665,6 +8391,12 @@ function initArchimedeanModule() {
             if (storedCurveParameters.length) { redrawStoredImage(); }
         }
     });
+    /* Magnetische Min/Max-Kopplung: seit v153.1f NICHT mehr hier als
+       Paar-Listener mit gefangenen Element-Referenzen, sondern zentral
+       und zustandslos in g4mInitRangeCoupling (§2) — ein delegierter
+       Capture-Listener je Slider-Feld, Partner-Suche zum Ereignis-
+       zeitpunkt. Gilt für F1 UND F2 aus einer Quelle. */
+
     g4mSyncModBottomOptics();
     g4mSyncColorButtons();
 }
@@ -7676,7 +8408,8 @@ function g4mSyncColorButtons() {
     const random = (g4mState.archUseRandomColors !== false);
     g4mSetBotModActive('arch-color-random-on',  random);
     g4mSetBotModActive('arch-color-random-off', !random);
-    const cell = document.querySelector('.g4m-arch-colorcell');
+    // Auf F2 gescoped (v153.1c) — F1 hat inzwischen eine eigene Farbzelle
+    const cell = document.querySelector('#archimedean-panel .g4m-arch-colorcell');
     if (cell) cell.classList.toggle('g4m-arch-color-random', random);
     const cp = document.getElementById('arch-default-color');
     if (cp && g4mState.archDefaultColor) cp.value = g4mState.archDefaultColor;
@@ -7704,8 +8437,9 @@ function initToolbarButtons() {
     // Modus-Indikator öffnet das Formel-Menü (v150d)
     bind('g4m-mode-indicator', createModeDropdown);
     bind('arch-options-btn', g4mToggleArchOptions);
+    bind('sf-options-btn', g4mToggleSfOptions);
     bind('arch-formula-toggle', g4mToggleArchFormula);
-    bind('arch-formula-close-btn', function() { hideArchFormulaPanel(); });
+    // arch-formula-close-btn entfiel (v153.1d) — Schliessen über Pfeil/Formula-Button
 
     // Der klickbare Formel-Hinweis ist auch per Tastatur bedienbar
     const fToggle = document.getElementById('arch-formula-toggle');
@@ -7747,13 +8481,16 @@ function g4mArchSelectParam(param) {
     const showOpt = (param === 'optimizer');
     const showCon = (param === 'connect');
     const showCol = (param === 'color');
-    document.querySelectorAll('.g4m-arch-reserve6 .g4m-arch-botmod')
+    /* Auf das F2-Panel gescoped (v153.1c): F1 trägt seit dem Neuaufbau
+       DENSELBEN reserve6-Block — ungescoped würde F2 die F1-Buttons
+       mit umschalten (und umgekehrt). */
+    document.querySelectorAll('#archimedean-panel .g4m-arch-reserve6 .g4m-arch-botmod')
         .forEach(function (b) { b.classList.toggle('g4m-arch-mod-hidden', !showMod); });
-    document.querySelectorAll('.g4m-arch-reserve6 .g4m-arch-botopt')
+    document.querySelectorAll('#archimedean-panel .g4m-arch-reserve6 .g4m-arch-botopt')
         .forEach(function (b) { b.style.visibility = showOpt ? 'visible' : 'hidden'; });
-    document.querySelectorAll('.g4m-arch-reserve6 .g4m-arch-botcon')
+    document.querySelectorAll('#archimedean-panel .g4m-arch-reserve6 .g4m-arch-botcon')
         .forEach(function (b) { b.style.visibility = showCon ? 'visible' : 'hidden'; });
-    document.querySelectorAll('.g4m-arch-reserve6 .g4m-arch-botcol')
+    document.querySelectorAll('#archimedean-panel .g4m-arch-reserve6 .g4m-arch-botcol')
         .forEach(function (b) { b.style.visibility = showCol ? 'visible' : 'hidden'; });
     g4mArchUpdateSqVals();
 }
@@ -7796,6 +8533,104 @@ function g4mArchUpdateSqVals() {
     }
 }
 
+/* ── F1: Quadrat-Auswahl + Wertespiegel (v153.1) ──────────────────
+   Exakt das F2-Muster (g4mArchSelectParam/g4mArchUpdateSqVals), nur
+   auf das Superformula-Panel gescoped. Die Quadrate sind reine
+   SELEKTOREN: Klick zeigt die zugehörige (unveränderte) Parameter-
+   zeile im Slider-Feld — keine zweite Zustandshaltung, die Slider
+   und Wertefelder bleiben dieselben Elemente (Ids param-/val-…). */
+const G4M_SF_SQ_PARAMS = ['a', 'b', 'm', 'n1', 'n2', 'n3'];
+
+function g4mSfFmtPair(param) {
+    const sf = g4mState.superformulaParams;
+    if (!sf || !sf[param]) return '';
+    const f = (param === 'm')
+        ? function (v) { return String(Math.round(v)); }
+        : function (v) { return Number(v).toFixed(1); };
+    return 'Min. ' + f(sf[param].min) + '\n' + 'Max. ' + f(sf[param].max);
+}
+
+function g4mSfUpdateSqVals() {
+    G4M_SF_SQ_PARAMS.forEach(function (param) {
+        const el = document.getElementById('sf-sqval-' + param);
+        if (el) el.textContent = g4mSfFmtPair(param);   // \n -> Zeilenumbruch via white-space
+    });
+    // Funktions-Quadrate: Statustext statt Min/Max (wie F2)
+    const colEl = document.getElementById('sf-sqval-color');
+    if (colEl) colEl.textContent = (g4mState.useRandomColors !== false) ? 'Random' : 'Fixed';
+    const mEl = document.getElementById('sf-sqval-mod');
+    if (mEl) {
+        const mod = g4mState.sfModulation || {};
+        mEl.textContent = mod.enabled ? (String(mod.type || 'sin')) : 'Off';
+    }
+}
+
+/* Zeigt genau eine Parameterzeile im F1-Slider-Feld; markiert das
+   aktive Quadrat (gleiche Optik wie im F2- und Tool-Panel). */
+function g4mSfSelectParam(param) {
+    document.querySelectorAll('#superformel-panel .g4m-arch-sq')
+        .forEach(function (sq) { sq.classList.remove('g4m-arch-sq-active'); });
+    document.querySelectorAll('#superformel-panel .g4m-arch-prow')
+        .forEach(function (row) { row.classList.remove('g4m-arch-prow-active'); });
+    const sq  = document.getElementById('sf-sq-' + param);
+    const row = document.getElementById('sf-prow-' + param);
+    if (sq)  sq.classList.add('g4m-arch-sq-active');
+    if (row) row.classList.add('g4m-arch-prow-active');
+    /* Sin/Cos/Tan/On/Off bilden das Grundraster (v153.1c, wie F2):
+       bei «mod» mit Inhalt, sonst leeres Raster. Die Color-Zellen
+       (On/Off + Farbwähler) sind NUR bei «color» sichtbar. */
+    const showMod = (param === 'mod');
+    const showCol = (param === 'color');
+    document.querySelectorAll('#superformel-panel .g4m-arch-reserve6 .g4m-arch-botmod')
+        .forEach(function (b) { b.classList.toggle('g4m-arch-mod-hidden', !showMod); });
+    document.querySelectorAll('#superformel-panel .g4m-arch-reserve6 .g4m-arch-botcol')
+        .forEach(function (b) { b.style.visibility = showCol ? 'visible' : 'hidden'; });
+    g4mSfUpdateSqVals();
+}
+
+/* ── Rail-Ausrichtung auf die Tool-Slider-Linie (v153.1b) ─────────
+   Die untere Rail (Max) des F1-/F2-Paares soll exakt auf der y-Linie
+   des Tool-Panel-Sliders liegen. Die 0.463u-Vorgabe im Stylesheet
+   stimmt beim Referenzmaß (u = 60px, Desktop); bei kleinerem u
+   verschiebt sich die Tool-Linie aber NICHT rein u-proportional
+   (clamp-Schriften und fixe Innenabstände im Tool-Editor). Darum
+   wird nach dem Öffnen NACHGEMESSEN und --g4m-rails-shift auf dem
+   Editor in Panel-Pixeln nachgestellt — Messdifferenz durch die
+   Panel-Skala geteilt, da die Panels transform-skaliert sind.
+   Gleiche Mess-Philosophie wie g4mPositionNavCovers (v150x). */
+function g4mAlignRailsToTool(panelId) {
+    const panel = document.getElementById(panelId);
+    if (!panel) return;
+    const editor   = panel.querySelector('.g4m-arch-editor');
+    if (!editor) return;
+
+    /* NUR Querformat: im Hochformat stehen Tool-Panel und Overlay-
+       Panel ÜBEREINANDER — eine gemeinsame y-Linie existiert nicht.
+       Eine dort gesetzte Absenkung wird zurückgenommen, damit die
+       u-proportionale CSS-Vorgabe (0.463u) wieder greift. */
+    if (typeof g4mIsPortrait === 'function' && g4mIsPortrait()) {
+        editor.style.removeProperty('--g4m-rails-shift');
+        return;
+    }
+
+    const toolRail = document.querySelector('.g4m-param-editor .slider-row.g4m-row-active .slider-container');
+    const maxRail  = editor.querySelector('.g4m-arch-prow-active .g4m-arch-rail-max');
+    if (!toolRail || !maxRail) return;   // z. B. Funktions-Zeile ohne Rails aktiv
+
+    function mid(el) { const r = el.getBoundingClientRect(); return r.top + r.height / 2; }
+    const delta = mid(toolRail) - mid(maxRail);
+    if (Math.abs(delta) < 0.75) return;   // bereits bündig — kein Nachstellen
+    if (Math.abs(delta) > 100)  return;   // Plausibilität: Layout noch nicht gesetzt
+
+    // Aktuell wirkende Absenkung aufgelöst in px vom aktiven Block lesen
+    // (getComputedStyle auf der Custom Property liefert nur den Token-Text)
+    const block = maxRail.closest('.g4m-arch-block');
+    const cur   = block ? (parseFloat(getComputedStyle(block).marginTop) || 0) : 0;
+    // Panel-Skala herausrechnen: 1 gemessenes px = 1/scale Panel-px
+    const scale = parseFloat(panel.style.getPropertyValue('--panel-scale')) || uiScale || 1;
+    editor.style.setProperty('--g4m-rails-shift', (cur + delta / scale) + 'px');
+}
+
 /* ── Barrierefreiheit ─────────────────────────────────────────────
    Rollen und Beschriftungen für die maßgeschneiderten Bedienelemente;
    die eigenen Slider erhalten ihre ARIA-Attribute direkt im
@@ -7804,8 +8639,8 @@ function initAccessibility() {
     const LABELS = {
         'dpad-up': 'Move up', 'dpad-down': 'Move down',
         'dpad-left': 'Move left', 'dpad-right': 'Move right',
-        'gielis-close-btn': 'Close formula panel',
         'formula-button': 'Show Gielis formula',
+        'sf-options-btn': 'Open superformula options page 2',
         'optimal-boundaries-btn': 'Set optimal parameter boundaries'
     };
     Object.keys(LABELS).forEach(function(id) {
@@ -7818,28 +8653,15 @@ function initAccessibility() {
         svg.setAttribute('aria-hidden', 'true');
     });
 
-    // Random/Fixed-Umschalter als Radiogruppen auszeichnen.
-    // Frische Abfragen (Befund 19) — erfassen jetzt auch die
-    // generierten Slider-Zeilen. Das aria-label der Gruppe benennt
-    // den Parameter (aus dem Zeilen-Label), damit Screenreader
-    // nicht nur "Gruppe" ohne Kontext hören.
-    g4mRadioGroups().forEach(function(group) {
-        group.setAttribute('role', 'radiogroup');
-        const row = group.closest('.slider-row, .normalization-row');
-        const labelEl = row ? row.querySelector('.slider-label') : null;
-        group.setAttribute('aria-label',
-            labelEl ? labelEl.textContent + ' mode' : 'Mode');
-    });
-    g4mRadioButtons().forEach(function(btn) {
-        const mode = btn.dataset.mode;
-        btn.setAttribute('role', 'radio');
-        btn.setAttribute('aria-label',
-            mode === 'random' ? 'Random value' :
-            mode === 'fixed'  ? 'Fixed value' :
-            mode === 'on'     ? 'Normalization on' :
-            mode === 'off'    ? 'Normalization off' : 'Toggle');
-        btn.setAttribute('aria-checked',
-            /active-(green|orange|blue)/.test(btn.className) ? 'true' : 'false');
+    // ARIA für die neuen Random-On/Off-Quadrate (Radios entfernt v153d).
+    // Jedes Paar ist eine Radiogruppe; die beiden Felder sind die Radios.
+    document.querySelectorAll('.g4m-rnd-pair').forEach(function (pair) {
+        pair.setAttribute('role', 'radiogroup');
+        const onBtn  = pair.querySelector('.g4m-rnd-on');
+        const offBtn = pair.querySelector('.g4m-rnd-off');
+        [onBtn, offBtn].forEach(function (b) { if (b) b.setAttribute('role', 'radio'); });
+        if (onBtn)  onBtn.setAttribute('aria-checked',  onBtn.classList.contains('g4m-rnd-selected')  ? 'true' : 'false');
+        if (offBtn) offBtn.setAttribute('aria-checked', offBtn.classList.contains('g4m-rnd-selected') ? 'true' : 'false');
     });
 
     // Native Range-Inputs der Parameter-Panels beschriften
@@ -7890,6 +8712,14 @@ function initStateSubscriptions() {
         if (p.id === 'home-panel')           updateHomeButtonState();
         if (p.id === 'gielis-formula-panel') updateGoButtonState();
     });
+    /* F1-Quadratwerte (v153.1): jeden Schreibweg über den Store spiegeln
+       — Slider-Input, Optimal Boundaries, Sitzungs-Wiederherstellung.
+       Der Auslöser bleibt entkoppelt (gleiches Muster wie oben). */
+    g4mBus.on('state', function (p) {
+        if (p.key === 'superformulaParams') g4mSfUpdateSqVals();
+        if (p.key === 'useRandomColors')    g4mSfUpdateSqVals();
+        if (p.key === 'sfModulation')       g4mSfUpdateSqVals();
+    });
 }
 
 // Initialize
@@ -7905,6 +8735,7 @@ function init() {
     
     // Initialize radio button colors before resetting to defaults
     initializeRadioButtonColors();
+    setNormalization(g4mState.normalizationEnabled);   // Toggle-Optik auf Startzustand
     
     // Superformula Panel-Steuerung initialisieren
     initializeSuperformPanel();
@@ -7922,6 +8753,8 @@ function init() {
     updateRangeFills();            // gefüllte Tracks für native Range-Inputs
     applyAllSliderFreezeStates();  // Random-Modus friert Slider ein
     initArchimedeanModule();       // F2-Panel: Slider, Presets, Modulation
+    g4mInitValBoxEditing();        // Wertefelder der F1-/F2-Slider editierbar (v153.1d)
+    g4mInitRangeCoupling();        // magnetische Min/Max-Kopplung, delegiert (v153.1f)
     initGielisPanel();             // { ϕ π }-Button → Formel-Panel
     initHomePanel();               // Home-Panel über der Canvas (Start-Zustand)
     /* Nachmessung der Home-Abdeckungen (v150x): die Init-Messung kann
