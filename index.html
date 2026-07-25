@@ -131,11 +131,6 @@ Kontakt: dd@danidubs.ch
           object-fit: contain;
         }
 
-        .canvas-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
 
         /* Canvas Tools Panel Styles */
         .tool-btn {
@@ -400,21 +395,6 @@ Kontakt: dd@danidubs.ch
         .g4m-param-sq .g4m-sq-value,
         .g4m-param-editor .slider-label,
         .g4m-param-editor .value-display,
-        .g4m-param-editor .toggle-display {
-            /* clamp mit Boden 10px (v150q) — ein Pixel unter den
-               Buttons, weil die längsten Quadrat-Labels (23 Zeichen,
-               "Modulation of Amplitude") bei 10px Mono gerade exakt
-               in die 2u-Zelle passen; Notfall-Umbruch bleibt als
-               Sicherheitsnetz. Desktop: identische 14px-Kappe wie
-               die Buttons — dort buttongleich wie bisher. */
-            font-size: clamp(9px, calc(var(--u) * 0.269), 14px);   /* Boden 9px (v150r, war 10) */
-            font-weight: 700;
-            /* EINE Farbe (v150o): dasselbe dunkle Grau wie die
-               tool-btn-Beschriftungen oben und unten — vorher lief
-               Text in #666/#555 und Zahlen in #333, der Hell-Dunkel-
-               Unterschied las sich wie ein anderer Schriftschnitt */
-            color: #666666;
-        }
         /* Im Editor kein 14-Zeilen-Raster mehr — die Zeilen liegen
            gestapelt, genau eine ist sichtbar (v150k) */
         .sliders-container {
@@ -478,33 +458,10 @@ Kontakt: dd@danidubs.ch
             cursor: pointer;
         }
 
-        .radio-group {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 48px;
-        }
 
-        .radio-btn {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            border: none;
-            background-color: white;
-            cursor: pointer;
-        }
 
-        .radio-btn.active-green {
-            background-color: #4CAF50;
-        }
 
-        .radio-btn.active-orange {
-            background-color: #FFB74D;
-        }
 
-        .radio-btn.active-blue {
-            background-color: #2196F3;
-        }
 
         .value-display {
             font-size: 11px;
@@ -536,10 +493,6 @@ Kontakt: dd@danidubs.ch
             padding: 0 20px;
         }
 
-        .toggle-display {
-            font-size: 11px;
-            color: #666666;
-        }
         /* Normalization-Umschalter (ersetzt die Radios, v153d):
            klickbarer On/Off-Text mit dezentem Button-Look. */
 
@@ -1388,7 +1341,7 @@ html, body { overflow: hidden; }
     height: min(24px, calc(var(--u) * 0.4615));
 }
 
-.slider-label, .value-display, .toggle-display {
+.slider-label, .value-display {
     font-size: min(11px, calc(var(--u) * 0.2115));
 }
 .value-display {
@@ -1396,7 +1349,6 @@ html, body { overflow: hidden; }
     min-width: min(40px, calc(var(--u) * 0.769));
 }
 :root {
-    --radio-col: min(48px, calc(var(--u) * 0.923));
     --val-col:   min(50px, calc(var(--u) * 0.9615));
 }
 .radio-btn {
@@ -1411,7 +1363,7 @@ html, body { overflow: hidden; }
 .slider-container { height: min(2px, calc(var(--u) * 0.0385)); }
 .slider-row       { padding: 0 min(20px, calc(var(--u) * 0.3846)); }
 .slider-top-row {
-    grid-template-columns: 1fr var(--radio-col) var(--val-col);
+    grid-template-columns: 1fr var(--val-col);   /* seit v153d ohne Radio-Spalte */
     padding-bottom: min(4px, calc(var(--u) * 0.0769));
     gap: min(10px, calc(var(--u) * 0.1923));
 }
@@ -1540,23 +1492,14 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
         .g4m-param-label     { width: 40px; text-align: left; color: #666666; font-weight: bold; }
         .g4m-param-label-sm  { width: 30px; font-size: 11px; color: #666666; }
         .g4m-val-box         { width: 42px; text-align: right; font-size: 11px; color: #666666; background: #f5f5f5; border: 1px solid #d0d0d0; padding: 1px 4px; }
-        .g4m-mini-btn        { flex: 1; font-size: 10px; padding: 2px; margin: 0; background: #f5f5f5; color: #666666; border: 1px solid #ccc; cursor: pointer; }
 
         /* g4m-flexrow-ind(-mb), g4m-param-label-30, g4m-abs-left-center,
            g4m-viz-section(.g4m-first), g4m-val-box-sm und g4m-viz-box
            entfielen (v153.1): das alte kompakte F1-Boundary-Layout ist
            durch die F2-Struktur (g4m-arch-prow/-block/-viz) ersetzt. */
         .g4m-flex-center     { display: flex; align-items: center; justify-content: center; }
-        .g4m-param-name      { width: 30px; font-weight: bold; color: #666666; }
-        .g4m-color-dot       { width: 16px; height: 16px; border-radius: 50%; cursor: pointer; border: 1px solid #666; }
-        .g4m-seg-btn         { padding: 3px 12px; font-size: 11px; margin: 0; border: none; cursor: pointer; }
-        .g4m-seg-btn-sm      { padding: 2px 8px; font-size: 10px; margin: 0; border: none; cursor: pointer; }
-        .g4m-formula-line    { margin: 0; font-size: 24px; color: #666666; text-align: center; }
         .g4m-panel-watermark { flex: 1; display: flex; justify-content: center; align-items: center; font-size: 32px; color: rgba(0,0,0,0.25); }
-        .g4m-seg-group       { display: flex; border: 1px solid #aaa; border-radius: 3px; overflow: hidden; }
-        .g4m-preset-btn      { flex: 1; padding: 5px; font-size: 12px; margin: 0; border: 1px solid #aaa; cursor: pointer; font-style: italic; }
         .g4m-note-text       { flex: 1; font-size: 11px; color: #555; }
-        .g4m-flexrow-mb4     { display: flex; align-items: center; margin-bottom: 4px; }
 
         /* ════════════════════════════════════════════════════════════
            F2-PANEL-NEUGESTALTUNG (v153) — Look & Feel des Tool-Panels.
@@ -1847,13 +1790,6 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
            sollen nicht in die schmale Feldspalte gequetscht werden,
            sondern auf der Rail-Achse liegen — also unter dem Titel,
            linksbündig auf gleicher Höhe wie sonst die erste Rail. */
-        .g4m-arch-optseg {
-            position: absolute;
-            top: calc(var(--g4m-pad-top) + var(--g4m-title-h) + var(--g4m-rails-shift, 0px));
-            left: var(--g4m-pad-x);
-            justify-self: start !important;
-            height: var(--g4m-row-h);
-        }
         .g4m-arch-seg-spacer { height: var(--g4m-arch-field-h); }
         .g4m-arch-segbtn {
             box-sizing: border-box;
@@ -2007,21 +1943,10 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
         .g4m-arch-babygo:hover { background-color: #c62828; }
         .g4m-arch-babygo:active { transform: scale(0.96); }
         /* Farb-Zeile am unteren Feldrand verankert */
-        .g4m-arch-color-row {
-            position: absolute;
-            left: 0; right: 0; bottom: calc(var(--u) * 0.25);
-            display: flex; align-items: center; justify-content: center;
-        }
-        .g4m-arch-color-row > div { font-size: clamp(9px, calc(var(--u) * 0.269), 14px); }
         /* Optimizer On/Off im Parameter-Kopf — rechtsbündig, kleine Abstände.
            Höhe exakt = Feldhöhe (wie Fine/Coarse bzw. der Spacer der
            anderen Parameter), damit die Kopfzeile gleich hoch ist und die
            Rails auf identischer y-Position liegen. */
-        .g4m-arch-optseg {
-            gap: 5px;
-            height: var(--g4m-arch-field-h);
-            font-size: clamp(9px, calc(var(--u) * 0.269), 14px);
-        }
 
 </style>
 </head>
@@ -2913,8 +2838,8 @@ const toolsContainer  = document.querySelector('.canvas-tools-panel');
    [data-mode] grenzt zugleich die F1-Farb-Punkte (#color-random-
    on/off, eigene Handler in initCurveColorControls) sauber aus dem
    generischen Radio-Handler aus — vorher liefen dort ZWEI Handler. */
-function g4mRadioGroups()  { return document.querySelectorAll('.radio-group'); }
-function g4mRadioButtons() { return document.querySelectorAll('.radio-btn[data-mode]'); }
+/* g4mRadioGroups/g4mRadioButtons entfielen (v154.3) — die Radio-
+   Punkte sind seit v153d Geschichte, es gab keine Aufrufer mehr. */
 
 /* ── Zentrale Zustandsverwaltung ──────────────────────────────────
    Der Zustand liegt PRIVAT im Store. g4mState ist eine reine Lese-
@@ -4272,24 +4197,8 @@ let needsRegen = false;
 let g4mHintTimer = null;
 
 
-// Farbklasse, die zur Spalte der Slider-Zeile gehört
-function getRowColorClass(sliderRow) {
-    if (sliderRow && sliderRow.classList.contains('slider-orange')) return 'active-orange';
-    if (sliderRow && sliderRow.classList.contains('slider-blue'))   return 'active-blue';
-    return 'active-green';
-}
-
-// Alle aktiven Farbklassen eines Radio-Buttons entfernen
-function clearActiveColor(btn) {
-    btn.classList.remove('active-green', 'active-orange', 'active-blue');
-    btn.setAttribute('aria-checked', 'false');
-}
-
-// Aktive Farbklasse setzen und Screenreader-Zustand nachführen
-function markActiveColor(btn, colorClass) {
-    btn.classList.add(colorClass);
-    btn.setAttribute('aria-checked', 'true');
-}
+/* getRowColorClass/clearActiveColor/markActiveColor entfielen
+   (v154.3) — Helfer der entfernten Radio-Punkte ohne Aufrufer. */
 
 /* Zustand + Optik der Normalisierung in EINER Funktion — einziger
    Schreibpfad für den Normalization-Zustand (Toggle-Klick; früher
@@ -4656,7 +4565,7 @@ function hexToRgba(hex, alpha) {
 function renderByDisplayMode(ctx, points, color, params, closedLines) {
     switch (g4mState.currentDisplayMode) {
         case 'filled': drawFilled(ctx, points, color, params.lineWidth); break;
-        case 'curves': drawCurves(ctx, points, color, params.lineWidth); break;
+        case 'curves': drawCurves(ctx, points, color, params.lineWidth, closedLines); break;
         case 'lines':
             if (closedLines) drawLines(ctx, points, color, params.lineWidth);
             else             drawOpenLines(ctx, points, color, params.lineWidth);
@@ -4758,9 +4667,23 @@ function drawFilled(ctx, points, color, lineWidth) {
     ctx.fill();
 }
 
-function drawCurves(ctx, points, color, lineWidth) {
+/* Weiche Kurve durch die Punkte (quadratische Segmente über die
+   Mittelpunkte). Die geglättete Kurve läuft konstruktionsbedingt auf
+   der MITTELPUNKT-Spur (bei groben Winkelschritten leicht innerhalb
+   der Rohpunkte — gleichmässig, daher parallel). closed steuert den
+   Abschluss (v154.2):
+   · true  (Superformula): Rückschluss über den ersten Punkt — die
+     Kontur ist geschlossen.
+   · false (Spiralen): die Kurve endet WEICH AUF DER SPUR am letzten
+     Mittelpunkt. Frühere Fassungen sprangen zum Abschluss auf den
+     ROHEN Endpunkt (voller Radius) hinaus — dieser Ausschwenker
+     verliess die Parallelspur und überlappte sichtbar die Nachbar-
+     windung (User-Befund 25.07.). Ein halber Winkelschritt Auslauf
+     entfällt dafür — konsistent zur Glättung der ganzen Kurve. */
+function drawCurves(ctx, points, color, lineWidth, closed) {
     if (points.length < 3) {
-        drawLines(ctx, points, color, lineWidth);
+        if (closed) drawLines(ctx, points, color, lineWidth);
+        else        drawOpenLines(ctx, points, color, lineWidth);
         return;
     }
     
@@ -4768,7 +4691,13 @@ function drawCurves(ctx, points, color, lineWidth) {
     ctx.strokeStyle = color;
     ctx.lineWidth = lineWidth;
     
-    ctx.moveTo(points[0].x, points[0].y);
+    if (closed) {
+        ctx.moveTo(points[0].x, points[0].y);
+    } else {
+        // offen: auch der START liegt auf der Mittelpunkt-Spur —
+        // der rohe Anfangspunkt läge (wie der Endpunkt) daneben.
+        ctx.moveTo((points[0].x + points[1].x) / 2, (points[0].y + points[1].y) / 2);
+    }
     
     for (let i = 1; i < points.length - 1; i++) {
         const xc = (points[i].x + points[i+1].x) / 2;
@@ -4776,12 +4705,15 @@ function drawCurves(ctx, points, color, lineWidth) {
         ctx.quadraticCurveTo(points[i].x, points[i].y, xc, yc);
     }
     
-    const lastPoint = points[points.length - 1];
-    const firstPoint = points[0];
-    const xc = (lastPoint.x + firstPoint.x) / 2;
-    const yc = (lastPoint.y + firstPoint.y) / 2;
-    ctx.quadraticCurveTo(lastPoint.x, lastPoint.y, xc, yc);
-    ctx.quadraticCurveTo(xc, yc, firstPoint.x, firstPoint.y);
+    if (closed) {
+        const lastPoint  = points[points.length - 1];
+        const firstPoint = points[0];
+        const xc = (lastPoint.x + firstPoint.x) / 2;
+        const yc = (lastPoint.y + firstPoint.y) / 2;
+        ctx.quadraticCurveTo(lastPoint.x, lastPoint.y, xc, yc);
+        ctx.quadraticCurveTo(xc, yc, firstPoint.x, firstPoint.y);
+    }
+    // offen: Ende am letzten Mittelpunkt — kein Sprung auf den Rohpunkt
     
     ctx.stroke();
 }
@@ -5158,10 +5090,21 @@ function drawArchimedeanSpiral(ctx, centerX, centerY, params) {
 
     renderByDisplayMode(ctx, cartesianPoints, colorWithTransparency, params, false);
 
-    // Verbindungslinie Start → End
+    // Verbindungslinie Start → End («Close Curve», v154.2): sie muss
+    // exakt dort andocken, wo die SICHTBARE Kurve beginnt und endet.
+    // Im Curves-Modus läuft die geglättete Kurve auf der Mittelpunkt-
+    // Spur — Anfang/Ende liegen auf den äusseren Mittelpunkten, nicht
+    // auf den Rohpunkten (die Linie endete sonst sichtbar daneben).
     if (g4mState.archConnectingLines && cartesianPoints.length > 1) {
-        const sp = cartesianPoints[0];
-        const ep = cartesianPoints[cartesianPoints.length - 1];
+        const nPts = cartesianPoints.length;
+        let sp = cartesianPoints[0];
+        let ep = cartesianPoints[nPts - 1];
+        if (g4mState.currentDisplayMode === 'curves' && nPts >= 3) {
+            sp = { x: (cartesianPoints[0].x + cartesianPoints[1].x) / 2,
+                   y: (cartesianPoints[0].y + cartesianPoints[1].y) / 2 };
+            ep = { x: (cartesianPoints[nPts-2].x + cartesianPoints[nPts-1].x) / 2,
+                   y: (cartesianPoints[nPts-2].y + cartesianPoints[nPts-1].y) / 2 };
+        }
         ctx.beginPath();
         ctx.strokeStyle = colorWithTransparency;
         ctx.lineWidth   = params.lineWidth;
@@ -5413,6 +5356,8 @@ function applyGoodDefaults() {
 
 // Start-Zustand der Random/Fixed-Steuerung (Radios entfernt v153d):
 // alle Slider im Fixed-Modus; Normalization-Default kommt aus dem Store.
+/* Startzustand aller Random-Modi: Fixed. (Name historisch — die
+   Radio-Buttons selbst entfielen v153d, der Startzustand blieb.) */
 function initializeRadioButtonColors() {
     g4mRandomCapableRows().forEach(function (r) {
         g4mSetRandomMode(r.id, false);   // Start: Fixed
@@ -7129,7 +7074,14 @@ function setRangeFill(input) {
 function updateRangeFills() {
     document.querySelectorAll('input[type="range"]').forEach(input => {
         setRangeFill(input);
-        input.addEventListener('input', function() { setRangeFill(this); });
+        /* idempotent (v154.3): die Funktion läuft bei Init UND nach
+           Sitzungs-Restore — ohne Guard sammelte jeder Lauf einen
+           weiteren identischen Listener an (funktional harmlos,
+           aber unnötige Doppelarbeit pro Reglerbewegung). */
+        if (!input._g4mFillBound) {
+            input._g4mFillBound = true;
+            input.addEventListener('input', function() { setRangeFill(this); });
+        }
     });
 }
 
