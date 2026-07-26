@@ -1003,6 +1003,33 @@ Kontakt: dd@danidubs.ch
   letter-spacing: 0.05em;
 }
 
+/* Release-Anzeige der Begrüssungsseite (v154.4): dezent in der
+   Bildschirmecke — QUER unten rechts. Der Text kommt aus G4M_RELEASE
+   (EINE Quelle); Abstand und Schriftgrad skalieren mit --u, damit die
+   Angabe auf jedem Gerät gleich proportioniert sitzt. */
+.g4m-home-release {
+  position: absolute;
+  bottom: calc(var(--u) * 0.3);
+  right:  calc(var(--u) * 0.3);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: min(13px, calc(var(--u) * 0.24));
+  color: rgba(255, 255, 255, 0.7);   /* auf dem Home-Grau lesbar, ohne zu dominieren */
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  pointer-events: none;              /* Klicks gehören der Abdeckung */
+}
+
+/* HOCH: die Canvas-Abdeckung deckt die obere Bildschirmhälfte —
+   der Stempel wandert entsprechend in die Ecke oben links. */
+@media (orientation: portrait) {
+  .g4m-home-release {
+    bottom: auto;
+    right:  auto;
+    top:  calc(var(--u) * 0.3);
+    left: calc(var(--u) * 0.3);
+  }
+}
+
 #g4m-home-left img {
   max-width: 95%;
   max-height: 95%;
@@ -2749,6 +2776,13 @@ Max. 100%</span>
          Canvas-Seite — im Hochformat damit OBEN. Platzhaltertext,
          bis der User das PNG liefert. -->
     <div class="g4m-home-left-text">g4m</div>
+    <!-- Release-Anzeige (v154.4): Version · Datum, gesetzt aus
+         G4M_RELEASE (§2). Sitzt in der Canvas-Abdeckung, weil die
+         im Querformat die rechte und im Hochformat die obere
+         Bildschirmhälfte deckt — damit landet der Stempel quer
+         unten rechts und hoch oben links, jeweils in der
+         Bildschirmecke. -->
+    <div class="g4m-home-release" id="g4m-home-release"></div>
 </div>
 </div>
 
@@ -3365,9 +3399,25 @@ const sliderData = {
    v153.0: Neue Nummerierung ab hier. Stempel war seit v151s nicht
    mehr nachgeführt worden (Datei intern bis v153d gepatcht) —
    ab jetzt wieder synchron mit dem Dateinamen halten. */
-const G4M_BUILD = 'v153.0';
+/* v154.4: Stempel um das DATUM erweitert und zur EINEN Release-Quelle
+   gemacht — Version und Datum stehen ab jetzt ausschliesslich hier.
+   Sie speisen den Tab-Titel, die Konsole UND die Anzeige auf der
+   Begrüssungsseite (quer unten rechts, hoch oben links). Das Datum
+   ist im Alltag das eigentliche Diagnose-Mittel: die Versionsnummer
+   allein verrät nicht, ob der Browser eine gecachte Altversion
+   spielt. Bei jeder Abgabe NUR diese eine Zeile nachführen. */
+const G4M_RELEASE = Object.freeze({ version: 'v154.4', date: '25.07.2026' });
+const G4M_BUILD = G4M_RELEASE.version;   // Kurzform für Titel und Konsole
 document.title = document.title + ' · ' + G4M_BUILD;
-console.log('g4m build', G4M_BUILD);
+console.log('g4m build', G4M_BUILD, '·', G4M_RELEASE.date);
+
+/* Release-Anzeige der Begrüssungsseite aus derselben Quelle setzen.
+   Das Markup liegt vor diesem Skript, der Zugriff ist also sicher;
+   der Guard schützt trotzdem gegen künftige Umbauten. */
+(function g4mStampHomeRelease() {
+    const el = document.getElementById('g4m-home-release');
+    if (el) el.textContent = G4M_RELEASE.version + ' · ' + G4M_RELEASE.date;
+})();
 
 const G4M_ANIM = {
     PANEL_MS: 1200,     // Formel-Tafeln/Home: transform-Fahrt (v150i)
