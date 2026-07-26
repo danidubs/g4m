@@ -933,6 +933,12 @@ Kontakt: dd@danidubs.ch
             background-color: var(--g4m-mode-color-superformula) !important;
             border-color: var(--g4m-sf-line) !important;
         }
+        /* Leere Sin/Cos/Tan-Felder (v154.6) auf F1 ebenfalls in den
+           GRÜNEN Ableitungen — analog zur Regel darüber. */
+        #superformel-panel .g4m-botmod-typ-hidden {
+            background-color: var(--g4m-mode-color-superformula) !important;
+            border-color: var(--g4m-sf-line) !important;
+        }
 
 /* body.mode-* #fN-btn { … !important } entfiel (Befund 28): Die in
    Befund 25 dokumentierte Doppel-Semantik ist aufgelöst — Button-
@@ -981,7 +987,7 @@ Kontakt: dd@danidubs.ch
   overflow: hidden;          /* Abdeckung verschwindet an der Rahmenkante (v150t) */
   pointer-events: none;
 }
-#home-panel, #g4m-home-left {
+#home-panel, #g4m-home-left, #g4m-tools-cover {
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
   pointer-events: auto;
@@ -995,6 +1001,56 @@ Kontakt: dd@danidubs.ch
   border: none !important;
   outline: none !important;
 }
+/* Weisse Tools-Abdeckung (v155.0): exakt das Weiss der leeren Canvas
+   (#FFFFFF = Vorgabe von canvasBackgroundColor), damit der Übergang
+   nach dem ersten Go wie EINE Fläche wirkt. */
+#g4m-tools-cover { background-color: #FFFFFF; }
+
+/* ── Zwei Stufen der Abdeckung (v155.1) ───────────────────────────
+   'plain' — bis zum ersten Bild: reine weisse Fläche, kein Ausweg
+             ausser den F-Knöpfen darüber.
+   'grid'  — ab dem ersten Bild: dieselbe Fläche zeigt das Raster der
+             darunterliegenden Buttons als feine hellgraue Linien und
+             gibt an der Stelle des Defaults-Quadrats den «Tools»-
+             Button frei, der sie endgültig wegschiebt.
+   Das Raster liegt als eigenes Gitter über der Fläche und blendet
+   sanft ein; die Zellmasse spiegeln 1:1 das Tools-Panel (12 Spalten,
+   11 Zeilen unterhalb der F-Reihe). */
+.g4m-tc-grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: repeat(11, 1fr);
+  opacity: 0;
+  transition: opacity var(--g4m-anim-fs-fade, 0.6s) ease;
+  pointer-events: none;   /* nur der Tools-Button ist bedienbar */
+}
+#g4m-tools-cover[data-stage="grid"] .g4m-tc-grid { opacity: 1; }
+.g4m-tc-cell {
+  box-sizing: border-box;
+  border: 1px solid #ececec;   /* feine hellgraue Linie auf Weiss */
+}
+/* «Tools»-Button an der Stelle des Defaults-Quadrats (Raster-Zeile 3,
+   Spalten 11-12) — Optik der tool-btn, damit er sofort als Knopf
+   gelesen wird. Erst in der Stufe 'grid' bedienbar. */
+#g4m-tools-release {
+  box-sizing: border-box;
+  background-color: #e0e0e0;
+  border: 1px solid #bdbdbd;
+  color: #666666;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(11px, calc(var(--u) * 0.3), 18px);
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background-color 0.15s ease;
+}
+#g4m-tools-release:hover { background-color: #d0d0d0; }
+#g4m-tools-cover[data-stage="grid"] #g4m-tools-release { pointer-events: auto; }
 
 .g4m-home-left-text {
   color: #ffffff;
@@ -1408,6 +1464,7 @@ html, body { overflow: hidden; }
    450ms-Verstecken liess den Screen dahinter aufblitzen. Vollflächen
    dürfen sichtbar bleiben — nur ihre Transition pausiert. */
 body.g4m-no-anim #g4m-home-left,
+body.g4m-no-anim #g4m-tools-cover,
 body.g4m-no-anim .g4m-nav-cover-in,
 body.g4m-no-anim #home-panel {
     transition: none !important;
@@ -1575,6 +1632,20 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
         /* Kopf-/Fußreihe */
         .g4m-arch-top  { grid-row: 1; }
         .g4m-arch-bot  { grid-row: 12; }
+        /* Sin/Cos/Tan bei Modulation Off als LEERE Rasterfelder (v154.6):
+           Rahmen und Panel-Grundfarbe bleiben sichtbar, damit die Struktur
+           des Rasters erkennbar ist — nur Text und Aktiv-Farbe werden
+           ausgeblendet (gleiche Optik wie g4m-arch-mod-hidden).
+           pointer-events sperrt Klicks und Hover im leeren Zustand.
+           Gilt für F1 (sf-mod-*) und F2 (arch-mod-*) gleich; die grüne
+           F1-Ableitung folgt weiter unten per #superformel-panel-Regel. */
+        .g4m-botmod-typ-hidden {
+            color: transparent !important;
+            background-color: var(--g4m-mode-color-archimedean) !important;
+            border-color: var(--g4m-arch-line) !important;
+            pointer-events: none !important;
+            cursor: default;
+        }
         /* Unterste Modulations-Reihe: zentrierte Beschriftung, Aktiv-Optik */
         .g4m-arch-botmod,
         .g4m-arch-botopt,
@@ -2061,7 +2132,7 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
                  da das Tools-Panel in beiden Orientierungen identisch
                  ist, konsistent für Hoch- und Querformat.
                  Inhalt/Farbe setzt g4mApplyModeOptics (§1). -->
-            <button type="button" class="tool-btn bottom-btn" style="grid-column: 1 / 3;" id="g4m-mode-indicator" title="Select formula">Superformula</button>
+            <button type="button" class="tool-btn bottom-btn" style="grid-column: 1 / 3;" id="g4m-mode-indicator" title="Select formula">Select formula</button>
             <button type="button" class="tool-btn bottom-btn" style="grid-column: 3 / 5;" id="canvas-btn">Canvas</button>
             <button type="button" class="tool-btn bottom-btn" style="grid-column: 5 / 7;" id="drawing-btn">Drawing</button>
             <button type="button" class="tool-btn bottom-btn" style="grid-column: 7 / 9;">Filter</button>
@@ -2248,9 +2319,13 @@ Max. 1.5</span>
         </button>
         <div class="g4m-arch-fnsq g4m-arch-reserve6">
             <!-- obere Reihe: Sin/Cos/Tan, je 2u breit — Zellen wie F2 -->
-            <button type="button" id="sf-mod-sin" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-restop g4m-arch-botmod g4m-arch-botmod-active" style="grid-column: 1 / 3;" aria-label="Modulation sine">Sin</button>
-            <button type="button" id="sf-mod-cos" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-restop g4m-arch-botmod" style="grid-column: 3 / 5;" aria-label="Modulation cosine">Cos</button>
-            <button type="button" id="sf-mod-tan" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-restop g4m-arch-botmod" style="grid-column: 5 / 7;" aria-label="Modulation tangent">Tan</button>
+<!-- Sin/Cos/Tan starten AUSGEBLENDET (v154.5), weil die Modulation
+                 standardmässig Off ist — g4mSetModTypeVisible blendet sie
+                 bei On ein. Die Klasse hier verhindert ein Aufblitzen vor
+                 der JS-Initialisierung. -->
+            <button type="button" id="sf-mod-sin" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-restop g4m-arch-botmod g4m-arch-botmod-active g4m-botmod-typ-hidden" style="grid-column: 1 / 3;" aria-label="Modulation sine">Sin</button>
+            <button type="button" id="sf-mod-cos" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-restop g4m-arch-botmod g4m-botmod-typ-hidden" style="grid-column: 3 / 5;" aria-label="Modulation cosine">Cos</button>
+            <button type="button" id="sf-mod-tan" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-restop g4m-arch-botmod g4m-botmod-typ-hidden" style="grid-column: 5 / 7;" aria-label="Modulation tangent">Tan</button>
             <!-- untere Reihe: On/Off (Zellen 1-2, wie F2) -->
             <button type="button" id="sf-mod-on"  class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botmod" style="grid-column: 1 / 2;" aria-label="Modulation on">On</button>
             <button type="button" id="sf-mod-off" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botmod g4m-arch-botmod-active" style="grid-column: 2 / 3;" aria-label="Modulation off">Off</button>
@@ -2427,9 +2502,10 @@ Max. 100%</span>
              3 nebeneinander, 2 Reihen übereinander. -->
         <div class="g4m-arch-fnsq g4m-arch-reserve6">
             <!-- obere Reihe: Sin/Cos/Tan, je 2u breit -->
-            <button type="button" id="arch-mod-sin" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-restop g4m-arch-botmod g4m-arch-botmod-active" style="grid-column: 1 / 3;" aria-label="Modulation sine">Sin</button>
-            <button type="button" id="arch-mod-cos" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-restop g4m-arch-botmod" style="grid-column: 3 / 5;" aria-label="Modulation cosine">Cos</button>
-            <button type="button" id="arch-mod-tan" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-restop g4m-arch-botmod" style="grid-column: 5 / 7;" aria-label="Modulation tangent">Tan</button>
+<!-- Sin/Cos/Tan starten AUSGEBLENDET (v154.5) — analog F1. -->
+            <button type="button" id="arch-mod-sin" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-restop g4m-arch-botmod g4m-arch-botmod-active g4m-botmod-typ-hidden" style="grid-column: 1 / 3;" aria-label="Modulation sine">Sin</button>
+            <button type="button" id="arch-mod-cos" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-restop g4m-arch-botmod g4m-botmod-typ-hidden" style="grid-column: 3 / 5;" aria-label="Modulation cosine">Cos</button>
+            <button type="button" id="arch-mod-tan" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-restop g4m-arch-botmod g4m-botmod-typ-hidden" style="grid-column: 5 / 7;" aria-label="Modulation tangent">Tan</button>
             <!-- untere Reihe: 6 kleine 1u-Buttons: On, Off, Reserve×3, Go -->
             <button type="button" id="arch-mod-on"  class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botmod" style="grid-column: 1 / 2;" aria-label="Modulation on">On</button>
             <button type="button" id="arch-mod-off" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botmod g4m-arch-botmod-active" style="grid-column: 2 / 3;" aria-label="Modulation off">Off</button>
@@ -2796,6 +2872,22 @@ Max. 100%</span>
 </div>
 </div>
 
+<!-- Weisse Tools-Abdeckung (v155.0) — ZWEITE Stufe der Benutzer-
+     führung, unabhängig von der Home-Seite. Sie liegt unter der
+     grauen Home-Abdeckung und deckt die Tools UNTERHALB der F1-F10-
+     Reihe ab. Nach dem ersten Go (Home-Seite fährt weg) bleibt sie
+     als einzige stehen: sichtbar sind dann Canvas, Navigation und die
+     F-Reihe. Freigegeben wird sie per D-Pad-Pfeil oder erneutem Go;
+     ihr Rahmen clippt die Fahrt, sie verschwindet also unter dem
+     Navigation-Tool. -->
+<div class="g4m-home-frame" id="g4m-tools-cover-frame">
+<div id="g4m-tools-cover" data-open="0" data-stage="plain" style="visibility: hidden;">
+    <!-- Raster + «Tools»-Button erzeugt buildToolsCoverGrid (§2) aus
+         DERSELBEN Rasterbeschreibung wie das Tools-Panel darunter. -->
+    <div class="g4m-tc-grid" id="g4m-tc-grid"></div>
+</div>
+</div>
+
 <!-- Vollbild-Symbol des Home-Screens (v150y): NUR das weisse Symbol,
      transparent, ohne Button-Körper — liegt ÜBER den Vorhängen (z 75)
      exakt an der Position der orientierungs-aktiven Button-Instanz
@@ -2991,13 +3083,27 @@ const G4M_PERSIST = (function () {
 
 const g4mStore = (function () {
     const state = {
-        activeDrawingMode: 'superformula',
+        /* Start NEUTRAL (v154.7): keine Formel vorgewählt — der User
+           entscheidet mit dem ersten Klick auf F1/F2/… selbst, welche
+           Kurvenart er benutzt. Vorher war 'superformula' Default, was
+           beim Start verwirrte (F1 leuchtete, ohne dass jemand es
+           gewählt hatte). null = "noch keine Wahl getroffen". */
+        activeDrawingMode: null,
 
         // Render-Zustand
         currentDisplayMode: 'filled',
         canvasBackgroundColor: '#FFFFFF',
         normalizationEnabled: false,
         homeCoversOn: true,            // Start: Home-Abdeckungen zu (v150s)
+        /* Zweite Stufe (v155.0): die weisse Tools-Abdeckung. Sie liegt
+           beim Start unter der Home-Seite und bleibt nach dem ersten Go
+           allein stehen — freigegeben per D-Pad-Pfeil oder erneutem Go.
+           Der Home-Button stellt beide Stufen wieder her. */
+        toolsCoverOn: true,
+        /* Einmal über den «Tools»-Button freigegeben, bleibt die
+           Abdeckung fort (v155.1) — auch der Home-Button holt sie
+           nicht zurück. */
+        toolsCoverDone: false,
 
         // Archimedean-Parameter
         archConnectingLines: false,
@@ -3183,6 +3289,12 @@ const G4M_PANELS = {
     'arch-formula-panel':   { openAttr: 'data-open',           side: 'tools',  zoomed: true  },
     'home-panel':           { openAttr: 'data-open',           side: 'canvas', zoomed: false },
     'g4m-home-left':        { openAttr: 'data-open',           side: 'tools',  zoomed: false },
+    /* Zweite Stufe der Benutzerführung (v155.0): die weisse Tools-
+       Abdeckung liegt UNTER der grauen Home-Abdeckung und bleibt nach
+       dem ersten Go stehen. Seite 'tools' — sie zieht sich damit auf
+       derselben Achse wie die Home-Abdeckung zum Navigation-Tool hin
+       zurück. */
+    'g4m-tools-cover':      { openAttr: 'data-open',           side: 'tools',  zoomed: false },
     'gielis-formula-panel': { openAttr: 'data-open',           side: 'tools',  zoomed: false }
 };
 
@@ -3332,11 +3444,19 @@ function g4mApplyModeOptics(mode) {
        v150b, Platz des frueheren Formula-Buttons): zeigt
        dauerhaft FN, Formelnamen und Farbe der aktiven Kurvenart —
        die Farbe kommt per var() aus derselben CSS-Quelle wie die
-       Aktiv-Buttons (User-Spezifikation v150). */
+       Aktiv-Buttons (User-Spezifikation v150). Im NEUTRALEN Start-
+       zustand (mode = null, v154.7) leuchtet kein F-Button und der
+       Indikator zeigt in Button-Grundoptik die Aufforderung, eine
+       Formel zu wählen. */
     const ind = document.getElementById('g4m-mode-indicator');
     if (ind) {
-        ind.style.backgroundColor = 'var(--g4m-mode-color-' + mode + ')';
-        ind.textContent = G4M_MODE_NAMES[mode] || '';   // nur der Name (v150c)
+        if (mode) {
+            ind.style.backgroundColor = 'var(--g4m-mode-color-' + mode + ')';
+            ind.textContent = G4M_MODE_NAMES[mode] || '';   // nur der Name (v150c)
+        } else {
+            ind.style.backgroundColor = '';           // Button-Grundfarbe aus dem Stylesheet
+            ind.textContent = 'Select formula';
+        }
     }
 }
 function g4mSetDrawingMode(mode) {
@@ -3406,7 +3526,55 @@ const sliderData = {
    ist im Alltag das eigentliche Diagnose-Mittel: die Versionsnummer
    allein verrät nicht, ob der Browser eine gecachte Altversion
    spielt. Bei jeder Abgabe NUR diese eine Zeile nachführen. */
-const G4M_RELEASE = Object.freeze({ version: 'v154.4', date: '25.07.2026' });
+/* v154.5: Sin/Cos/Tan in F1 UND F2 nur noch bei Modulation On sichtbar
+   (visibility-hidden hält die Grid-Plätze frei, nichts verrutscht) —
+   bei Off verschwinden die Typ-Buttons, um Verwirrung zu vermeiden. */
+/* v154.6: Bei Off zeigen die drei Felder jetzt LEERE Rasterzellen
+   (Rahmen + Panel-Grundfarbe wie g4m-arch-mod-hidden) statt komplett
+   zu verschwinden — die Rasterstruktur bleibt so erkennbar. */
+/* v154.7: NEUTRALER Start — keine Formel vorgewählt (F1 leuchtet
+   nicht mehr von selbst). Der Modus-Indikator zeigt "Select formula";
+   Go ohne Formelwahl schüttelt Go + Indikator statt zu generieren.
+   Der User wählt mit F1/F2/… selbst seine erste Kurvenart. */
+/* v154.8: Start-Text der Canvas folgt dem neutralen Start — vor der
+   Formelwahl "Please click F1, F2, F3,... to select a formula!",
+   danach der bisherige Go-Hinweis. Wechsel erfolgt live beim ersten
+   F-Klick (Bus-Ereignis 'mode'), solange noch kein Bild existiert. */
+/* v155.0: ZWEITE Stufe der Benutzerführung. Die Home-Seite bleibt
+   unverändert; der erste Go fährt sie weg wie bisher. Zurück bleiben
+   die leere weisse Canvas mit dem Hinweistext, das Navigation-Tool
+   und die Reihe F1-F10 — die übrigen Tools deckt ein weisses Panel im
+   Canvas-Weiss ab, bis der D-Pad-Pfeil oder ein erneutes Go sie
+   freigibt; es zieht sich dabei unter Navigation und Canvas zurück.
+   Der Home-Button stellt beide Stufen wieder her. */
+/* v155.1: Abfolge geschärft. Die Abdeckung hat KEINEN D-Pad-Pfeil und
+   wird auch von Go nicht mehr weggeschoben — Go erzeugt wieder Bilder.
+   Stufe 1 (bis zum ersten Bild): reine weisse Fläche, der Weg führt
+   über die F-Knöpfe. Stufe 2 (ab dem ersten Bild): dieselbe Fläche
+   zeigt das Raster der Buttons darunter als feine hellgraue Linien und
+   gibt auf dem Defaults-Platz den «Tools»-Button frei; er schiebt sie
+   Richtung Navigation-Tool ENDGÜLTIG weg. Eigene z-Ebene
+   (TOOLS_COVER) hält Formel-Panels der Tools-Seite sichtbar. */
+/* v155.2: Fehlerbehebung — der Hinweistext verschwand ab dem zweiten
+   Seitenaufruf. updateCanvasBackground() füllte nur die Hintergrund-
+   farbe und zeichnete allein ein BESTEHENDES Bild nach; auf der leeren
+   Canvas blieb eine weisse Fläche. Beim Start läuft die Funktion nur,
+   wenn eine gespeicherte Sitzung vorliegt — daher erst ab dem zweiten
+   Aufruf sichtbar. Jetzt gilt überall: leere Canvas trägt den Hinweis. */
+/* v155.3: Die kleine Zusatzzeile «Based on the Superformula by Prof.
+   Johan Gielis (2000)» unter dem Start-Hinweis entfiel — die Canvas
+   trägt nur noch die Handlungsaufforderung. */
+/* v155.4: Fahrtrichtung der weissen Tools-Abdeckung korrigiert — sie
+   fährt ZUM Navigation-Tool hin (quer nach rechts, hoch nach oben) und
+   verschwindet unter Navigation und Canvas. Damit folgt sie derselben
+   Regel wie alle Panels der App: geöffnet wird immer Richtung Nav. */
+/* v155.5: Beschriftung des Freigabe-Buttons auf «more Tools». */
+/* v155.6: F3-F10 erzeugen kein Bild mehr. Der Generierungs-Dispatch
+   fiel für unbekannte Modi stillschweigend auf 'superformula' zurück —
+   bei gewähltem F5 erschien eine Superformel. Jetzt zeichnet nur, wer
+   einen eigenen Eintrag in G4M_RENDERERS hat; sonst kurzer Hinweis
+   statt Bild. Neue Formeln brauchen allein den Registry-Eintrag. */
+const G4M_RELEASE = Object.freeze({ version: 'v155.6', date: '26.07.2026' });
 const G4M_BUILD = G4M_RELEASE.version;   // Kurzform für Titel und Konsole
 document.title = document.title + ' · ' + G4M_BUILD;
 console.log('g4m build', G4M_BUILD, '·', G4M_RELEASE.date);
@@ -3490,6 +3658,9 @@ const G4M_Z = Object.freeze({
     RESTING: 10,          // Haupt-Panels im Ruhezustand
     RAISED: 15,           // Haupt-Panel nach abgeschlossener Heimfahrt
     FORMULA_RESTING: 20,  // Formel-Panels (Gielis/Arch) im Ruhezustand
+    TOOLS_COVER: 45,      // weisse Tools-Abdeckung — über dem Tools-Panel (40),
+                          // aber UNTER den Formel-Panels (50): die auf der
+                          // Tools-Seite wohnenden Panels bleiben sichtbar (v155.1)
     SLIDING: 30,          // fahrendes/aktives Panel — über den ruhenden
     OPTIONS: 35,          // Options-Panel über dem aktiven Panel
     FORMULA_SHOWN: 50,    // geöffnetes Formel-Panel
@@ -3629,13 +3800,24 @@ const goodDefaults = G4M_DEFAULTS.good;
    UI-Sprache: Englisch (vorher Sprachmix aus deutschen Alerts/
    Ladeanzeigen und englischen Buttons). Später leicht i18n-fähig. */
 const G4M_TEXT = Object.freeze({
-    startHint:       'Please click «Go» to generate an Image',
-    attribution:     'Based on the Superformula by Prof. Johan Gielis (2000)',
+    /* Zwei Start-Hinweise (v154.8), passend zum neutralen Start aus
+       v154.7: SOLANGE keine Formel gewählt ist, fordert die Canvas zur
+       Formelwahl auf; danach zum Go. showStartText wählt anhand von
+       activeDrawingMode. */
+    selectFormulaHint: 'Please click F1, F2, F3,... to select a formula!',
+    startHint:       'Click Go to create image',
+    /* attribution entfiel (v155.3): der Zusatz stand als kleine zweite
+       Zeile unter dem Start-Hinweis auf der Canvas und wurde nicht mehr
+       gewünscht — ohne Verwender ist auch der Text weg. */
     /* Befund 27: modusabhängig statt statisch 'Generating super-
        formulas...' — das Label liefert die Renderer-Registry (§3),
        neue Modi (F3–F6) bringen ihren Text als Registry-Feld mit. */
     generatingCurves: function (label) { return 'Generating ' + label + '...'; },
     clickGoForNew:   'Click «Go» to generate a new image',
+    /* Hinweis für noch leere Formel-Plätze (v155.6): F3-F10 tragen bis
+       heute keinen Renderer — Go darf dort NICHTS zeichnen, sonst käme
+       eine Superformel unter falschem Namen heraus. */
+    modeComingSoon:  function (fn) { return fn + ' has no formula yet \u2014 coming soon'; },
     generateFirst:   'Please click «Go» first to generate an image.',
     downloadingDpi:  function (dpi) { return 'Downloading g4m at ' + dpi + ' dpi...'; },
     generatingDpi:   function (dpi) { return 'Generating ' + dpi + ' dpi image...'; },
@@ -3802,6 +3984,61 @@ function g4mSelectParam(id) {
     // (bei Parametern ohne Random bleibt der graue Reserve-Look).
     if (typeof g4mShowRandomToggleFor === 'function') g4mShowRandomToggleFor(id);
 }
+/* ── Raster der weissen Tools-Abdeckung (v155.1) ──────────────────
+   Zeichnet als feine hellgraue Linien nach, was UNTER der Abdeckung
+   liegt — abgeleitet aus derselben Rasterbeschreibung wie das Tools-
+   Panel (12u x 12u), jedoch ohne die F-Reihe (u1), die die Abdeckung
+   nicht deckt. Es bleiben 11 Zeilen:
+     u2-u7   Parameter-Raster: 6 x 3 Quadrate à 2u x 2u
+     u8      untere Button-Zeile: 6 Felder à 2u
+     u9      Reserve-Zeile:      6 Felder à 2u
+     u10-u12 Editor-Feld:        eine Fläche 12u x 3u
+   Das Quadrat unten rechts im Parameter-Raster (Platz des Defaults-
+   Buttons) trägt statt einer Linie den «Tools»-Button. */
+function buildToolsCoverGrid() {
+    const grid = document.getElementById('g4m-tc-grid');
+    if (!grid || grid.childElementCount) return;   // idempotent
+
+    function cell(colStart, colSpan, rowStart, rowSpan) {
+        const d = document.createElement('div');
+        d.className = 'g4m-tc-cell';
+        d.style.gridColumn = colStart + ' / span ' + colSpan;
+        d.style.gridRow    = rowStart + ' / span ' + rowSpan;
+        grid.appendChild(d);
+        return d;
+    }
+
+    // Parameter-Raster: 3 Reihen à 6 Quadrate, je 2u x 2u
+    for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 6; c++) {
+            const isDefaultsSlot = (r === 2 && c === 5);   // unten rechts
+            if (isDefaultsSlot) continue;                  // bekommt den Button
+            cell(c * 2 + 1, 2, r * 2 + 1, 2);
+        }
+    }
+    // Untere Button-Zeile (u8) und Reserve-Zeile (u9): je 6 Felder à 2u
+    [7, 8].forEach(function (row) {
+        for (let c = 0; c < 6; c++) cell(c * 2 + 1, 2, row, 1);
+    });
+    // Editor-Feld (u10-u12) als eine Fläche
+    cell(1, 12, 9, 3);
+
+    /* «Tools»-Button auf dem Defaults-Platz — er gibt die Abdeckung
+       ENDGÜLTIG frei (siehe g4mHideToolsCover). */
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.id = 'g4m-tools-release';
+    btn.textContent = 'more Tools';
+    btn.setAttribute('aria-label', 'Show more tools');
+    btn.style.gridColumn = '11 / span 2';
+    btn.style.gridRow    = '5 / span 2';
+    btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        g4mHideToolsCover();
+    });
+    grid.appendChild(btn);
+}
+
 function buildParamGrid() {
     const grid = document.getElementById('g4m-param-grid');
     if (!grid) return;
@@ -4984,10 +5221,50 @@ function g4mApplyArchLive() {
 function g4mApplyOptimizerLive() { g4mApplyArchLive(); }
 
 // Main functions — beide Generatoren dispatchen auf die Pipeline
+/* Neutraler Startzustand (v154.7): solange keine Formel gewählt ist
+   (activeDrawingMode = null), erzeugt Go KEIN Bild — stattdessen
+   schütteln sich Go und der Modus-Indikator ("Select formula") kurz,
+   dieselbe Optik wie der Gielis-Lock. Sobald der User F1/F2/…
+   geklickt hat, arbeitet Go unverändert. */
+function g4mSignalModeNeeded(hintText) {
+    ['generate-btn', 'g4m-mode-indicator'].forEach(function (id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.style.animation = 'shake ' + (G4M_ANIM.SHAKE_MS / 1000) + 's ease-in-out';
+        setTimeout(function () { el.style.animation = ''; }, G4M_ANIM.SHAKE_MS);
+    });
+    /* Optionaler Kurzhinweis über der Canvas — gleicher Weg und
+       gleiche Standzeit wie der «Click Go»-Hinweis (v155.6). */
+    if (hintText && loadingIndicator) {
+        loadingIndicator.textContent = hintText;
+        loadingIndicator.style.display = 'block';
+        clearTimeout(g4mHintTimer);
+        g4mHintTimer = setTimeout(function () {
+            g4mHintTimer = null;
+            loadingIndicator.style.display = 'none';
+        }, G4M_ANIM.HINT_MS);
+    }
+}
 function generateSuperformulas(opts) {
+    const mode = g4mState.activeDrawingMode;
+    if (!mode) { g4mSignalModeNeeded(); return; }
+    /* Nur Modi mit EIGENEM Renderer zeichnen (v155.6). Die Modus-Id ist
+       zugleich die Renderer-Id — F3-F10 haben (noch) keinen Eintrag in
+       G4M_RENDERERS und erzeugen darum KEIN Bild. Vorher fiel jeder
+       unbekannte Modus stillschweigend auf 'superformula' zurück: F5
+       war gewählt, gezeichnet wurde eine Superformel. Wer später eine
+       Formel nachrüstet, trägt sie in die Registry ein — hier ist
+       nichts anzupassen (EINE Quelle). */
+    if (!G4M_RENDERERS[mode]) {
+        const fn = (G4M_MODE_BUTTONS[mode] || '').replace('-btn', '').toUpperCase();
+        g4mSignalModeNeeded(G4M_TEXT.modeComingSoon(fn || 'This formula'));
+        return;
+    }
+    /* Erstes Bild = Stufe 2 der Abdeckung (v155.1): sie zeigt ab jetzt
+       das Raster der Buttons darunter und den «Tools»-Button. */
+    g4mToolsCoverShowGrid();
     needsRegen = false;
-    runGeneration(g4mState.activeDrawingMode === 'archimedean'
-        ? 'archimedean' : 'superformula', opts);
+    runGeneration(mode, opts);
 }
 
 // ── ARCHIMEDEAN SPIRAL GENERATOR ────────────────────────────────
@@ -5310,11 +5587,21 @@ function setDrawingButtonLabel(btn, label) {
 }
 
 function updateCanvasBackground() {
+    /* Leere Canvas = Hinweistext (v155.2). Vorher füllte diese Funktion
+       nur die Hintergrundfarbe und zeichnete ausschliesslich ein
+       BESTEHENDES Bild nach — auf der noch leeren Canvas übermalte sie
+       damit den Start-Text und liess eine weisse Fläche zurück.
+       Sichtbar wurde das ab dem ZWEITEN Seitenaufruf: erst wenn eine
+       gespeicherte Sitzung vorliegt, läuft g4mSyncDomFromStore() und
+       ruft diese Funktion beim Start auf. Derselbe Fehler traf den
+       Canvas-Farbwähler, solange noch kein Bild erzeugt war.
+       showStartText() malt Hintergrund UND Text in einem Zug — die
+       Regel „leere Canvas trägt den Hinweis" gilt damit an jeder
+       Stelle, die den Hintergrund neu setzt. */
+    if (storedCurveParameters.length === 0) { showStartText(); return; }
     ctx.fillStyle = g4mState.canvasBackgroundColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    if (storedCurveParameters.length > 0) {
-        redrawStoredImage();
-    }
+    redrawStoredImage();
 }
 
 /* HINWEIS ZUM SPLIT: resetToDefaults/applyGoodDefaults sind reine
@@ -5948,6 +6235,7 @@ g4mListen(window, 'resize', () => {
         updateUiScale();
         positionHomePanel();
         positionHomeLeft();
+        positionToolsCover();      // weisse Tools-Abdeckung (v155.0)
         g4mPositionNavCovers();
         if (isGielisPanelOpen()) positionGielisPanel();
         repositionOpenPanels();
@@ -5968,13 +6256,14 @@ function showStartText() {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     
-    // Text zentriert auf der Canvas zeichnen
-    const text = G4M_TEXT.startHint;
+    // Text zentriert auf der Canvas zeichnen — vor der Formelwahl die
+    // Aufforderung dazu, danach der Go-Hinweis (v154.8)
+    const text = g4mState.activeDrawingMode ? G4M_TEXT.startHint : G4M_TEXT.selectFormulaHint;
     ctx.fillText(text, canvas.width / 2, canvas.height / 2);
-    
-    // Attribution hinzufügen (kleiner, unter dem Haupttext)
-    ctx.font = Math.max(7, Math.round(canvas.width / 98)) + 'px JetBrains Mono';
-    ctx.fillText(G4M_TEXT.attribution, canvas.width / 2, canvas.height / 2 + 40);
+    /* Die zweite, kleinere Zeile mit der Gielis-Nennung entfiel (v155.3,
+       User-Entscheidung): die Start-Canvas trägt nur noch die eine
+       Handlungsaufforderung. Die Nennung selbst steht weiterhin im
+       Kopf der Datei und auf der Gielis-Bildtafel ({ϕπ}-Button). */
 }
 // Funktionen für die Superformula-Visualisierung
 
@@ -6342,6 +6631,7 @@ function setArchDefaults() {
     g4mSetBotModActive('arch-mod-cos', d.modulation.type === 'cos');
     g4mSetBotModActive('arch-mod-sin', d.modulation.type === 'sin');
     g4mSetBotModActive('arch-mod-tan', d.modulation.type === 'tan');
+    g4mSetModTypeVisible('arch-mod-', d.modulation.enabled);   // Sin/Cos/Tan nur bei On (v154.5)
     _archSlider('arch-mod-strength', d.modulation.strength, 'arch-mod-strength-val', d.modulation.strength.toFixed(2));
     _archSlider('arch-mod-freq',     d.modulation.freq,     'arch-mod-freq-val',     d.modulation.freq.toFixed(1));
 
@@ -6369,6 +6659,17 @@ function _archBtn(id, active) {
 function g4mSetBotModActive(id, active) {
     const b = document.getElementById(id);
     if (b) b.classList.toggle('g4m-arch-botmod-active', !!active);
+}
+/* Sin/Cos/Tan nur bei Modulation On zeigen (v154.5): blendet die drei
+   Typ-Buttons einer Modulations-Gruppe gemeinsam ein oder aus. Wird an
+   ALLEN Stellen nachgeführt, die auch die Aktiv-Optik setzen (Init,
+   Store-Sync, Daten-Import, Klick-Handler) — so kann der sichtbare
+   Zustand nie vom Store abweichen. */
+function g4mSetModTypeVisible(prefix, visible) {
+    ['sin', 'cos', 'tan'].forEach(function (t) {
+        const b = document.getElementById(prefix + t);
+        if (b) b.classList.toggle('g4m-botmod-typ-hidden', !visible);
+    });
 }
 function _archShow(id, show) {
     const el = document.getElementById(id);
@@ -6463,6 +6764,7 @@ function g4mSyncDomFromStore() {
     g4mSetBotModActive('arch-mod-cos', mod.type === 'cos');
     g4mSetBotModActive('arch-mod-sin', mod.type === 'sin');
     g4mSetBotModActive('arch-mod-tan', mod.type === 'tan');
+    g4mSetModTypeVisible('arch-mod-', mod.enabled);   // Sin/Cos/Tan nur bei On (v154.5)
     _archSlider('arch-mod-strength', mod.strength, 'arch-mod-strength-val', Number(mod.strength).toFixed(2));
     _archSlider('arch-mod-freq',     mod.freq,     'arch-mod-freq-val',     Number(mod.freq).toFixed(1));
 
@@ -7097,6 +7399,7 @@ function initFullscreenButton() {
         updateUiScale();
         positionHomePanel();
         positionHomeLeft();
+        positionToolsCover();      // weisse Tools-Abdeckung (v155.0)
         g4mPositionNavCovers();
         if (isGielisPanelOpen()) positionGielisPanel();
         repositionOpenPanels();
@@ -7402,6 +7705,7 @@ function g4mSyncSfModOptics() {
     g4mSetBotModActive('sf-mod-cos', mod.type === 'cos');
     g4mSetBotModActive('sf-mod-sin', mod.type === 'sin');
     g4mSetBotModActive('sf-mod-tan', mod.type === 'tan');
+    g4mSetModTypeVisible('sf-mod-', !!mod.enabled);   // Sin/Cos/Tan nur bei On (v154.5)
 }
 
 function initSfModulationControls() {
@@ -7712,6 +8016,84 @@ function g4mSetNavCovers(on) {
         if (c) c.setAttribute('data-cover', on ? '1' : '0');
     });
 }
+
+/* ── Weisse Tools-Abdeckung (v155.0) ──────────────────────────────
+   ZWEITE Stufe der Benutzerführung, unabhängig von der Home-Seite:
+   Start: Home-Seite (unverändert) — darunter liegt bereits diese
+          Abdeckung, unsichtbar hinter der grauen Home-Fläche.
+   1. Go: die Home-Seite fährt weg wie bisher. Zurück bleiben die
+          leere weisse Canvas mit dem Hinweistext, das Navigation-
+          Tool und die Reihe F1-F10 — die übrigen Tools bleiben
+          weiss abgedeckt, damit der Blick zuerst auf die Formel-
+          wahl fällt.
+   dann:  D-Pad-Pfeil (quer links, hoch unten) ODER erneutes Go gibt
+          die Tools frei; die Abdeckung zieht sich zum Navigation-
+          Tool hin zurück und verschwindet an der Rahmenkante, also
+          optisch unter Navigation und Canvas.
+   Home:  stellt beide Stufen wieder her. */
+function positionToolsCover() {
+    const frame = document.getElementById('g4m-tools-cover-frame');
+    if (!frame || !toolsContainer) return;
+    const r = toolsContainer.getBoundingClientRect();
+    /* Der Rahmen beginnt UNTER der F-Reihe: sie ist in beiden
+       Orientierungen die oberste Rasterzeile des Tools-Panels und die
+       dem Navigation-Tool zugewandte Kante. Gemessen wird an F1
+       selbst statt über eine u-Rechnung — die Naht stammt damit wie
+       bei den übrigen Abdeckungen aus DEMSELBEN Rect und kann keine
+       Bruchpixel-Fuge bilden. Fehlt der Button, deckt der Rahmen wie
+       die Home-Fläche das ganze Panel. */
+    const f1  = document.getElementById('f1-btn');
+    const top = f1 ? f1.getBoundingClientRect().bottom : r.top;
+    frame.style.top    = top + 'px';
+    frame.style.left   = r.left   + 'px';
+    frame.style.width  = r.width  + 'px';
+    frame.style.height = (r.bottom - top) + 'px';
+    /* Zwischen Tools-Panel und Formel-Panels (v155.1) — und damit weit
+       unter den Home-Abdeckungen (65): solange die Home-Seite liegt,
+       ist die weisse Fläche vollständig verdeckt; öffnet der User ein
+       Formel-Panel auf der Tools-Seite, erscheint es ÜBER ihr. */
+    frame.style.zIndex = String(G4M_Z.TOOLS_COVER);
+}
+function g4mShowToolsCover(instant) {
+    const el = document.getElementById('g4m-tools-cover');
+    if (!el) return;
+    /* Einmal freigegeben, bleibt frei (v155.1): der User braucht die
+       Abdeckung danach nicht mehr — sie liesse sich sonst über Home
+       ungewollt wieder vor die Tools schieben. */
+    if (g4mState.toolsCoverDone) return;
+    buildToolsCoverGrid();
+    g4mStore.set('toolsCoverOn', true);
+    positionToolsCover();
+    el.style.visibility = 'visible';
+    if (instant) {
+        g4mParkPanelSlide(el, 'translateX(0)');   // Start/Resize: ohne Fahrt
+    } else {
+        g4mSetPanelSlide(el, 'translateX(0)');
+    }
+    g4mSetPanelOpen('g4m-tools-cover', true);
+}
+/* Stufe 2 (v155.1): sobald das erste Bild entstanden ist, zeigt die
+   Abdeckung das Raster der Buttons darunter und gibt den «Tools»-
+   Button frei. Idempotent — jeder weitere Aufruf ändert nichts. */
+function g4mToolsCoverShowGrid() {
+    const el = document.getElementById('g4m-tools-cover');
+    if (!el || !g4mState.toolsCoverOn) return;
+    buildToolsCoverGrid();
+    el.setAttribute('data-stage', 'grid');
+}
+function g4mHideToolsCover() {
+    const el = document.getElementById('g4m-tools-cover');
+    if (!el) return;
+    g4mStore.set('toolsCoverOn', false);
+    g4mStore.set('toolsCoverDone', true);   // endgültig — kein Zurück (v155.1)
+    /* Fahrt ZUM Navigation-Tool hin (v155.4) — quer von links nach
+       rechts, hoch nach oben: dieselbe Richtung wie bei jedem anderen
+       Panel der App (g4mHiddenTransform konvergiert auf die Nav).
+       Der Rahmen clippt sie an der Panel-Kante, sie verschwindet also
+       unter Navigation-Tool und Canvas. */
+    g4mSetPanelSlide(el, g4mHiddenTransform('tools'));
+    g4mSetPanelOpen('g4m-tools-cover', false);
+}
 /* Sichtbarkeit des Home-Vollbild-Symbols — seit v151c eigenständig:
    im Hochformat öffnen die Vorhänge VOR dem Symbol-Fade, gekoppelt
    wäre das Symbol mitten im Flug verschwunden. */
@@ -7758,6 +8140,11 @@ function g4mHideHomeSides() {                      // Helfer: beide grossen Seit
 function g4mShowHomeCovers() {
     clearTimeout(g4mCoverTimer);
     g4mPositionNavCovers();                        // frische Masse (Layout kann sich gesetzt haben)
+    /* Beide Stufen zurück (v155.0): die weisse Tools-Abdeckung liegt
+       wieder bereit, verdeckt hinter der Home-Seite — der nächste Go
+       spielt die Abfolge damit von vorn. Sie erscheint OHNE Fahrt,
+       weil sie ohnehin unsichtbar unter der Home-Fläche liegt. */
+    g4mShowToolsCover(true);
     g4mStore.set('homeCoversOn', true);
     /* Rückkehr = Desktop-Abfolge in beiden Orientierungen; der EINE
        strukturelle Unterschied (v151h): die Andock-Position liegt
@@ -7843,6 +8230,10 @@ function initHomePanel() {
     g4mSetNavCovers(true);
     g4mSetFsHome(true);
     g4mStore.set('homeCoversOn', true);
+    /* Die weisse Tools-Abdeckung liegt von Anfang an bereit (v155.0) —
+       verdeckt hinter der grauen Home-Fläche, sichtbar erst, wenn die
+       Home-Seite beim ersten Go abzieht. */
+    g4mShowToolsCover(true);
     showHomePanel();
     const leftInit = document.getElementById('g4m-home-left');
     if (leftInit) {
@@ -8003,6 +8394,8 @@ function handleLeftArrowClick(e) {
     if (fid)                       { hideFPanel(fid); return; }
     if (isSuperformulaPanelOpen()) { hideSuperformulaPanel(); return; }
     if (isHomePanelVisible())      { hideHomePanel(); return; }
+    /* Die weisse Tools-Abdeckung hat KEINEN Pfeil (v155.1): sie wird
+       allein über ihren eigenen «Tools»-Button freigegeben. */
 }
 
 function handleRightArrowClick(e) {
@@ -8316,6 +8709,7 @@ function initArchimedeanModule() {
         if (modCosBtn) modCosBtn.classList.toggle('g4m-arch-botmod-active', mod.type === 'cos');
         if (modSinBtn) modSinBtn.classList.toggle('g4m-arch-botmod-active', mod.type === 'sin');
         if (modTanBtn) modTanBtn.classList.toggle('g4m-arch-botmod-active', mod.type === 'tan');
+        g4mSetModTypeVisible('arch-mod-', !!mod.enabled);   // Sin/Cos/Tan nur bei On (v154.5)
     }
 
     if (modOnBtn) modOnBtn.addEventListener('click', function() {
@@ -8722,6 +9116,13 @@ function initStateSubscriptions() {
         if (p.key === 'useRandomColors')    g4mSfUpdateSqVals();
         if (p.key === 'sfModulation')       g4mSfUpdateSqVals();
     });
+    /* Start-Hinweis auf der Canvas nachführen (v154.8): wählt der User
+       seine erste Formel, wechselt der Text von der Formel-Aufforderung
+       auf den Go-Hinweis — aber nur, solange noch KEIN Bild existiert;
+       ein bereits gezeichnetes Bild wird nie überschrieben. */
+    g4mBus.on('mode', function () {
+        if (storedCurveParameters.length === 0) showStartText();
+    });
 }
 
 // Initialize
@@ -8729,7 +9130,7 @@ function init() {
     initImageFallbacks();          // vor allem anderen: error-Listener der Panel-Bilder
     resizeCanvas();
     loadTokenCounter();
-    g4mApplyModeOptics(g4mState.activeDrawingMode);   // Start: F1 zeigt den aktiven Default-Modus (Befund 28)
+    g4mApplyModeOptics(g4mState.activeDrawingMode);   // Start NEUTRAL (v154.7): kein F-Button aktiv, Indikator "Select formula"
     
     // Set initial drawing button text
     const drawingBtn = document.getElementById('drawing-btn');
@@ -8765,7 +9166,7 @@ function init() {
        unter den Vorhängen hervor. Einmal nach dem load-Ereignis und
        einmal nach der Settle-Zeit frisch positionieren. */
     const g4mRepositionCovers = function () {
-        positionHomePanel(); positionHomeLeft(); g4mPositionNavCovers();
+        positionHomePanel(); positionHomeLeft(); positionToolsCover(); g4mPositionNavCovers();
     };
     window.addEventListener('load', g4mRepositionCovers);
     setTimeout(g4mRepositionCovers, G4M_ANIM.VIEWPORT_SETTLE_MS);
