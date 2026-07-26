@@ -197,7 +197,19 @@ Kontakt: dd@danidubs.ch
         }
         /* Grauer Reserve-Look (unterste Ebene, immer da). Über die
            Paare gelegt, wenn der aktive Parameter kein Random kennt. */
-        .g4m-rnd-blank { z-index: 1; }
+        /* Der Strich (v156.2) macht sichtbar, dass dieser Parameter
+           keinen Zufallsmodus HAT — vorher stand hier ein leeres Feld,
+           nicht unterscheidbar von einem verlorenen Knopf. */
+        .g4m-rnd-blank {
+            z-index: 1;
+            display: flex; align-items: center; justify-content: center;
+            color: #b0b0b0;
+        }
+        /* Ausgegraute Beschriftung, wenn es nichts zu schalten gibt */
+        #g4m-random-caption.g4m-cap-inactive { color: #b0b0b0; }
+        /* Lange Beschriftung: gleiche Schriftgrösse wie «Random», nur
+           minim enger gesetzt, damit sie in die 2u-Zelle passt (v156.3) */
+        #g4m-random-caption.g4m-cap-long { letter-spacing: -0.05em; }
         /* Ein On/Off-Paar = zwei 1u-Quadrate nebeneinander */
         .g4m-rnd-pair {
             display: grid;
@@ -719,6 +731,15 @@ Kontakt: dd@danidubs.ch
             font-size: min(15px, calc(var(--u) * 0.288));
         }
 
+        /* Drawing-Menü (v155.7): «Filled (Lines)» ist breiter als die
+           2u-Spalte und bricht darum auf zwei Zeilen um — zentriert
+           und mit engem Zeilenabstand, damit beide Zeilen in die
+           1u hohe Zelle passen. */
+        #display-mode-dropdown > div {
+            text-align: center;
+            line-height: 1.15;
+        }
+
         #resolution-dropdown > div:hover, #display-mode-dropdown > div:hover, #canvas-color-dropdown > div:hover {
             background-color: #f0f0f0;
         }
@@ -924,6 +945,59 @@ Kontakt: dd@danidubs.ch
             text-align: center;
             padding: 0 2px;
         }
+        /* Bauart-Button (v156.0): dieselbe Zellen-Optik und Schrift-
+           staffelung wie «Optimal Boundaries» im F1-Panel, weil er
+           denselben Platz einnimmt. */
+        #arch-spiral-type-btn.g4m-arch-cell {
+            display: flex; align-items: center; justify-content: center;
+            font-size: clamp(9px, calc(var(--u) * 0.24), 13px);
+            font-weight: 700;
+            line-height: 1.15;
+            text-align: center;
+            padding: 0 2px;
+        }
+        /* Bauart-Menü (v156.0): weisse Fläche wie die übrigen Menüs,
+           2u breit, 4u hoch, wächst nach OBEN aus dem Button. Die
+           Einträge teilen die Höhe gleichmässig (flex) — so bleibt das
+           Menü beim Nachrüsten weiterer Spiralen gleich gross. */
+        #arch-spiral-dropdown {
+            position: absolute;
+            z-index: 1000;
+            background-color: #ffffff;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        #arch-spiral-dropdown .g4m-sp-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 1px;
+            padding: 0 8px;
+            box-sizing: border-box;
+            cursor: pointer;
+            background-color: #ffffff;
+            color: #666666;
+            line-height: 1.05;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        #arch-spiral-dropdown .g4m-sp-item:hover { background-color: #f5f5f5; }
+        #arch-spiral-dropdown .g4m-sp-name { font-weight: 700; font-size: min(12px, calc(var(--u) * 0.23)); }
+        #arch-spiral-dropdown .g4m-sp-formula { font-size: min(10px, calc(var(--u) * 0.19)); opacity: 0.75; }
+        #arch-spiral-dropdown .g4m-dd-active { background-color: #f0f0f0; }
+        #arch-spiral-dropdown .g4m-dd-active .g4m-sp-name { color: #333333; }
+        /* Noch nicht umgesetzte Bauarten: sichtbar als Vorschau, aber
+           blass und ohne Zeiger — sie sind nicht wählbar. */
+        #arch-spiral-dropdown .g4m-sp-soon {
+            cursor: default;
+            color: #b0b0b0;
+        }
+        #arch-spiral-dropdown .g4m-sp-soon:hover { background-color: #ffffff; }
+
         /* erste Rasterzeile fest auf Reihe 1 — wie die F2-Quadrate */
         #sf-sq-a, #sf-sq-b, #sf-sq-m, #sf-sq-n1, #sf-sq-n2, #sf-sq-n3 { grid-row: 1; }
         /* Leeres Modulations-Grundraster (g4m-arch-mod-hidden) trägt auf
@@ -1411,6 +1485,9 @@ html, body { overflow: hidden; }
    identisch zum Original — nichts wird je wieder kleiner).
    Mobile-Feintuning = nur den Bodenwert ändern. */
 .tool-btn { font-size: clamp(10px, calc(var(--u) * 0.269), 14px); }   /* Boden 10px (v150r, war 11) */
+/* Lange Beschriftungen (v155.7): «Drawing (Filled Curves)» passt nicht
+   in die 2u-Breite. Nur der betroffene Button wird kleiner gesetzt. */
+.tool-btn.g4m-btn-longlabel { font-size: clamp(8px, calc(var(--u) * 0.20), 11px); line-height: 1.15; }
 .nav-btn  { font-size: clamp(10px, calc(var(--u) * 0.269), 14px); }
 .go-btn   { font-size: min(32px, calc(var(--u) * 0.615)); }
 
@@ -2154,7 +2231,7 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
                  zum aktiven Parameter passende ein (analog F2-Panel).
                  Inhalt generiert buildRandomToggleStack (§2). -->
             <div class="g4m-rnd-stack" id="g4m-rnd-stack" style="grid-row: 9; grid-column: 11 / 13;">
-                <div class="tool-btn reserve-btn g4m-rnd-blank" aria-hidden="true"></div>
+                <div class="tool-btn reserve-btn g4m-rnd-blank" aria-hidden="true">&mdash;</div>
             </div>
         </div>
 
@@ -2429,7 +2506,9 @@ Max. 1.5</span>
 
     <!-- ===== Reihe 1 (1u): Page-2 · Titel (4 Felder verbunden) · Formula ===== -->
     <button type="button" id="arch-options-btn" class="g4m-arch-cell g4m-arch-top">Page 2</button>
-    <div class="g4m-arch-cell g4m-arch-top g4m-arch-title">Archimedean Spiral Parameters</div>
+    <!-- Titel nennt die gewählte Bauart (v156.0) — gesetzt von
+         g4mSyncSpiralUi, Startwert entspricht der Vorgabe. -->
+    <div class="g4m-arch-cell g4m-arch-top g4m-arch-title" id="arch-panel-title">Archimedean Spiral Parameters</div>
     <button type="button" id="arch-formula-toggle" class="g4m-arch-cell g4m-arch-top" role="button" tabindex="0" aria-label="Open formula panel">Formula</button>
 
     <!-- ===== Reihen 2-7 (6u): 18 Quadrate (6 x 3 à 2u x 2u) ===== -->
@@ -2529,8 +2608,10 @@ Max. 100%</span>
                 </span>
             </div>
             <button type="button" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-reserve" style="grid-column: 3 / 4;" aria-label="Reserve"></button>
-            <button type="button" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-reserve" style="grid-column: 4 / 5;" aria-label="Reserve"></button>
-            <button type="button" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-reserve" style="grid-column: 5 / 6;" aria-label="Reserve"></button>
+            <!-- Spiral-Bauart (v156.0): 2u x 1u, an derselben Stelle wie
+                 «Optimal Boundaries» im F1-Panel — direkt links vom
+                 Baby-Go. Öffnet das Bauart-Menü (2u x 4u). -->
+            <button type="button" id="arch-spiral-type-btn" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot" style="grid-column: 4 / 6;" aria-label="Choose spiral type">Archimedean</button>
             <button type="button" id="arch-baby-go" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-babygo" style="grid-column: 6 / 7;" aria-label="Generate new image">Go</button>
         </div>
     </div>
@@ -2999,7 +3080,7 @@ const G4M_PERSIST = (function () {
     // Nur diese Schlüssel werden persistiert (Parameter, nicht Laufzeit-
     // /UI-Zustände wie offene Panels, Modus, Home-Abdeckungen).
     const PERSIST_KEYS = [
-        'currentDisplayMode', 'canvasBackgroundColor', 'normalizationEnabled',
+        'currentDisplayMode', 'spiralType', 'canvasBackgroundColor', 'normalizationEnabled',
         'archConnectingLines', 'archimedeanParams', 'archUseRandomColors',
         'archDefaultColor', 'useRandomColors', 'defaultCurveColor',
         'viewParams', 'superformulaParams', 'archModulation', 'sfModulation', 'randomModes'
@@ -3092,6 +3173,10 @@ const g4mStore = (function () {
 
         // Render-Zustand
         currentDisplayMode: 'filled',
+        /* Bauart der F2-Spirale (v156.0) — Schlüssel aus G4M_SPIRALS.
+           Wird mitgespeichert, damit die zuletzt gewählte Spirale eine
+           Sitzung überdauert. */
+        spiralType: 'archimedean',
         canvasBackgroundColor: '#FFFFFF',
         normalizationEnabled: false,
         homeCoversOn: true,            // Start: Home-Abdeckungen zu (v150s)
@@ -3254,7 +3339,7 @@ const g4mStore = (function () {
             // Bus-Ereignisse, damit Abonnenten (und Auto-Save) reagieren
             ['archimedeanParams','viewParams','archModulation','sfModulation','superformulaParams']
                 .forEach(function (k) { g4mBus.emit('state', { key: k, value: state[k] }); });
-            ['currentDisplayMode','canvasBackgroundColor','normalizationEnabled',
+            ['currentDisplayMode','spiralType','canvasBackgroundColor','normalizationEnabled',
              'archConnectingLines','archUseRandomColors','archDefaultColor',
              'useRandomColors','defaultCurveColor']
                 .forEach(function (k) { g4mBus.emit('state', { key: k, value: state[k] }); });
@@ -3430,11 +3515,21 @@ const G4M_MODE_BUTTONS = Object.freeze({
    Zieht eine neue Formel ein, ist ihr Name genau dieser eine Eintrag. */
 const G4M_MODE_NAMES = Object.freeze({
     superformula: 'Superformula',
+    /* F2 ist die Spiral-FAMILIE (v156.0) — angezeigt wird die gewählte
+       Bauart, siehe g4mModeName. Der Eintrag hier ist nur der Rückfall. */
     archimedean:  'Archimedean',
     f3: 'Coming soon', f4: 'Coming soon', f5: 'Coming soon',
     f6: 'Coming soon', f7: 'Coming soon', f8: 'Coming soon',
     f9: 'Coming soon', f10: 'Coming soon'
 });
+/* Anzeigename eines Modus. F2 nennt die AKTIVE Spiral-Bauart, nicht
+   die Familie — «Logarithmic» ist aussagekräftiger als «Spiral»
+   (v156.0). Die Funktion liegt vor g4mApplyModeOptics, wird aber auch
+   vom Formel-Menü und vom Panel-Titel genutzt. */
+function g4mModeName(mode) {
+    if (mode === 'archimedean') return g4mSpiralName();
+    return G4M_MODE_NAMES[mode] || '';
+}
 function g4mApplyModeOptics(mode) {
     Object.keys(G4M_MODE_BUTTONS).forEach(function (m) {
         const btn = document.getElementById(G4M_MODE_BUTTONS[m]);
@@ -3452,7 +3547,7 @@ function g4mApplyModeOptics(mode) {
     if (ind) {
         if (mode) {
             ind.style.backgroundColor = 'var(--g4m-mode-color-' + mode + ')';
-            ind.textContent = G4M_MODE_NAMES[mode] || '';   // nur der Name (v150c)
+            ind.textContent = g4mModeName(mode);   // nur der Name (v150c)
         } else {
             ind.style.backgroundColor = '';           // Button-Grundfarbe aus dem Stylesheet
             ind.textContent = 'Select formula';
@@ -3574,7 +3669,47 @@ const sliderData = {
    bei gewähltem F5 erschien eine Superformel. Jetzt zeichnet nur, wer
    einen eigenen Eintrag in G4M_RENDERERS hat; sonst kurzer Hinweis
    statt Bild. Neue Formeln brauchen allein den Registry-Eintrag. */
-const G4M_RELEASE = Object.freeze({ version: 'v155.6', date: '26.07.2026' });
+/* v155.7: «Filled» gab es nur auf Basis der Rohpunkte — also der
+   Lines-Kontur. Jetzt stehen «Filled (Lines)» und «Filled (Curves)»
+   zur Wahl; die zweite füllt entlang der geglätteten Kontur von
+   drawCurves. Der gespeicherte Wert 'filled' bleibt die Lines-
+   Variante, alte Sitzungen gelten also unverändert weiter. */
+/* v155.8: Menü-Reihenfolge — «Filled (Curves)» vor «Filled (Lines)»,
+   passend zur nachfolgenden Ordnung Curves, Lines, Points. */
+/* v155.9 wurde verworfen (Reload-Button gegen Browser-Cache) — die
+   Nummer bleibt unbesetzt, damit keine zwei Fassungen unter ihr
+   kursieren. */
+/* v156.0: F2 ist die Spiral-FAMILIE. Ein Menü im Panel (an der Stelle
+   von «Optimal Boundaries» in F1) wählt die Bauart; archimedisch und
+   logarithmisch sind umgesetzt, fünf weitere stehen als Vorschau
+   bereit. Alles Gemeinsame — Parameter, Optimizer, Modulation,
+   Verbindungslinien, Farben — bleibt geteilt; verschieden ist EINE
+   Zeile Mathematik je Bauart, zentral in g4mSpiralRadius. Die vorher
+   doppelt (bzw. in einer toten Funktion dreifach) vorhandene
+   Radiusformel wurde dabei zusammengeführt. */
+/* v156.1: Fehlerbehebung — unter «Logarithmic» erschien kein Bild.
+   setArchDefaults schrieb die Grenzen von a NUR in die Regler, nicht
+   in den Store (_archSlider setzt bewusst keinen Zustand). Bei der
+   archimedischen Spirale fiel das nie auf, weil Vorgabe und Store-
+   Startwert beide 0…0 lauten; bei der logarithmischen ist a der
+   Skalenfaktor, und a = 0 lässt r = 0·e^(b·θ) auf null zusammen-
+   fallen — die Normalisierung rechnete dann 0/0. Jetzt läuft a wie
+   jeder andere Parameter über den Store-Patch. */
+/* v156.2: Die «Random»-Zeile im Tools-Panel bleibt immer besetzt. Bei
+   Zoom, Pan-X, Pan-Y und Rotation blendete sie sich früher vollständig
+   aus — samt On/Off-Quadraten; die leere Stelle war von einem
+   verschwundenen Knopf nicht zu unterscheiden. Jetzt steht die
+   Beschriftung dort (ausgegraut) und im Feld darunter ein Strich. */
+/* v156.3: «Normalization» steht im selben Schriftgrad wie «Random» —
+   die nötige Breite kommt aus minim engerem Zeichenabstand statt aus
+   kleinerer Schrift. */
+/* v156.4: Kein Kurzhinweis mehr auf der Canvas beim Einschalten von
+   Random — er legte sich bei jedem Klick auf On über das Bild. */
+/* v156.5: Hyperbelspirale umgesetzt, r = a/(\u03B8 + b). Der Winkel-
+   versatz b hält die Polstelle bei \u03B8 = 0 aus dem Bild und gibt dem
+   b-Regler eine Wirkung; ein harter Mindestnenner fängt auch die von
+   Hand erreichbaren Grenzfälle ab. */
+const G4M_RELEASE = Object.freeze({ version: 'v156.5', date: '26.07.2026' });
 const G4M_BUILD = G4M_RELEASE.version;   // Kurzform für Titel und Konsole
 document.title = document.title + ' · ' + G4M_BUILD;
 console.log('g4m build', G4M_BUILD, '·', G4M_RELEASE.date);
@@ -3796,6 +3931,126 @@ const G4M_DEFAULTS = {
 const defaults = G4M_DEFAULTS.tool;
 const goodDefaults = G4M_DEFAULTS.good;
 
+/* ── Spiral-Registry (v156.0) ─────────────────────────────────────
+   F2 ist nicht mehr «die archimedische Spirale», sondern die FAMILIE
+   der Spiralen; die Bauart wählt ein Menü im F2-Panel. Alles, was die
+   Spiralen teilen — Parameter a, b, α, β, N, Keim-Mechanik, Optimizer,
+   Modulation, Verbindungslinien, Farben, das ganze Panel — bleibt
+   gemeinsam. Verschieden ist EINE Zeile Mathematik pro Bauart.
+
+   Ein Eintrag besteht aus:
+     name     Anzeigename (Panel-Titel, Modus-Indikator, Busy-Text)
+     formula  Formel als Text, für die Menü-Zeile
+     radius   (a, b, θ) -> r   ODER null = noch nicht umgesetzt
+     defaults überschreibt einzelne Blöcke von G4M_DEFAULTS.archPanel
+              (a, b, n …) — nötig, weil dieselben Regler je nach Bauart
+              ganz andere Bereiche brauchen: bei der archimedischen ist
+              b ein Zuwachs pro Winkel, bei der logarithmischen ein
+              WACHSTUMSEXPONENT, und a darf dort nicht 0 sein.
+
+   Einträge ohne radius erscheinen im Menü als Vorschau, sind aber
+   nicht wählbar — dieselbe Linie wie bei F3-F10 (v155.6): lieber kein
+   Bild als ein Bild der falschen Formel. */
+const G4M_SPIRALS = Object.freeze({
+    archimedean: Object.freeze({
+        name: 'Archimedean',
+        formula: 'r = a + b\u00B7\u03B8',
+        radius: function (a, b, theta) { return a + b * theta; }
+        // defaults: keine — G4M_DEFAULTS.archPanel IST der Archimedes-Fall
+    }),
+    logarithmic: Object.freeze({
+        name: 'Logarithmic',
+        formula: 'r = a\u00B7e^(b\u00B7\u03B8)',
+        radius: function (a, b, theta) { return a * Math.exp(b * theta); },
+        /* a ist hier ein SKALENFAKTOR (0 ergäbe eine Spirale ohne jeden
+           Radius), b der Wachstumsexponent. Über die voreingestellten
+           rund 4 Umläufe wächst der Radius damit etwa um das 13-fache —
+           die vertraute Gestalt der logarithmischen Spirale. */
+        defaults: Object.freeze({
+            a: Object.freeze({ min: 1, max: 1 }),
+            b: Object.freeze({ useFine: true, min: 0.08, max: 0.15 }),
+            n: Object.freeze({ min: 90, max: 110 })
+        })
+    }),
+    /* Vorschau — Formeln stehen, die Umsetzung folgt. Sobald eine
+       radius-Funktion (und bei Bedarf ein defaults-Block) eingetragen
+       ist, wird der Eintrag von selbst wählbar; an der Oberfläche ist
+       nichts anzupassen. */
+    hyperbolic: Object.freeze({
+        name: 'Hyperbolic',
+        formula: 'r = a/(\u03B8 + b)',
+        /* Die reine Form lautet r = a/\u03B8. Zwei Dinge sprechen dagegen,
+           sie wörtlich zu nehmen (v156.5):
+             · Bei \u03B8 = 0 liegt eine Polstelle — r wird unendlich, und
+               die Normalisierung erzeugt daraus NaN-Punkte.
+             · b käme in der Formel nicht vor; der b-Regler des Panels
+               täte nichts, was als Fehler auffiele.
+           Beides löst derselbe Zusatz: b verschiebt den Winkel im
+           Nenner. Bei b = 0 ist es exakt die klassische Hyperbelspirale,
+           bei b > 0 rückt die Polstelle aus dem gezeichneten Bereich.
+           Der Nenner wird zusätzlich hart von der Null ferngehalten,
+           damit auch b = 0 UND \u03B2 = 0 (beides über die Regler
+           erreichbar) ein endliches Bild ergeben. */
+        radius: function (a, b, theta) {
+            const d = theta + b;
+            const EPS = 1e-3;
+            return a / (Math.abs(d) < EPS ? (d < 0 ? -EPS : EPS) : d);
+        },
+        /* Anders als bei den beiden ersten Bauarten NIMMT der Radius hier
+           mit wachsendem Winkel AB: die Kurve kommt von aussen und windet
+           sich nach innen. Wenige Umläufe zeigen das am deutlichsten —
+           bei vielen Schritten schrumpft alles nach dem ersten Umlauf in
+           einen Punkt zusammen. Die Vorgaben ergeben rund 2,5 Umläufe. */
+        defaults: Object.freeze({
+            a:     Object.freeze({ min: 1,  max: 1 }),
+            b:     Object.freeze({ useFine: true, min: 0.2, max: 0.4 }),
+            beta:  Object.freeze({ min: 20, max: 30 }),
+            n:     Object.freeze({ min: 50, max: 70 })
+        })
+    }),
+    fermat:     Object.freeze({ name: 'Fermat',     formula: 'r = a\u00B7\u221A\u03B8', radius: null }),
+    lituus:     Object.freeze({ name: 'Lituus',     formula: 'r = a / \u221A\u03B8',    radius: null }),
+    cornu:      Object.freeze({ name: 'Cornu',      formula: 'Clothoid',                radius: null }),
+    golden:     Object.freeze({ name: 'Golden',     formula: 'r = a\u00B7\u03C6^(2\u03B8/\u03C0)', radius: null })
+});
+/* Aktive Bauart. Rückfall auf die archimedische, wenn der Schlüssel
+   unbekannt ist ODER auf einen noch nicht umgesetzten Eintrag zeigt —
+   etwa weil eine gespeicherte Sitzung aus einer neueren Fassung stammt.
+   So kann NIE eine Bauart ohne eigene Formel gezeichnet werden, und
+   die Formel steht an genau einer Stelle: in ihrem Registry-Eintrag. */
+function g4mSpiral() {
+    const sp = G4M_SPIRALS[g4mState.spiralType];
+    return (sp && typeof sp.radius === 'function') ? sp : G4M_SPIRALS.archimedean;
+}
+function g4mSpiralName() { return g4mSpiral().name; }
+/* Vorgaben der aktiven Bauart über die gemeinsamen F2-Vorgaben legen */
+function g4mSpiralDefaults() {
+    return Object.assign({}, G4M_DEFAULTS.archPanel, g4mSpiral().defaults || {});
+}
+
+/* Radius der aktiven Spirale an der Stelle θ, inklusive Modulation —
+   DIE eine Quelle (v156.0). Vorher stand die Formel doppelt im Code:
+   in archCalcRealPts (Vorschau-Bilder) und in radiusAt innerhalb von
+   drawArchimedeanSpiral (Zeichnen und Längenmessung). Zwei Kopien
+   derselben Mathematik hätten sich mit jeder neuen Bauart weiter
+   auseinanderentwickelt; jetzt greifen beide hierauf zu.
+   Die Modulation r *= (1 + stärke · f(θ · frequenz)) wirkt für JEDE
+   Bauart gleich — sie skaliert den Radius, unabhängig davon, wie er
+   zustande kam. Tan bleibt hart auf [-1, 1] begrenzt. */
+function g4mSpiralRadius(a, b, theta) {
+    let r = g4mSpiral().radius(a, b, theta);   // g4mSpiral liefert stets eine umgesetzte Bauart
+    const mod = g4mState.archModulation;
+    if (mod && mod.enabled) {
+        let mv = 0;
+        const t = theta * mod.freq;
+        if      (mod.type === 'sin') mv = mod.strength * Math.sin(t);
+        else if (mod.type === 'cos') mv = mod.strength * Math.cos(t);
+        else if (mod.type === 'tan') mv = mod.strength * Math.max(Math.min(Math.tan(t), 1), -1);
+        r *= (1 + mv);
+    }
+    return r;
+}
+
 /* ── G4M_TEXT — nutzersichtbare Texte an EINER Stelle (Befund 17).
    UI-Sprache: Englisch (vorher Sprachmix aus deutschen Alerts/
    Ladeanzeigen und englischen Buttons). Später leicht i18n-fähig. */
@@ -3813,7 +4068,8 @@ const G4M_TEXT = Object.freeze({
        formulas...' — das Label liefert die Renderer-Registry (§3),
        neue Modi (F3–F6) bringen ihren Text als Registry-Feld mit. */
     generatingCurves: function (label) { return 'Generating ' + label + '...'; },
-    clickGoForNew:   'Click «Go» to generate a new image',
+    /* clickGoForNew entfiel (v156.4) — der Kurzhinweis beim Einschalten
+       von Random wurde entfernt, damit blieb der Text ohne Verwender. */
     /* Hinweis für noch leere Formel-Plätze (v155.6): F3-F10 tragen bis
        heute keinen Renderer — Go darf dort NICHTS zeichnen, sonst käme
        eine Superformel unter falschem Namen heraus. */
@@ -3836,15 +4092,33 @@ const G4M_TEXT = Object.freeze({
 
 /* Anzeige-Modi: EINE Quelle für Initial-Label, Dropdown-Aufbau und
    Reset — vorher dreimal als Literal-Array kopiert (Befund 17). */
+/* label = Eintrag im Drawing-Menü, short = Beschriftung des Buttons
+   (dort steht der Text schon in Klammern — «Filled (Lines)» ergäbe
+   doppelte Klammern und passt nicht in die 2u-Breite).
+   Der Wert 'filled' bleibt unverändert, damit gespeicherte Sitzungen
+   früherer Fassungen weiterhin gelten (v155.7). */
+/* Reihenfolge (v155.8): erst die beiden Füllungen, dann die Konturen —
+   innerhalb beider Gruppen gleich sortiert (Curves vor Lines), damit
+   das Menü von oben nach unten EINEM Muster folgt. */
 const G4M_DISPLAY_MODES = Object.freeze([
-    Object.freeze({ value: 'filled', label: 'Filled' }),
-    Object.freeze({ value: 'curves', label: 'Curves' }),
-    Object.freeze({ value: 'lines',  label: 'Lines'  }),
-    Object.freeze({ value: 'points', label: 'Points' })
+    Object.freeze({ value: 'filled-curves', label: 'Filled (Curves)', short: 'Filled Curves' }),
+    Object.freeze({ value: 'filled',        label: 'Filled (Lines)',  short: 'Filled Lines'  }),
+    Object.freeze({ value: 'curves',        label: 'Curves',          short: 'Curves' }),
+    Object.freeze({ value: 'lines',         label: 'Lines',           short: 'Lines'  }),
+    Object.freeze({ value: 'points',        label: 'Points',          short: 'Points' })
 ]);
+function g4mDisplayMode(value) {
+    return G4M_DISPLAY_MODES.find(function (mode) { return mode.value === value; }) || null;
+}
 function g4mDisplayModeLabel(value) {
-    const m = G4M_DISPLAY_MODES.find(function (mode) { return mode.value === value; });
-    return m ? m.label : value;
+    const m = g4mDisplayMode(value);
+    return m ? (m.short || m.label) : value;
+}
+/* Modi, deren sichtbare Kontur auf der MITTELPUNKT-Spur läuft (die
+   Glättung von drawCurves). Die «Close Curve»-Verbindungslinie muss
+   dort andocken, wo die Kontur wirklich beginnt und endet. */
+function g4mUsesSmoothTrack(value) {
+    return value === 'curves' || value === 'filled-curves';
 }
 
 /* §2 ─ SLIDER- & EINGABE-UI (→ ui-sliders.js) ───────────────────── */
@@ -3979,7 +4253,30 @@ function g4mSelectParam(id) {
        die Quadrate stattdessen etwas ein/aus (z. B. Normalization),
        wäre «Random» darüber irreführend — Zelle bleibt leer. */
     const rndCaption = document.getElementById('g4m-random-caption');
-    if (rndCaption) rndCaption.style.visibility = g4mIsRandomCapable(id) ? 'visible' : 'hidden';
+    if (rndCaption) {
+        /* Die Beschriftung verschwand früher ganz, sobald der aktive
+           Parameter keinen Zufallsmodus kennt (Zoom, Pan-X, Pan-Y,
+           Rotation). Zusammen mit dem leeren Feld darunter sah das aus
+           wie ein FEHLENDER Knopf statt wie «hier gibt es nichts zu
+           schalten» (User-Befund 26.07.). Jetzt bleibt die Zeile immer
+           besetzt und sagt, was Sache ist (v156.2):
+             · Zufallsfähiger Parameter → «Random», normal
+             · Normalization            → «Normalization» (die Quadrate
+               darunter schalten sie, nicht einen Zufallsmodus)
+             · Zoom/Pan/Rotation        → «Random», ausgegraut */
+        const capable = g4mIsRandomCapable(id);
+        const isNorm  = (id === 'normalization-row');
+        const text    = isNorm ? 'Normalization' : 'Random';
+        rndCaption.style.visibility = 'visible';
+        rndCaption.textContent = text;
+        rndCaption.classList.toggle('g4m-cap-inactive', !capable && !isNorm);
+        /* «Normalization» ist 13 Zeichen lang und läuft bei gleicher
+           Schriftgrösse rund 5 % über die 2u-Breite. Statt die Schrift
+           zu verkleinern (v156.2, wirkte neben «Random» wie ein anderer
+           Rang) rückt v156.3 die Zeichen minim enger zusammen — der
+           Schriftgrad bleibt exakt der von «Random». */
+        rndCaption.classList.toggle('g4m-cap-long', text.length > 8);
+    }
     // On/Off-Schalter unter "Random Tools": passendes Paar einblenden
     // (bei Parametern ohne Random bleibt der graue Reserve-Look).
     if (typeof g4mShowRandomToggleFor === 'function') g4mShowRandomToggleFor(id);
@@ -4573,14 +4870,11 @@ function handleRandomModeChange(sliderId, isRandom) {
     if (!sliderObj) return;
     
     if (isRandom) {
+        /* Der Kurzhinweis «Click Go to generate a new image» über der
+           Canvas entfiel (v156.4): Er erschien bei JEDEM Klick auf On,
+           legte sich über das Bild und sagte nichts, was der User nicht
+           schon wüsste. needsRegen bleibt als Zustandsmerker. */
         needsRegen = true;
-        loadingIndicator.textContent = G4M_TEXT.clickGoForNew;
-        loadingIndicator.style.display = 'block';
-        clearTimeout(g4mHintTimer);   // Mehrfach-Toggle: alten Timer verwerfen (Befund 26)
-        g4mHintTimer = setTimeout(() => {
-            g4mHintTimer = null;
-            loadingIndicator.style.display = 'none';
-        }, G4M_ANIM.HINT_MS);
     } else {
         applyFixedValue(sliderId);
     }
@@ -4852,6 +5146,8 @@ function hexToRgba(hex, alpha) {
 function renderByDisplayMode(ctx, points, color, params, closedLines) {
     switch (g4mState.currentDisplayMode) {
         case 'filled': drawFilled(ctx, points, color, params.lineWidth); break;
+        // Gefüllt, aber entlang der GEGLÄTTETEN Kontur (v155.7)
+        case 'filled-curves': drawFilledCurves(ctx, points, color); break;
         case 'curves': drawCurves(ctx, points, color, params.lineWidth, closedLines); break;
         case 'lines':
             if (closedLines) drawLines(ctx, points, color, params.lineWidth);
@@ -4950,6 +5246,40 @@ function drawFilled(ctx, points, color, lineWidth) {
         ctx.lineTo(points[i].x, points[i].y);
     }
     
+    ctx.closePath();
+    ctx.fill();
+}
+
+/* Gefüllt entlang der GEGLÄTTETEN Kontur (v155.7).
+   «Filled» füllte bisher immer das Polygon der Rohpunkte — also die
+   Kontur des Lines-Modus. Bei wenigen Winkelschritten sind die Kanten
+   dort deutlich zu sehen. Diese Variante baut denselben Pfad wie
+   drawCurves (quadratische Segmente über die Mittelpunkte) und füllt
+   ihn, statt ihn zu stricheln. Die Fläche ist immer geschlossen —
+   auch bei offenen Punktfolgen (Spiralen), genau wie bisher bei
+   drawFilled: eine Füllung ohne Abschluss gibt es nicht. */
+function drawFilledCurves(ctx, points, color) {
+    if (points.length < 3) { drawFilled(ctx, points, color); return; }
+
+    ctx.beginPath();
+    ctx.fillStyle = color;
+
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length - 1; i++) {
+        const xc = (points[i].x + points[i+1].x) / 2;
+        const yc = (points[i].y + points[i+1].y) / 2;
+        ctx.quadraticCurveTo(points[i].x, points[i].y, xc, yc);
+    }
+    // Rückschluss über den letzten Rohpunkt auf den ersten — Wort für
+    // Wort der geschlossene Zweig von drawCurves, damit Kontur und
+    // Füllung deckungsgleich sind.
+    const lastPoint  = points[points.length - 1];
+    const firstPoint = points[0];
+    const xc = (lastPoint.x + firstPoint.x) / 2;
+    const yc = (lastPoint.y + firstPoint.y) / 2;
+    ctx.quadraticCurveTo(lastPoint.x, lastPoint.y, xc, yc);
+    ctx.quadraticCurveTo(xc, yc, firstPoint.x, firstPoint.y);
+
     ctx.closePath();
     ctx.fill();
 }
@@ -5106,7 +5436,9 @@ const G4M_RENDERERS = {
         prepare: prepareSuperformulaGeneration
     },
     archimedean: {
-        label: 'Archimedean spirals',   // Busy-Text-Baustein (Befund 27)
+        /* Busy-Text-Baustein (Befund 27) — nennt die gewählte Bauart
+           (v156.0), darum eine Funktion statt einer festen Zeichenkette. */
+        get label() { return g4mSpiralName() + ' spirals'; },
         makeParams: generateArchimedeanParameters,
         draw: drawArchimedeanSpiral,
         prepare: prepareArchimedeanGeneration
@@ -5351,20 +5683,11 @@ function drawArchimedeanSpiral(ctx, centerX, centerY, params) {
     const toolPoints = Math.max(2, g4mState.viewParams.toolPoints);
 
     /* Radius an der Stelle θ — EINE Quelle für Längenmessung und
-       Zeichenpunkte (v153.1h), inkl. Kurvenmodulation
-       r *= (1 + stärke · f(θ · frequenz)). */
+       Zeichenpunkte (v153.1h). Die Formel selbst liegt seit v156.0 in
+       g4mSpiralRadius, gemeinsam mit der Vorschau und abhängig von der
+       gewählten Spiral-Bauart. */
     function radiusAt(theta) {
-        let r = params.a + params.b * theta;
-        const mod = g4mState.archModulation;
-        if (mod && mod.enabled) {
-            let mv = 0;
-            const t = theta * mod.freq;
-            if      (mod.type === 'sin') mv = mod.strength * Math.sin(t);
-            else if (mod.type === 'cos') mv = mod.strength * Math.cos(t);
-            else if (mod.type === 'tan') mv = mod.strength * Math.max(Math.min(Math.tan(t), 1), -1);
-            r *= (1 + mv);
-        }
-        return r;
+        return g4mSpiralRadius(params.a, params.b, theta);
     }
 
     // Schritt 1: Radius-Spannweite über die nSteps Wachstumsschritte
@@ -5426,7 +5749,7 @@ function drawArchimedeanSpiral(ctx, centerX, centerY, params) {
         const nPts = cartesianPoints.length;
         let sp = cartesianPoints[0];
         let ep = cartesianPoints[nPts - 1];
-        if (g4mState.currentDisplayMode === 'curves' && nPts >= 3) {
+        if (g4mUsesSmoothTrack(g4mState.currentDisplayMode) && nPts >= 3) {
             sp = { x: (cartesianPoints[0].x + cartesianPoints[1].x) / 2,
                    y: (cartesianPoints[0].y + cartesianPoints[1].y) / 2 };
             ep = { x: (cartesianPoints[nPts-2].x + cartesianPoints[nPts-1].x) / 2,
@@ -5584,6 +5907,10 @@ function setDrawingButtonLabel(btn, label) {
         document.createElement('br'),
         document.createTextNode('(' + label + ')')
     );
+    /* «Filled Lines/Curves» sprengt bei voller Schriftgrösse die 2u
+       Buttonbreite (v155.7). Eine eigene Klasse verkleinert NUR diesen
+       Button — das globale tool-btn-Mass bleibt unangetastet. */
+    btn.classList.toggle('g4m-btn-longlabel', label.length > 8);
 }
 
 function updateCanvasBackground() {
@@ -5857,7 +6184,7 @@ function createModeDropdown() {
             fn.textContent = G4M_MODE_BUTTONS[mode].replace('-btn', '').toUpperCase();
             const name = document.createElement('span');
             name.className = 'g4m-dd-name';
-            name.textContent = G4M_MODE_NAMES[mode] || '';
+            name.textContent = g4mModeName(mode);   // F2 nennt die Bauart (v156.0)
             item.appendChild(fn);
             item.appendChild(name);
 
@@ -6086,9 +6413,14 @@ document.getElementById('drawing-btn').addEventListener('click', function () {
         if (toolsRect && toolsRect.height > 0) {
             const u = toolsRect.height / 12;
             const bRect = drawingBtn.getBoundingClientRect();
-            dropdown.style.top    = (bRect.top - u * 4) + 'px';
+            /* Höhe = 1u je Eintrag (v155.7): die Zahl der Anzeige-Modi
+               ist gewachsen, die frühere feste 4u-Rechnung hätte den
+               letzten Eintrag abgeschnitten. Die Klasse steuert nur
+               das Layout (Spalte, oben bündig), nicht die Höhe. */
+            const ddH = u * G4M_DISPLAY_MODES.length;
+            dropdown.style.top    = (bRect.top - ddH) + 'px';
             dropdown.style.bottom = 'auto';
-            dropdown.style.height = (u * 4) + 'px';
+            dropdown.style.height = ddH + 'px';
             dropdown.classList.add('g4m-dd-4u');
         }
         G4M_DISPLAY_MODES.forEach(function (mode) {
@@ -6098,7 +6430,7 @@ document.getElementById('drawing-btn').addEventListener('click', function () {
 
             item.addEventListener('click', function () {
                 g4mStore.set('currentDisplayMode', mode.value);
-                setDrawingButtonLabel(drawingBtn, mode.label);
+                setDrawingButtonLabel(drawingBtn, mode.short || mode.label);
                 close();
                 if (storedCurveParameters.length > 0) {
                     redrawStoredImage();
@@ -6434,6 +6766,86 @@ function initializeSuperformPanel() {
     if (obBtn) obBtn.addEventListener('click', applyGoodDefaults);
 }
 
+/* ── Spiral-Bauart wählen (v156.0) ────────────────────────────────
+   Menü an der Stelle, an der F1 «Optimal Boundaries» hat: 2u breit
+   wie sein Anker, 4u hoch, wächst nach oben. Die Einträge entstehen
+   aus G4M_SPIRALS — eine neue Bauart erscheint hier von selbst.
+   Nutzt die zentrale Dropdown-Mechanik (Toggle, Klick nach aussen,
+   Tastaturpfad aus Befund 16) wie alle anderen Menüs. */
+function createSpiralDropdown() {
+    const anchor = document.getElementById('arch-spiral-type-btn');
+    if (!anchor) return;
+    g4mToggleDropdown('arch-spiral-dropdown', anchor, function (dropdown, close) {
+        /* Geometrie aus der Live-Messung wie beim Formel-Menü: 1u =
+           Panel-Höhe / 12. Oben verankert (Unterkante = Button-
+           Oberkante), damit das Menü exakt am Raster sitzt. */
+        const panel = document.getElementById('archimedean-panel');
+        const pRect = panel ? panel.getBoundingClientRect() : null;
+        const aRect = anchor.getBoundingClientRect();
+        const u = (pRect && pRect.height > 0) ? pRect.height / 12 : aRect.height;
+        dropdown.style.left   = aRect.left + 'px';
+        dropdown.style.top    = (aRect.top - u * 4) + 'px';
+        dropdown.style.bottom = 'auto';
+        dropdown.style.width  = aRect.width + 'px';
+        dropdown.style.height = (u * 4) + 'px';
+
+        Object.keys(G4M_SPIRALS).forEach(function (key) {
+            const sp = G4M_SPIRALS[key];
+            const ready = typeof sp.radius === 'function';
+            const item = document.createElement('div');
+            item.className = 'g4m-sp-item'
+                + (ready ? '' : ' g4m-sp-soon')
+                + (g4mState.spiralType === key ? ' g4m-dd-active' : '');
+
+            const name = document.createElement('span');
+            name.className = 'g4m-sp-name';
+            name.textContent = sp.name;
+            const formula = document.createElement('span');
+            formula.className = 'g4m-sp-formula';
+            formula.textContent = sp.formula;
+            item.appendChild(name);
+            item.appendChild(formula);
+
+            if (ready) {
+                item.addEventListener('click', function () {
+                    close();
+                    g4mSetSpiralType(key);
+                });
+            } else {
+                /* Noch keine Formel dahinter — nicht wählbar (v155.6-
+                   Linie: lieber kein Bild als das der falschen Formel). */
+                item.setAttribute('aria-disabled', 'true');
+            }
+            dropdown.appendChild(item);
+        });
+    });
+}
+
+/* Bauart umschalten: Zustand setzen, die zur Bauart gehörenden
+   Parametergrenzen anwenden und alle Beschriftungen nachziehen. Ein
+   vorhandenes Bild wird NICHT automatisch neu erzeugt — der User
+   entscheidet mit Go, wann die neue Spirale erscheint. */
+function g4mSetSpiralType(key) {
+    if (!G4M_SPIRALS[key] || g4mState.spiralType === key) return;
+    g4mStore.set('spiralType', key);
+    setArchDefaults();      // a, b, N der neuen Bauart (siehe g4mSpiralDefaults)
+    g4mSyncSpiralUi();
+}
+
+/* Beschriftungen, die die Bauart nennen: Button, Panel-Titel und der
+   Modus-Indikator der Tools-Zeile. EINE Stelle, von Umschalten,
+   Panel-Öffnen und Sitzungs-Wiederherstellung gleichermassen genutzt. */
+function g4mSyncSpiralUi() {
+    const name = g4mSpiralName();
+    const btn = document.getElementById('arch-spiral-type-btn');
+    if (btn) btn.textContent = name;
+    const title = document.getElementById('arch-panel-title');
+    if (title) title.textContent = name + ' Spiral Parameters';
+    if (g4mState.activeDrawingMode === 'archimedean') {
+        g4mApplyModeOptics('archimedean');   // Indikator zeigt die Bauart
+    }
+}
+
 /* updateF1ButtonColor(isPanelVisible) entfiel (Befund 28): F1
    folgte als einziger Button der PANEL-Sichtbarkeit statt dem
    Modus — die Wurzel der Asymmetrie. Button-Optik liegt jetzt
@@ -6561,7 +6973,10 @@ function hideSuperformulaPanel() {
 }
 
 function setArchDefaults() {
-    const d = G4M_DEFAULTS.archPanel;
+    /* Vorgaben der aktiven Spiral-Bauart über die gemeinsamen F2-
+       Vorgaben gelegt (v156.0): a, b und N unterscheiden sich je
+       Bauart, alles Übrige ist geteilt. */
+    const d = g4mSpiralDefaults();
 
     // Tool-Panel Defaults für Archimedean
     Object.keys(d.sliders).forEach(function (id) {
@@ -6574,6 +6989,16 @@ function setArchDefaults() {
     // Parametergrenzen in EINEM Store-Patch setzen; die Slider- und
     // Anzeige-Synchronisation läuft im selben Durchgang mit
     g4mStore.patchArch(function (p) {
+        /* a — Grenzen in den Store (v156.1). Zuvor setzte setArchDefaults
+           NUR die beiden Regler und ihre Anzeige (_archSlider schreibt
+           bewusst kein State); die Grenzen im Store blieben unberührt.
+           Bei der archimedischen Spirale fiel das nie auf, weil Vorgabe
+           und Store-Startwert beide 0…0 lauten. Die logarithmische
+           entlarvte es: dort ist a der SKALENFAKTOR — mit a = 0 wird
+           r = 0·e^(b·θ) = 0, alle Punkte fallen in den Mittelpunkt und
+           es erscheint nichts. */
+        p.a.min = d.a.min; p.a.max = d.a.max;
+
         // b — Fein
         p.b.useFine = d.b.useFine;
         p.b.min = d.b.min; p.b.max = d.b.max;
@@ -6798,6 +7223,8 @@ function g4mSyncDomFromStore() {
 
     // Canvas-Hintergrund nachziehen
     if (typeof updateCanvasBackground === 'function') updateCanvasBackground();
+    // Bauart-Beschriftungen nach dem Wiederherstellen (v156.0)
+    if (typeof g4mSyncSpiralUi === 'function') g4mSyncSpiralUi();
 }
 
 function showArchimedeanPanel() {
@@ -6805,6 +7232,7 @@ function showArchimedeanPanel() {
     // ist eine persistente Nutzerwahl (Start-Default kommt aus dem Store).
     // Parameter-Defaults weiterhin nur beim ersten Öffnen.
     g4mInitPanelOnce('archimedean', setArchDefaults);
+    g4mSyncSpiralUi();          // Bauart-Beschriftungen (v156.0)
     closeAllPanels('archimedean-panel');
     const panel = document.getElementById('archimedean-panel');
     if (!panel) return;
@@ -8449,14 +8877,6 @@ function initNavigation() {
 /* §6 ─ ARCHIMEDEAN-MODUL (→ archimedean.js) ─────────────────────────
    Slider, Fein/Grob, Presets, Modulation, Farben
    ──────────────────────────────────────────────────────────────────── */
-function archCalcPts(a, b, alphaDeg, betaDeg, n) {
-    const pts = [], br = betaDeg * Math.PI / 180, tm = alphaDeg * Math.PI / 180;
-    for (let i = 0; i <= n; i++) {
-        const th = br + tm * i / n, r = a + b * th;
-        pts.push({ x: r * Math.cos(th), y: r * Math.sin(th) });
-    }
-    return pts;
-}
 
 // Archimedean-Vorschau (offener Spiralzug) — derselbe Maler
 function archPaintPts(c, pts, w, h) {
@@ -8523,19 +8943,10 @@ function archCalcRealPts(prm) {
     const betaRad  = prm.beta  * Math.PI / 180;
     const alphaRad = prm.alpha * Math.PI / 180;
     const nSteps   = Math.max(2, Math.round(prm.nSteps || 200));
-    const mod = g4mState.archModulation;
     const pts = [];
     for (let i = 0; i <= nSteps; i++) {
         const theta = betaRad + i * alphaRad;
-        let r = prm.a + prm.b * theta;
-        if (mod && mod.enabled) {
-            let mv = 0;
-            const tt = theta * mod.freq;
-            if      (mod.type === 'sin') mv = mod.strength * Math.sin(tt);
-            else if (mod.type === 'cos') mv = mod.strength * Math.cos(tt);
-            else if (mod.type === 'tan') mv = mod.strength * Math.max(Math.min(Math.tan(tt), 1), -1);
-            r *= (1 + mv);
-        }
+        const r = g4mSpiralRadius(prm.a, prm.b, theta);   // Bauart + Modulation (v156.0)
         pts.push({ x: r * Math.cos(theta), y: r * Math.sin(theta) });
     }
     return pts;
@@ -8684,6 +9095,14 @@ function initArchimedeanModule() {
             if (g4mState.homeCoversOn) g4mHideHomeCovers();
             // OHNE prepare → Panel bleibt offen, kein Wechsel zur Canvas
             generateSuperformulas({ skipPrepare: true });
+        });
+
+        /* Spiral-Bauart (v156.0): öffnet das Menü. stopPropagation wie
+           beim Baby-Go — der Klick darf nicht ans Panel durchfallen. */
+        const spiralBtn = document.getElementById('arch-spiral-type-btn');
+        if (spiralBtn) spiralBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            createSpiralDropdown();
         });
     })();
 
