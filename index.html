@@ -134,8 +134,9 @@ Kontakt: dd@danidubs.ch
 
         /* Canvas Tools Panel Styles */
         .tool-btn {
+            box-sizing: border-box;   /* Kerbe rechnet nach innen (v156.7) */
             background-color: #e0e0e0;
-            border: 1px solid #bdbdbd;
+            border: var(--g4m-notch) solid var(--g4m-notch-tool);   /* Breite 0 (v157.0) */
             color: #666666;
             font-family: 'JetBrains Mono', monospace;
             font-size: 14px;
@@ -224,7 +225,7 @@ Kontakt: dd@danidubs.ch
         .g4m-rnd-btn {
             box-sizing: border-box;
             background-color: #e0e0e0;
-            border: 1px solid #bdbdbd;
+            border: var(--g4m-notch) solid var(--g4m-notch-tool);
             color: #666666;
             font-family: 'JetBrains Mono', monospace;
             font-size: clamp(9px, calc(var(--u) * 0.269), 14px);
@@ -243,9 +244,11 @@ Kontakt: dd@danidubs.ch
            den Rasterflächen vorbehalten) mit weisser Schrift: gleiche
            Aktiv-Logik wie On/Off/Sin/Cos/Tan auf F1/F2. */
         .g4m-rnd-btn.g4m-rnd-selected { color: #ffffff; }
-        .g4m-rnd-btn.g4m-rnd-selected.g4m-rnd-sel-green  { background-color: #4CAF50; border-color: #3D8C40; }
-        .g4m-rnd-btn.g4m-rnd-selected.g4m-rnd-sel-orange { background-color: #FFB74D; border-color: #CC923E; }
-        .g4m-rnd-btn.g4m-rnd-selected.g4m-rnd-sel-blue   { background-color: #2196F3; border-color: #1A78C2; }
+        /* Kein eigener Rahmenton mehr (v156.7) — die Kerbe gehoert der
+           Flaeche, nicht dem gewaehlten Knopf. */
+        .g4m-rnd-btn.g4m-rnd-selected.g4m-rnd-sel-green  { background-color: #4CAF50; }
+        .g4m-rnd-btn.g4m-rnd-selected.g4m-rnd-sel-orange { background-color: #FFB74D; }
+        .g4m-rnd-btn.g4m-rnd-selected.g4m-rnd-sel-blue   { background-color: #2196F3; }
 
         /* F6-F10 + Vollbild-Slot: orientierungsabhängige Platzierung
            (v150f). Standard = Quer-/Desktop-Format: F1-F10 lückenlos,
@@ -289,7 +292,7 @@ Kontakt: dd@danidubs.ch
             position: relative;
             box-sizing: border-box;
             background-color: #e0e0e0;
-            border: 1px solid #bdbdbd;
+            border: var(--g4m-notch) solid var(--g4m-notch-tool);
             font-family: 'JetBrains Mono', monospace;
             display: flex;
             flex-direction: column;
@@ -351,7 +354,7 @@ Kontakt: dd@danidubs.ch
             grid-row: 9 / 12;
             box-sizing: border-box;
             background-color: #e0e0e0;
-            border: 1px solid #bdbdbd;
+            border: var(--g4m-notch) solid var(--g4m-notch-tool);
             display: flex;
             flex-direction: column;
             padding: calc(var(--u) * 0.15) calc(var(--u) * 0.1);
@@ -389,24 +392,63 @@ Kontakt: dd@danidubs.ch
         .g4m-param-editor .slider-top-row {
             grid-template-columns: 1fr 48px var(--g4m-val-w);
             padding-bottom: calc(var(--u) * 0.3);
+            /* Beschriftungszeile auf die Titelzeile von F1/F2 heben
+               (v157.7): den Betrag misst g4mAlignRailsToTool nach und
+               setzt --g4m-toprow-shift auf dem Editor — translate
+               verschiebt nur die Zeile, die Rail darunter (der Anker
+               der Panel-Angleichung) bleibt liegen. */
+            transform: translateY(var(--g4m-toprow-shift, 0px));
         }
         .g4m-param-editor .slider-top-row.no-radio {
             grid-template-columns: 1fr var(--g4m-val-w);
         }
+        /* Wertefeld baugleich zum F1-/F2-Wertefeld (v157.8): gleicher
+           Innenabstand (0/4) und gleiche Flex-Konstruktion (Text
+           rechtsbündig, vertikal zentriert) wie g4m-val-box. Breite
+           und Höhe misst g4mAlignRailsToTool am GERENDERTEN Panel-
+           Wertefeld nach und setzt sie als --g4m-val-w/--g4m-val-h
+           auf dem Editor — die Panels sind transform-skaliert, eine
+           reine CSS-Übernahme der Panel-Masse träfe die gerenderte
+           Grösse daher nicht. Die Fallbacks (76px-Spalte, Feldhöhe
+           aus --g4m-arch-field-h) gelten, solange noch kein Panel
+           geöffnet war. */
         .g4m-param-editor .value-display {
-            padding: 4px 8px;
+            padding: 0 4px;
             box-sizing: border-box;
             width: var(--g4m-val-w);
             min-width: 0;
+            height: var(--g4m-val-h, var(--g4m-arch-field-h));
+            display: flex; align-items: center; justify-content: flex-end;
+        }
+        /* Rail-Zeile wie der F1-/F2-Zeilenbau (v157.9): Rail links,
+           Wertefeld rechts daneben, beide vertikal zentriert — das
+           Zentrum des Eingabefelds liegt damit exakt auf der Rail-
+           Linie, und die Rail endet wie auf F1/F2 um Feldspalte plus
+           Fuge (--g4m-arch-col-gap) vor der rechten Kante. */
+        .g4m-param-editor .slider-bottom-row {
+            display: grid;
+            grid-template-columns: 1fr var(--g4m-val-w);
+            column-gap: var(--g4m-arch-col-gap);
+            align-items: center;
         }
         /* EINE Typografie für alle Beschriftungen in Raster und
            Editor (v150o): Button-Schriftgrösse, fett — vorher
            liefen Random/On/Off (11px), Wertefeld (15px) und die
-           Normalization-Anzeige (11px) auseinander. */
+           Normalization-Anzeige (11px) auseinander.
+           REPARIERT (v157.6): Die Selektorliste lief ohne eigenen
+           Deklarationsblock in die .sliders-container-Regel hinein —
+           die Beschriftungen bekamen dadurch Flex-Layout statt der
+           Button-Typografie und fielen auf 11px/normal zurück
+           («kleiner und heller»). Jetzt wieder ein eigener Block. */
         .g4m-param-sq .g4m-sq-label,
         .g4m-param-sq .g4m-sq-value,
         .g4m-param-editor .slider-label,
-        .g4m-param-editor .value-display,
+        .g4m-param-editor .value-display {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(10px, calc(var(--u) * 0.269), 14px);
+            font-weight: 700;
+            color: #666666;
+        }
         /* Im Editor kein 14-Zeilen-Raster mehr — die Zeilen liegen
            gestapelt, genau eine ist sichtbar (v150k) */
         .sliders-container {
@@ -526,7 +568,7 @@ Kontakt: dd@danidubs.ch
 
         /* Navigation Tool Styles */
         .nav-btn {
-            border: none;
+            /* Randlos (v156.8) — gesetzt im Randlos-Block weiter unten */
             color: white;
             font-family: 'JetBrains Mono', monospace;
             font-size: 14px;
@@ -602,10 +644,24 @@ Kontakt: dd@danidubs.ch
             justify-content: center;
             font-size: 24px;
             color: #333;
+            transition: background-color 0.15s ease;   /* wie tool-btn (v157.6) */
         }
 
+        /* Hover-/Druck-Feedback wie die Buttons daneben (v157.6):
+           Vorher dunkelte der Hover nur hauchzart ab (rgba 5%) und ein
+           Druck blieb ohne Relief-Antwort — dadurch wirkte das D-Pad
+           anders als seine Nachbarn. Jetzt: Hover im selben Ton wie
+           tool-btn (#e0e0e0 → #d0d0d0), und beim Drücken eines Pfeils
+           sinkt die GANZE Kachel mit --g4m-press ein — das D-Pad ist
+           EIN Bedienfeld, also drückt es auch als eines. */
         .dpad-btn:hover {
-            background-color: rgba(0,0,0,0.05);
+            background-color: #d0d0d0;
+        }
+        .dpad-btn:active {
+            background-color: #d0d0d0;
+        }
+        .dpad:has(.dpad-btn:active) {
+            box-shadow: var(--g4m-press);
         }
 
         /* Loading indicator */
@@ -793,13 +849,149 @@ Kontakt: dd@danidubs.ch
             /* F2-Rasterlinien + Hover: gleiche Blau-Familie wie das Panel,
                nur dunkler — analog zum Tool-Panel (hellgraue Felder mit
                etwas dunkleren grauen Linien). */
-            --g4m-arch-line:  #7FB4E0;   /* Rasterlinien: dunkleres Panel-Blau */
+            --g4m-arch-line:  var(--g4m-hair);   /* Rasterlinie F2 — seit v156.9 die gemeinsame Haarlinie */
             --g4m-arch-hover: #9BCAF5;   /* Button-Hover: leicht abgedunkeltes Panel-Blau */
             /* F1-Rasterlinien + Hover (v153.1): gleiche Grün-Familie wie
                das Superformula-Panel, nur dunkler — exakt analog zu den
                F2-Blau-Ableitungen darüber. */
-            --g4m-sf-line:  #A9D97B;     /* Rasterlinien: dunkleres Panel-Grün */
+            --g4m-sf-line:  var(--g4m-hair);     /* Rasterlinie F1 — seit v156.9 die gemeinsame Haarlinie */
             --g4m-sf-hover: #C9F096;     /* Button-Hover: leicht abgedunkeltes Panel-Grün */
+            /* ── HAARLINIEN-RASTER (v156.9) ────────────────────────────
+               Die Buttons bleiben randlos im Sinne von v156.8 — sie
+               tragen keine Umrandung, keine Kerbe, keine Fuge. Das
+               Raster wird nur noch ANGEDEUTET: EINE dunkelgraue
+               Haarlinie zwischen benachbarten Feldern, app-weit
+               derselbe Ton, auf grauem, grünem und blauem Grund
+               gleichermassen. Wo Flächen zusammengehören (Titelfeld,
+               Viz-Fenster, Go), verläuft keine Linie hindurch — gezeichnet
+               wird immer nur die Kante zwischen ZWEI Feldern.
+
+               ZWEI STELLSCHRAUBEN, sonst nichts:
+
+                 --g4m-hair   Ton der Linie. Feiner wirkt heller
+                              (#8f8f8f), härter dunkler (#666666).
+                 --g4m-notch  HALBE Linienbreite. Jedes Feld zeichnet
+                              seine eigene Kante; zwei Nachbarn stossen
+                              aneinander und ergeben zusammen die volle
+                              Breite. 0.5px ergibt daher die echte
+                              1px-Haarlinie zwischen Feldern (und eine
+                              halbe am Panelrand). 0 schaltet das Raster
+                              vollständig ab — der randlose Zustand aus
+                              v156.8. 1px verdoppelt auf eine deutliche
+                              2px-Linie.
+
+               Weil box-sizing:border-box überall greift, ändert die
+               Linienbreite die Zellgeometrie des u-Rasters nicht — in
+               keiner der drei Stellungen.
+
+               Was hier NICHT mitgeschaltet wird, steht bei .g4m-tc-cell
+               (Raster der Tools-Abdeckung): das ist eine gezeichnete
+               Andeutung der verdeckten Buttons, kein Button-Rand — und
+               es liegt auf Weiss, wo ein dunkler Ton schreien würde. */
+            --g4m-hair:       #7a7a7a;
+            --g4m-notch:      0;          /* Raster AUS — absolut randlos (v157.0) */
+            --g4m-notch-tool: var(--g4m-hair);
+            --g4m-notch-nav:  var(--g4m-hair);
+
+            /* ── PLASTISCHE KACHELN (v157.0) ───────────────────────────
+               Getrennt wird weder durch Linie noch durch Fuge, sondern
+               durch FORM. Jede Kachel behält ihre eigene Farbe bis
+               exakt an die Grenze zum Nachbarn; ihre Ränder sind
+               abgerundete Schultern, die eine Lichtquelle links oben
+               modelliert: oben und links eine helle Kante, unten und
+               rechts eine dunkle. Wo zwei Kacheln aneinanderstossen,
+               trifft die dunkle Schulter der einen auf die helle der
+               anderen — die Trennung entsteht als Schattenwurf, nicht
+               als gezeichneter Strich. Kein schwarzer Trennstrich, kein
+               Hintergrund, der dazwischen durchscheint.
+
+               Umgesetzt als zwei INNENLIEGENDE Schatten. Innenliegend
+               ist wesentlich: sie bleiben in der Kachel und schieben
+               nichts, die Zellgeometrie des u-Rasters bleibt exakt
+               dieselbe wie im randlosen Zustand.
+
+               Bewusst OHNE border-radius: eine echte Eckenrundung
+               würde an den Kreuzungspunkten von je vier Kacheln den
+               Untergrund freilegen — im Navigation Tool wäre das der
+               Seitenhintergrund, also genau die hellen Löcher, die
+               vermieden werden sollen. Die Rundung ist rein durch die
+               Schattierung erzählt.
+
+               EINE STELLSCHRAUBE für die Reliefhöhe (v157.1):
+               --g4m-relief skaliert alle vier Kennwerte gemeinsam —
+               Schulterbreite, Weichheit UND die Deckkraft von Licht
+               und Schatten. Nur so sinkt die Kachel wirklich flacher
+               ein; würde man allein den Versatz kürzen, bliebe die
+               Schattierung gleich kräftig und der Effekt gleich laut.
+                 1     = volle Plastik (aktuell, seit v157.2 wieder)
+                 0.667 = ein Drittel flacher (v157.1)
+                 0     = flach, die randlose Variante aus v156.8
+               Die Grundwerte darunter beschreiben weiterhin die volle
+               Plastik; wer die PROPORTION ändern will (etwa weichere
+               Schulter bei gleicher Höhe), rührt dort und lässt den
+               Faktor in Ruhe. Die Untergrenzen max(1px…)/max(2px…)
+               halten das Relief auf kleinen Bildschirmen sichtbar,
+               wo der u-Anteil sonst unter ein Bildpunkt fiele. */
+            --g4m-relief:      1;
+            --g4m-bevel:       max(1px, calc(var(--u) * 0.045 * var(--g4m-relief)));
+            --g4m-bevel-blur:  max(2px, calc(var(--u) * 0.11  * var(--g4m-relief)));
+
+            /* ── LICHT UND SCHATTEN (v157.4) ───────────────────────────
+               Zwei Lagen, wie in v157.2: Licht oben links, Schatten
+               unten rechts. v157.3 hatte das Licht ganz gestrichen —
+               falsch, denn eine reine Abdunkelung KANN keine beleuchtete
+               Schulter zeigen; ohne Aufhellung fehlt der Kachel die
+               obere Kante und das Relief kippt zur flachen Platte mit
+               Schlagschatten. Das Licht ist zurück, nur halb so stark.
+
+               Warum die beiden Lagen sich verschieden verhalten:
+
+               SCHATTEN, rgba(0,0,0,a), ergibt über einer Fläche genau
+               Farbe × (1 − a) — alle drei Kanäle im selben Verhältnis.
+               Farbton und Sättigung bleiben damit exakt erhalten, nur
+               die Helligkeit sinkt. Der Schatten ist von Natur aus
+               farbtreu; ein grüner Knopf schattet grün ab.
+
+               LICHT lässt sich in CSS nicht farbtreu machen: jede
+               Aufhellung über eine Deckschicht zieht die Kanäle Richtung
+               der Deckfarbe. Weiss ist dabei die richtige Wahl — ein
+               Glanzlicht trägt die Farbe der LICHTQUELLE, nicht die des
+               Körpers. Entscheidend ist die Dosis. Bei 0.45 (v157.2)
+               stieg die Helligkeit so weit, dass die Buntheit sichtbar
+               wegbrach und die Kante grau anlief. Bei 0.22 bleibt die
+               Modellierung erhalten, die Farbe aber erkennbar sie
+               selbst: #4CAF50 wird zu #73C176 — heller, gleicher
+               Farbton, gleiche Sättigung.
+
+               ENTSCHIEDEN (v157.5): kräftiges Licht. Der Vergleich am
+               Bildschirm fiel eindeutig aus — die Modellierung wiegt
+               schwerer als die leichte Entfärbung, die ein starkes
+               Glanzlicht kostet. Die Werte sind exakt die aus v157.2.
+               Die Kette zum Nachvollziehen:
+                 0    = gar kein Licht, flache Platte     (v157.3)
+                 0.22 = zurückhaltend, aber zu matt        (v157.4)
+                 0.45 = kräftig, aktuell                   (v157.2/157.5)
+
+               DIE ZWEI DOSEN als eigene Stellschrauben, beide zusätzlich
+               von --g4m-relief skaliert:
+                 --g4m-light-a  Glanzlicht oben links. Hebt die
+                                Helligkeit und kostet dabei etwas
+                                Buntheit — das ist der Preis, den CSS
+                                für eine Aufhellung verlangt.
+                 --g4m-dark-a   Gegenstück auf der Schattenseite; darf
+                                bedenkenlos hoch, es entfärbt nichts. */
+            --g4m-light-a:     0.45;
+            --g4m-dark-a:      0.20;
+            --g4m-bevel-light: rgba(255, 255, 255, calc(var(--g4m-light-a) * var(--g4m-relief)));
+            --g4m-bevel-dark:  rgba(0, 0, 0, calc(var(--g4m-dark-a) * var(--g4m-relief)));
+            /* erhaben — Ruhezustand jeder Kachel */
+            --g4m-raise:
+                inset var(--g4m-bevel) var(--g4m-bevel) var(--g4m-bevel-blur) var(--g4m-bevel-light),
+                inset calc(var(--g4m-bevel) * -1) calc(var(--g4m-bevel) * -1) var(--g4m-bevel-blur) var(--g4m-bevel-dark);
+            /* eingedrückt — dieselbe Lichtquelle, Schulter andersherum */
+            --g4m-press:
+                inset var(--g4m-bevel) var(--g4m-bevel) var(--g4m-bevel-blur) var(--g4m-bevel-dark),
+                inset calc(var(--g4m-bevel) * -1) calc(var(--g4m-bevel) * -1) var(--g4m-bevel-blur) var(--g4m-bevel-light);
             /* ── EINE Quelle für die Slider-Optik (v153.1) ──────────────
                Griffgrösse und Rail-Stärke aller Slider (Tool-Panel-Editor,
                F1- und F2-Slider-Feld) — vorher liefen 30px (Tool), 18px
@@ -913,16 +1105,21 @@ Kontakt: dd@danidubs.ch
         #superformel-panel .g4m-arch-cell.g4m-arch-botmod-active {
             background-color: #7A9A5C;   /* dunkleres, leicht «schmutziges» Panel-Grün */
             color: #ffffff;
-            border-color: #62804A;
         }
         /* Aktives Parameter-Quadrat auf F1 (v153.1e): Grün-Pendant zur
            F2-Blau-Regel oben — gleiche Spezifität wie die Zellregel,
            spätere Position entscheidet. */
         #superformel-panel .g4m-arch-sq.g4m-arch-sq-active {
             background-color: #7A9A5C;
-            border-color: #62804A;
         }
         #superformel-panel .g4m-arch-viz { border-color: var(--g4m-sf-line); }
+        /* Kerbenfarbe des F1-Panels auch dort, wo die generischen Regeln
+           den F2-Blauton setzen (v156.7): Baby-Go ist von der Zellregel
+           oben ausgenommen (er behält sein Rot), Fine/Coarse und die
+           Preset-Knöpfe stehen frei im Slider-Feld. */
+        #superformel-panel .g4m-arch-babygo,
+        #superformel-panel .g4m-arch-segbtn,
+        #superformel-panel .g4m-arch-presetbtn { border-color: var(--g4m-sf-line); }
         /* Reihe 1: Page-2-Button links, Formula rechts — Format und
            Schrift wie Page-2-/Formula-Button des F2-Panels. */
         #sf-options-btn.g4m-arch-cell,
@@ -1103,6 +1300,10 @@ Kontakt: dd@danidubs.ch
 #g4m-tools-cover[data-stage="grid"] .g4m-tc-grid { opacity: 1; }
 .g4m-tc-cell {
   box-sizing: border-box;
+  /* AUSNAHME von der Randlosigkeit (v156.8): Dieses Raster ist kein
+     Button-Rand, sondern die einzige Andeutung, dass unter der weissen
+     Abdeckung überhaupt Bedienfelder liegen. Es bleibt darum eine
+     gezeichnete Linie und hängt bewusst nicht an --g4m-notch. */
   border: 1px solid #ececec;   /* feine hellgraue Linie auf Weiss */
 }
 /* «Tools»-Button an der Stelle des Defaults-Quadrats (Raster-Zeile 3,
@@ -1111,7 +1312,7 @@ Kontakt: dd@danidubs.ch
 #g4m-tools-release {
   box-sizing: border-box;
   background-color: #e0e0e0;
-  border: 1px solid #bdbdbd;
+  border: var(--g4m-notch) solid var(--g4m-notch-tool);
   color: #666666;
   font-family: 'JetBrains Mono', monospace;
   font-size: clamp(11px, calc(var(--u) * 0.3), 18px);
@@ -1218,7 +1419,13 @@ Kontakt: dd@danidubs.ch
   transform: scale(1.1);
 }
 
-/* — Rahmen-/Outline-Reset für Navigation Tool und Buttons — */
+/* — Rahmen-/Outline-Reset für Navigation Tool und Buttons —
+   v156.7: Das pauschale `border: none !important` ist hier entfallen.
+   Es war gegen Browser-Vorgaben gerichtet, hätte aber auch die Kerben
+   der Nav-Buttons unterdrückt — und genau die sollen das Navigation
+   Tool an dieselbe Design-Logik anschliessen wie Tool-Panel, F1 und
+   F2. Der Outline-Reset bleibt; Rahmen werden jetzt gezielt gesetzt
+   (Kerbe) bzw. gezielt gelöscht (D-Pad-Pfeile, s. u.). */
 .navigation-tool,
 .navigation-tool *,
 .app-container > div,
@@ -1228,7 +1435,30 @@ Kontakt: dd@danidubs.ch
 .nav-btn,
 [class^="btn-"] {
     outline: none !important;
+}
+/* Innerhalb des D-Pads bleibt es rahmenlos OHNE Kerbe: die vier Pfeile
+   sind Teile EINES Bedienfelds, keine vier einzelnen Kacheln. Gekerbt
+   wird das D-Pad als Ganzes (Regel darunter). */
+.dpad-btn,
+.dpad-btn * {
     border: none !important;
+}
+
+/* ── Navigation Tool: randlos wie eh und je (v156.8) ──────────────
+   Die Regel ist hier nur noch der Anschluss an den gemeinsamen
+   Schalter: bei --g4m-notch = 0 ist sie wirkungslos, das Navigation
+   Tool sieht exakt aus wie vor v156.7. Sie steht trotzdem, damit die
+   Nav mitzieht, falls die Fugen je wieder eingeschaltet werden — der
+   Ton ist bewusst EIN neutraler für alle Nav-Farben; bekäme jeder
+   Knopf seine eigene abgedunkelte Fuge, zerfiele die Leiste in elf
+   einzeln gerahmte Objekte statt EIN Feld. Go und D-Pad spannen
+   mehrere Rasterzellen und bekämen genau eine Fuge um ihre Gesamt-
+   fläche, nicht um jede überspannte Zelle. .navigation-tool .tool-btn
+   (Vollbild-Slot/Platzhalter) fährt über die .tool-btn-Regel mit. */
+.nav-btn,
+.dpad {
+    box-sizing: border-box;
+    border: var(--g4m-notch) solid var(--g4m-notch-nav);
 }
 
 /* Pseudo-Elemente des Navigation Tools unterdrücken */
@@ -1692,7 +1922,7 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
         .g4m-arch-cell {
             box-sizing: border-box;
             background-color: var(--g4m-mode-color-archimedean);
-            border: 1px solid var(--g4m-arch-line);   /* Rasterlinien: dunkleres Panel-Blau statt Grau (analog Tool-Panel) */
+            border: var(--g4m-notch) solid var(--g4m-arch-line);   /* Breite 0 (v157.0) */
             font-family: 'JetBrains Mono', monospace;
             color: #666666;
             margin: 0;
@@ -1758,7 +1988,6 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
         .g4m-arch-botmod-active {
             background-color: #5E8199;   /* dunkleres, leicht „schmutziges" Panel-Blau */
             color: #ffffff;
-            border-color: #4C6B80;
         }
         /* Page-2-Button (Reihe 1, Spalten 1-2) — Beschriftung wie tool-btn */
         #arch-options-btn.g4m-arch-cell {
@@ -1829,7 +2058,6 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
            für alle Parameter-Buttons. F1 überschreibt mit Grün (s. u.). */
         .g4m-arch-sq.g4m-arch-sq-active {
             background-color: #5E8199;
-            border-color: #4C6B80;
         }
         .g4m-arch-sq.g4m-arch-sq-active .g4m-arch-sq-letter,
         .g4m-arch-sq.g4m-arch-sq-active .g4m-arch-sq-vals { color: #ffffff; }
@@ -1838,7 +2066,6 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
         #archimedean-panel .g4m-arch-segbtn.g4m-on {
             background: #5E8199;
             color: #ffffff;
-            border-color: #4C6B80;
         }
         /* erste Rasterzeile fest auf Reihe 1 — deterministische Lage */
         #arch-sq-a, #arch-sq-b, #arch-sq-alpha, #arch-sq-beta, #arch-sq-n,
@@ -1874,14 +2101,27 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
             box-sizing: border-box;
             grid-row: 3 / 5;
             background-color: #000;
-            border: 1px solid var(--g4m-arch-line);
+            border: var(--g4m-notch) solid var(--g4m-arch-line);
             overflow: hidden;
+        }
+        /* Schwarze Haarlinie rechts/unten getilgt (v157.6): Die Panels
+           werden per Transform skaliert; bei der Subpixel-Rundung
+           zwischen dem schwarzen Fenster-Hintergrund und dem skalierten
+           Canvas blitzte am rechten und unteren Rand der Untergrund
+           hervor. Das Canvas wird um 2px übergroß gezogen — overflow:
+           hidden des Fensters schneidet den Überstand ab, der schwarze
+           Rand kann nirgends mehr durchscheinen. !important, weil die
+           Canvas-Größe inline im Markup steht. */
+        .g4m-arch-viz > canvas {
+            width:  calc(100% + 2px) !important;
+            height: calc(100% + 2px) !important;
         }
         .g4m-arch-viz-min { grid-column: 1 / 3; }   /* Spalten 1-2 (4u) */
         .g4m-arch-viz-max { grid-column: 3 / 5; }   /* Spalten 3-4 (4u) */
         .g4m-arch-viz-result { grid-column: 5 / 7; grid-row: 3 / 5; }  /* Spalten 5-6 (4u) */
         .g4m-arch-viz-label {
             position: absolute; bottom: 0; left: 0; right: 0;
+            z-index: 3;   /* über der Relief-Auflage (2) — Text bleibt klar (v157.2) */
             color: #fff; font-size: 12px; padding: 2px 5px 2px 8px;
             text-align: left; font-family: 'JetBrains Mono', monospace;
             pointer-events: none;
@@ -1923,16 +2163,21 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
             padding: var(--g4m-pad-top) var(--g4m-pad-x) 0 var(--g4m-pad-x);
             box-sizing: border-box;
         }
-        /* Schriftgrößen im Slider-Feld exakt wie im Tool-Panel-Editor */
+        /* Schriftgrößen im Slider-Feld exakt wie im Tool-Panel-Editor.
+           Seit v157.6 vollständig auf Button-Typografie gezogen:
+           gleicher 10px-Boden wie .tool-btn (war 9px) und fett für
+           ALLE Beschriftungen — vorher standen Titel (g4m-note-text)
+           und Wertefelder in normaler Schnittstärke neben den fetten
+           Min-/Max-Labels und wirkten dadurch heller. */
         .g4m-arch-editor .g4m-param-label-sm,
         .g4m-arch-editor .g4m-note-text,
         .g4m-arch-editor .g4m-val-box,
         .g4m-arch-editor .g4m-arch-segbtn,
         .g4m-arch-editor .g4m-arch-presetbtn {
-            font-size: clamp(9px, calc(var(--u) * 0.269), 14px);
+            font-size: clamp(10px, calc(var(--u) * 0.269), 14px);
+            font-weight: 700;
             color: #666666;
         }
-        .g4m-arch-editor .g4m-param-label-sm { font-weight: 700; }
 
         /* ── Gemeinsame Spaltengeometrie (v153b) ──────────────────────
            Feld-/Buttonbreite und -höhe EINE Quelle, damit Coarse-Button,
@@ -1969,7 +2214,12 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
         .g4m-arch-segbtn {
             box-sizing: border-box;
             height: var(--g4m-arch-field-h);
-            border: 1px solid #aaa;
+            /* VOLLE Haarlinie (v156.9): Fine/Coarse steht frei im Slider-
+               Feld, hat also keinen Nachbarn, der die zweite Hälfte
+               beisteuert — sonst wäre seine Kontur halb so kräftig wie
+               jede Rasterlinie. Bei --g4m-notch = 0 verschwindet sie
+               wie alles andere. */
+            border: calc(var(--g4m-notch) * 2) solid var(--g4m-arch-line);
             border-radius: 0;
             cursor: pointer;
             font-family: 'JetBrains Mono', monospace;
@@ -2034,11 +2284,102 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
             border-color: #4CAF50;
             background-color: #ffffff;
         }
+        /* Hover für Fine/Coarse und die Preset-Knöpfe (v156.8): seit
+           die Ränder weg sind, ist der Hover die einzige Rückmeldung,
+           dass ein Feld ein Knopf ist — beide hatten bisher keinen.
+           Richtung wie bei allen Buttons der App: abdunkeln (Wertefelder
+           hellen dagegen auf, das unterscheidet Feld von Knopf).
+           Der aktive Fine/Coarse-Knopf (g4m-on) ist ausgenommen, er
+           trägt bereits seine Aktivfarbe. */
+        .g4m-arch-segbtn:not(.g4m-on):hover,
+        .g4m-arch-presetbtn:hover { background: #e4e4e4; }
+        /* ── Wer die plastische Kachel trägt (v157.0) ─────────────────
+           Seit v157.2 trägt es JEDE Fläche der App — der Look lebt
+           davon, dass das Relief durchgehend da ist. Zwei Wege dorthin,
+           je nachdem, was in der Fläche liegt:
+
+           HIER, direkt als box-shadow: alles, dessen Inhalt den
+           Innenschatten durchscheinen lässt — Knöpfe und Rasterfelder,
+           die Schieberegler-Felder von Tool-Panel, F1 und F2 (ihre
+           Zeilen sind hintergrundlos) und die noch leeren Panels
+           F3-F10 (nur ein Wasserzeichen darin).
+
+           WEITER UNTEN, als ::after-Auflage: Flächen, die ein
+           deckendes Kind vollständig füllen — Canvas und die drei
+           Viz-Fenster je Panel. Ein Innenschatten des Elternteils
+           liegt UNTER dem Inhalt und wäre dort von der Zeichenfläche
+           übermalt. */
+        .tool-btn,
+        .g4m-rnd-btn,
+        .g4m-param-sq,
+        .g4m-arch-cell,
+        .g4m-param-editor,
+        .g4m-arch-segbtn,
+        .g4m-arch-presetbtn,
+        .nav-btn,
+        .dpad,
+        [data-panel-open],
+        #g4m-tools-release {
+            box-shadow: var(--g4m-raise);
+        }
+
+        /* ── Relief auch auf den Slider-Griffen (v157.6) ─────────────
+           Die Griffe tragen dieselbe Schulter wie die Buttons: die
+           eigenen Handle-Divs (Tool-Panel, Parameter-Editor) direkt,
+           die nativen Range-Thumbs im F1-/F2-Slider-Feld über ihre
+           Pseudo-Elemente. Webkit und Firefox brauchen GETRENNTE
+           Regeln — ein unbekannter Pseudo-Selektor in der Liste würde
+           die ganze Regel im jeweils anderen Browser entwerten. */
+        .slider-handle {
+            box-shadow: var(--g4m-raise);
+        }
+        input[type=range]::-webkit-slider-thumb {
+            box-shadow: var(--g4m-raise);
+        }
+        input[type=range]::-moz-range-thumb {
+            box-shadow: var(--g4m-raise);
+        }
+
+        /* ── Relief als Auflage (v157.2) ──────────────────────────────
+           Canvas und Viz-Fenster sind bis zum Rand von einer <canvas>
+           gefüllt; ein Innenschatten des Elternteils läge darunter und
+           bliebe unsichtbar. Die Auflage legt dieselbe Schulter ALS
+           EIGENE EBENE darüber. pointer-events:none, damit weder Klick
+           noch Zeiger etwas davon merken; position:absolute, damit sie
+           in den Flex-/Grid-Eltern nicht als Kind mitzählt.
+           Alle Träger sind bereits positioniert (relative bzw. fixed) —
+           die Auflage braucht keinen zusätzlichen Kontext. */
+        .canvas-container::after,
+        .g4m-arch-viz::after,
+        #sf-options-panel::after,
+        #arch-options-panel::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            box-shadow: var(--g4m-raise);
+            pointer-events: none;
+            z-index: 2;   /* über der Zeichenfläche, unter Ladeanzeige (1000) */
+        }
+        /* Drücken kehrt die Schulter um: dieselbe Lichtquelle, die
+           Kachel sinkt ein. Nur für das, was wirklich etwas auslöst —
+           Reserve- und Platzhalterfelder bleiben ruhig liegen. */
+        .tool-btn:not(.reserve-btn):not(.g4m-slot-blank):active,
+        .g4m-rnd-btn:active,
+        .g4m-param-sq:not(.g4m-sq-blank):active,
+        button.g4m-arch-cell:not(.g4m-arch-reserve):active,
+        .g4m-arch-segbtn:active,
+        .g4m-arch-presetbtn:active,
+        .nav-btn:active,
+        #g4m-tools-release:active {
+            box-shadow: var(--g4m-press);
+        }
+
         .g4m-arch-presets { display: flex; gap: 2px; margin-top: 3px; }
         .g4m-arch-presetbtn {
             box-sizing: border-box;
             height: var(--g4m-arch-field-h);
-            border: 1px solid #ccc; background: #f5f5f5; cursor: pointer;
+            /* volle Haarlinie wie Fine/Coarse — steht ebenfalls frei */
+            border: calc(var(--g4m-notch) * 2) solid var(--g4m-arch-line); background: #f5f5f5; cursor: pointer;
             font-family: 'JetBrains Mono', monospace;
             padding: 0 5px;
             display: inline-flex; align-items: center; justify-content: center;
@@ -2108,7 +2449,7 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
             box-sizing: border-box;
             background-color: #e53935;
             color: #fff;
-            border: 1px solid #c62828;
+            border: var(--g4m-notch) solid var(--g4m-arch-line);
             cursor: pointer;
             font-family: 'JetBrains Mono', monospace;
             font-weight: 700;
@@ -3709,7 +4050,146 @@ const sliderData = {
    versatz b hält die Polstelle bei \u03B8 = 0 aus dem Bild und gibt dem
    b-Regler eine Wirkung; ein harter Mindestnenner fängt auch die von
    Hand erreichbaren Grenzfälle ab. */
-const G4M_RELEASE = Object.freeze({ version: 'v156.5', date: '26.07.2026' });
+/* v156.6: Die Wahl einer Spiral-Bauart setzt nichts mehr zurück. Der
+   Umschalter rief bis dahin setArchDefaults — den vollen Erstöffnungs-
+   Satz des F2-Panels; damit fielen bei JEDEM Wechsel auch sämtliche
+   Tool-Panel-Regler samt Farben, Optimizer, Modulation und
+   Verbindungslinien auf ihre Vorgaben zurück. Angefasst werden jetzt
+   nur die Kurven-Blöcke, die die neue Bauart (oder zuvor die alte) in
+   ihrem Registry-Eintrag wirklich nennt. */
+/* v156.7: Randlose Buttons in der ganzen App. Kein Bedienelement trägt
+   mehr eine Umrandungslinie; getrennt werden die Felder durch KERBEN —
+   jede Kachel rückt um --g4m-notch nach innen, der freigelegte Streifen
+   zeigt die etwas dunklere Kerbenfarbe der Fläche. Tool-Panel, F1, F2
+   und Navigation Tool folgen derselben Logik; die Kerbe gehört immer
+   der Fläche, nie dem einzelnen (auch nicht dem aktiven) Knopf.
+   Geometrie unverändert: border-box rechnet die Kerbe nach innen, das
+   u-Raster bleibt auf den Pixel dasselbe. */
+/* v156.8: Absolut randlos. Die Kerben aus v156.7 lasen sich wie
+   aufgemalte Fugen, nicht wie echte Zwischenräume — die Trennbreite
+   --g4m-notch steht darum auf 0. Gleichfarbige Flächen stossen jetzt
+   in der ganzen App nahtlos aneinander, wie es das Navigation Tool
+   immer schon tat; wo ein Button liegt, verrät allein der Hover.
+   Fine/Coarse und die Preset-Knöpfe bekamen dafür einen Hover, den
+   sie bisher nicht hatten. Ausgenommen bleibt das Raster der Tools-
+   Abdeckung: es ist keine Button-Trennung, sondern die einzige
+   Andeutung der darunter verborgenen Bedienfelder. Der Schalter
+   bleibt erhalten — EIN Wert holt die Fugen zurück. */
+/* v156.9: Das Raster wird wieder angedeutet, aber als HAARLINIE statt
+   als Fuge: --g4m-notch auf 0.5px (die halbe Breite; zwei Nachbarn
+   ergeben zusammen die 1px-Linie) und EIN dunkelgrauer Ton --g4m-hair
+   für die ganze App. Die früheren Panel-Ableitungen --g4m-arch-line
+   (Blau) und --g4m-sf-line (Grün) zeigen jetzt auf diesen einen Ton;
+   die Variablen bleiben bestehen, damit panelweise Tönungen jederzeit
+   wieder möglich sind. Freistehende Knöpfe (Fine/Coarse, Presets)
+   zeichnen die doppelte Breite, weil ihnen der Nachbar fehlt. Ton und
+   Breite sind die einzigen zwei Stellschrauben. */
+/* v157.0: Die Trennung der Felder ist keine Zeichnung mehr, sondern
+   FORM. Zurück zur absolut randlosen Fläche aus v156.8 (--g4m-notch
+   auf 0) — jede Kachel behält ihre eigene Farbe bis an die Grenze zum
+   Nachbarn, es liegt weder Linie noch Fuge noch Hintergrund dazwischen.
+   Stattdessen trägt jede Kachel eine abgerundete Schulter, modelliert
+   von EINER Lichtquelle links oben: helle Kante oben/links, dunkle
+   unten/rechts, umgesetzt als zwei innenliegende Schatten. Wo zwei
+   Kacheln aneinanderstossen, trifft die dunkle Schulter der einen auf
+   die helle der anderen; die Trennung entsteht als Schattenwurf.
+   Drücken kehrt die Schulter um, die Kachel sinkt ein. Editor-Felder
+   und Viz-Fenster bleiben absichtlich flach — Flächen zum Hineinsehen,
+   keine Kacheln zum Drücken. Kein border-radius: eine echte Rundung
+   legte an den Kreuzungspunkten von vier Kacheln den Untergrund frei.
+   Geometrie unverändert, die Schatten liegen innen. */
+/* v157.1: Reliefhöhe um ein Drittel zurückgenommen — der Effekt wirkt
+   diskreter. Neu über EINEN Faktor --g4m-relief (0.667), der Schulter-
+   breite, Weichheit und die Deckkraft von Licht und Schatten gemeinsam
+   skaliert. Nur die gemeinsame Skalierung senkt die Kachel wirklich ab;
+   ein allein gekürzter Versatz liesse die Schattierung gleich kräftig.
+   Die Rechteck-Masse der Buttons sind unberührt — das 12u-Raster
+   bleibt lückenlos, die Farben stossen weiterhin direkt aneinander. */
+/* v157.2: Das Relief prägt den Look — also trägt es JEDE Fläche, nicht
+   nur die Knöpfe. Neu dabei: die Canvas, die drei Viz-Fenster je Panel,
+   die Schieberegler-Felder von Tool-Panel, F1 und F2, die noch leeren
+   Panels F3-F10 sowie die beiden Options-Seiten. Reliefhöhe zurück auf
+   den vollen Wert (--g4m-relief: 1), die Rücknahme aus v157.1 wirkte zu
+   zaghaft. Wo ein deckendes Kind die Fläche füllt (Canvas, Viz), liegt
+   die Schulter als eigene ::after-Ebene darüber statt als Innenschatten
+   darunter — sonst übermalte sie die Zeichenfläche. */
+/* v157.3: Keine fremden Farben mehr im Relief. Die Schattierung besteht
+   nur noch aus Schwarz-Deckkraft — rgba(0,0,0,a) ergibt Farbe × (1−a),
+   also denselben Farbton und dieselbe Sättigung bei geringerer
+   Helligkeit. Das weisse Licht der Vorgängerfassung zog jeden Kanal
+   Richtung Unbunt und liess bunte Kacheln an den Lichtkanten grau
+   anlaufen; es ist abgeschaltet (--g4m-bevel-light: transparent, die
+   Schattenlage bleibt für Vergleiche stehen). Die beleuchtete Schulter
+   ist jetzt die unveränderte Grundfarbe. Neu eine zweite, sehr zarte
+   Schattenlage ringsum (--g4m-bevel-edge), damit die Kachel an allen
+   vier Kanten gerundet wirkt und nicht wie eine Platte mit
+   Schlagschatten. */
+/* v157.4: Rücknahme des Kurzschlusses aus v157.3. Das Licht von links
+   oben ist zurück — ohne Aufhellung fehlt der Kachel die obere Kante,
+   und das Relief kippt zur flachen Platte mit Schlagschatten. Statt es
+   zu streichen, ist es halbiert: 0.22 statt 0.45. Bei dieser Dosis
+   bleibt die Farbe erkennbar sie selbst (#4CAF50 wird zu #73C176 —
+   heller, gleicher Farbton, gleiche Sättigung), erst darüber bricht die
+   Buntheit weg und die Kante läuft grau an. Der Schatten ist von Natur
+   aus farbtreu (Farbe × (1−a)) und darf darum kräftiger stehen: 0.26.
+   Beide Dosen jetzt als eigene Stellschrauben --g4m-light-a und
+   --g4m-dark-a, weiterhin von --g4m-relief mitskaliert. Die zarte
+   Ringlage aus v157.3 entfiel — sie dämpfte gerade die Lichtkante. */
+/* v157.5: Zurück auf die Dosierung von v157.2 — Licht 0.45, Schatten
+   0.20. Der Aufbau war in v157.2 und v157.4 identisch; unterschiedlich
+   waren allein diese beiden Zahlen. Der Vergleich am Bildschirm fiel
+   eindeutig aus: die Modellierung wiegt schwerer als die leichte
+   Entfärbung, die ein kräftiges Glanzlicht kostet. Die Zwischenschritte
+   0 (v157.3) und 0.22 (v157.4) bleiben im Kommentar dokumentiert, damit
+   die Strecke nachvollziehbar bleibt und nicht erneut abgelaufen wird. */
+/* v157.6: Drei Korrekturen. (1) Die schwarze Haarlinie rechts/unten an
+   den Viz-Fenstern von F1 und F2 ist getilgt: die Panels werden per
+   Transform skaliert, und bei der Subpixel-Rundung blitzte der schwarze
+   Fenster-Hintergrund neben dem Canvas hervor — das Canvas wird jetzt
+   2px übergroß gezogen und vom overflow:hidden des Fensters beschnitten.
+   (2) Die Slider-Griffe tragen das Relief der Buttons: die eigenen
+   Handle-Divs direkt, die nativen Range-Thumbs (F1/F2) über getrennte
+   -webkit-/-moz-Pseudo-Regeln. (3) Das D-Pad ist an die Nachbar-Buttons
+   angeglichen: Hover im Button-Ton #d0d0d0 statt rgba-5%-Hauch, und beim
+   Drücken eines Pfeils sinkt die ganze Kachel mit --g4m-press ein. */
+/* v157.7: Typografie und Beschriftungshöhen der Slider-Felder. (1) Die
+   v150o-Regel «EINE Typografie für alle Beschriftungen» war beschädigt —
+   ihre Selektorliste lief ohne eigenen Deklarationsblock in die
+   .sliders-container-Regel hinein; die Beschriftungen des Tool-Slider-
+   Felds fielen dadurch auf 11px/normal zurück und wirkten kleiner und
+   heller als die Buttons. Repariert: wieder Button-Schrift (clamp
+   10-14px), fett, #666666. (2) F1-/F2-Slider-Feld auf dieselbe
+   Typografie gezogen: 10px-Boden statt 9px und fett auch für Titel
+   (g4m-note-text) und Wertefelder, die bisher in normaler Schnittstärke
+   daneben standen. (3) Die Beschriftungszeile des Tool-Editors liegt
+   jetzt exakt auf der TITELZEILE von F1/F2 (g4m-note-text, «Parameter
+   a …»): g4mAlignRailsToTool misst nach der Rail-Angleichung auch die
+   Beschriftungshöhe nach und hebt die Zeile per translate
+   (--g4m-toprow-shift) auf die gemeinsame Linie — gemessen am Label
+   selbst, nicht an der Zeilenbox (deren padding-bottom die Boxmitte
+   unter die Textmitte zöge). Im Hochformat wird die Verschiebung wie
+   die Rail-Absenkung zurückgenommen. */
+/* v157.8: Eingabefelder der Slider-Felder vereinheitlicht. Das Tool-
+   Wertefeld (value-display) stand mit 76×26px und Innenabstand 4/8
+   neben den 61×24.8px-Feldern (0/4) von F1/F2 — Farben, Rahmen,
+   Hover/Fokus und Schrift waren bereits gleich, die Geometrie nicht.
+   Jetzt ist es baugleich zur g4m-val-box (Flex, Text rechtsbündig
+   zentriert, Innenabstand 0/4); Breite und Höhe übernimmt
+   g4mAlignRailsToTool vom GERENDERTEN Panel-Wertefeld als
+   --g4m-val-w/--g4m-val-h — die Panels sind transform-skaliert, eine
+   reine CSS-Übernahme der Panel-Masse träfe die gerenderte Grösse
+   nicht. --g4m-val-w speist weiterhin die Spaltenbreite der
+   Beschriftungszeile, Feld und Spalte bleiben deckungsgleich. Im
+   Hochformat werden die gemessenen Masse zurückgenommen. */
+/* v157.9: Tool-Wertefeld auf die Rail-Linie gesetzt — WIE AUF F1/F2.
+   buildToolSliderRows hängt es in die Rail-Zeile (rechts neben der
+   Rail) statt in die Beschriftungszeile, die dafür als Grid den
+   F1-/F2-Zeilenbau übernimmt — Rail links (1fr), Feldspalte rechts
+   (--g4m-val-w), Fuge --g4m-arch-col-gap, beide vertikal zentriert.
+   Das Feldzentrum liegt damit exakt auf der Rail, und die Rail endet
+   wie nebenan um Feldspalte plus Fuge vor der rechten Kante. Die
+   Beschriftungszeile trägt nur noch das Label auf der Titelhöhe. */
+const G4M_RELEASE = Object.freeze({ version: 'v157.9', date: '27.07.2026' });
 const G4M_BUILD = G4M_RELEASE.version;   // Kurzform für Titel und Konsole
 document.title = document.title + ' · ' + G4M_BUILD;
 console.log('g4m build', G4M_BUILD, '·', G4M_RELEASE.date);
@@ -4186,10 +4666,14 @@ function buildToolSliderRows() {
         // über die On/Off-Quadrate unter "Random Tools". Alle Zeilen werden
         // wie zuvor die radiolosen behandelt (Spaltenlayout no-radio).
 
+        /* Wertefeld auf die Rail-Zeile (v157.9): wie auf F1/F2 sitzt
+           das Eingabefeld RECHTS NEBEN der Rail, sein Zentrum auf der
+           Rail-Linie — die Rail wird um Feldspalte + Fuge gekürzt.
+           Vorher stand es in der Beschriftungszeile und wanderte mit
+           dieser auf die Titelhöhe. */
         const display = document.createElement('div');
         display.className = 'value-display';
         display.textContent = g4mFormatSliderValue(row.id, data.value);
-        top.appendChild(display);
 
         const bottom = document.createElement('div');
         bottom.className = 'slider-bottom-row';
@@ -4205,6 +4689,7 @@ function buildToolSliderRows() {
         sc.appendChild(track);
         sc.appendChild(handle);
         bottom.appendChild(sc);
+        bottom.appendChild(display);
 
         rowEl.appendChild(top);
         rowEl.appendChild(bottom);
@@ -6824,11 +7309,31 @@ function createSpiralDropdown() {
 /* Bauart umschalten: Zustand setzen, die zur Bauart gehörenden
    Parametergrenzen anwenden und alle Beschriftungen nachziehen. Ein
    vorhandenes Bild wird NICHT automatisch neu erzeugt — der User
-   entscheidet mit Go, wann die neue Spirale erscheint. */
+   entscheidet mit Go, wann die neue Spirale erscheint.
+
+   v156.6 — die Wahl einer Spiralkurve ist KEIN Zurücksetzen. Vorher
+   rief diese Funktion setArchDefaults, also den vollen F2-Erstöffnungs-
+   Satz: sämtliche Tool-Panel-Regler (Layers, Points, Pixels, Point
+   Size, Line Thickness, Transparency, Zoom, Pan, Rotation, Modulation
+   im Tool-Panel), dazu Farben, Optimizer, F2-Modulation und
+   Verbindungslinien fielen auf ihre Vorgaben zurück. Der Nutzer
+   verlor damit bei jedem Wechsel der Bauart seine ganze Einstell-
+   arbeit. Angefasst wird jetzt nur noch, was die Mathematik verlangt:
+   die Kurven-Blöcke, die die NEUE Bauart in ihrem Registry-Eintrag
+   nennt — plus jene, die die VORHERIGE genannt hatte, damit deren
+   Sonderwerte nicht hängen bleiben (Beispiel: Hyperbolic setzt β auf
+   20…30; zurück auf Archimedean muss β wieder 0…31 werden). Alles
+   Übrige bleibt unberührt. */
 function g4mSetSpiralType(key) {
     if (!G4M_SPIRALS[key] || g4mState.spiralType === key) return;
+    const prevKeys = Object.keys((G4M_SPIRALS[g4mState.spiralType] || {}).defaults || {});
+    const nextKeys = Object.keys(G4M_SPIRALS[key].defaults || {});
+    const touched  = prevKeys.concat(nextKeys.filter(function (k) {
+        return prevKeys.indexOf(k) === -1;
+    }));
     g4mStore.set('spiralType', key);
-    setArchDefaults();      // a, b, N der neuen Bauart (siehe g4mSpiralDefaults)
+    // Vorgaben der NEUEN Bauart, aber nur für die betroffenen Blöcke
+    if (touched.length) _archApplyCurveDefaults(g4mSpiralDefaults(), touched);
     g4mSyncSpiralUi();
 }
 
@@ -6972,6 +7477,74 @@ function hideSuperformulaPanel() {
     setTimeout(function() { panel.style.zIndex = String(G4M_Z.RESTING); }, G4M_ANIM.Z_RESTORE_MS);
 }
 
+/* ── Kurven-Parameter der Bauart setzen (v156.6) ──────────────────
+   Die fünf Blöcke a, b, α, β, N sind das EINZIGE, was sich je Spiral-
+   Bauart unterscheidet (siehe G4M_SPIRALS). Sie stecken hier in einer
+   eigenen Funktion, damit das Umschalten der Bauart genau diese
+   Blöcke anfassen kann — und sonst NICHTS. Vorher rief
+   g4mSetSpiralType das vollständige setArchDefaults, das nebenbei
+   auch die Tool-Panel-Regler, Farben, Modulation, Optimizer und
+   Verbindungslinien auf ihre F2-Vorgaben zurückwarf: die Wahl einer
+   Spiralkurve löschte damit die gesamte Einstellarbeit des Nutzers.
+
+   `only` ist eine Liste von Blocknamen; null/undefined heisst «alle».
+   Alles läuft in EINEM Store-Patch, die Regler- und Anzeige-
+   Synchronisation im selben Durchgang mit. */
+function _archApplyCurveDefaults(d, only) {
+    const want = function (k) { return !only || only.indexOf(k) !== -1; };
+    g4mStore.patchArch(function (p) {
+        /* a — Grenzen in den Store (v156.1). Zuvor setzte setArchDefaults
+           NUR die beiden Regler und ihre Anzeige (_archSlider schreibt
+           bewusst kein State); die Grenzen im Store blieben unberührt.
+           Bei der archimedischen Spirale fiel das nie auf, weil Vorgabe
+           und Store-Startwert beide 0…0 lauten. Die logarithmische
+           entlarvte es: dort ist a der SKALENFAKTOR — mit a = 0 wird
+           r = 0·e^(b·θ) = 0, alle Punkte fallen in den Mittelpunkt und
+           es erscheint nichts. */
+        if (want('a')) {
+            p.a.min = d.a.min; p.a.max = d.a.max;
+            _archSlider('arch-param-a-min', d.a.min, 'arch-val-a-min', d.a.min.toFixed(1));
+            _archSlider('arch-param-a-max', d.a.max, 'arch-val-a-max', d.a.max.toFixed(1));
+        }
+
+        // b — Fein
+        if (want('b')) {
+            p.b.useFine = d.b.useFine;
+            p.b.min = d.b.min; p.b.max = d.b.max;
+            p.b.fineMin = d.b.min; p.b.fineMax = d.b.max;
+            _archSlider('arch-param-b-fine-min', d.b.min, 'arch-val-b-fine-min', d.b.min.toFixed(2));
+            _archSlider('arch-param-b-fine-max', d.b.max, 'arch-val-b-fine-max', d.b.max.toFixed(2));
+            _archBtn('arch-b-fine-btn', true);  _archBtn('arch-b-coarse-btn', false);
+            _archShow('arch-b-fine', true);     _archShow('arch-b-coarse', false);
+        }
+
+        // alpha — Fein
+        if (want('alpha')) {
+            p.alpha.useFine = d.alpha.useFine;
+            p.alpha.min = d.alpha.min; p.alpha.max = d.alpha.max;
+            p.alpha.fineMin = d.alpha.min; p.alpha.fineMax = d.alpha.max;
+            _archSlider('arch-param-alpha-fine-min', d.alpha.min, 'arch-val-alpha-fine-min', d.alpha.min + '°');
+            _archSlider('arch-param-alpha-fine-max', d.alpha.max, 'arch-val-alpha-fine-max', d.alpha.max + '°');
+            _archBtn('arch-alpha-fine-btn', true);  _archBtn('arch-alpha-coarse-btn', false);
+            _archShow('arch-alpha-fine', true);     _archShow('arch-alpha-coarse', false);
+        }
+
+        // beta
+        if (want('beta')) {
+            p.beta.min = d.beta.min; p.beta.max = d.beta.max;
+            _archSlider('arch-param-beta-min', d.beta.min, 'arch-val-beta-min', d.beta.min + '°');
+            _archSlider('arch-param-beta-max', d.beta.max, 'arch-val-beta-max', d.beta.max + '°');
+        }
+
+        // N
+        if (want('n')) {
+            p.n.min = d.n.min; p.n.max = d.n.max;
+            _archSlider('arch-param-n-min', d.n.min, 'arch-val-n-min', String(d.n.min));
+            _archSlider('arch-param-n-max', d.n.max, 'arch-val-n-max', String(d.n.max));
+        }
+    });
+}
+
 function setArchDefaults() {
     /* Vorgaben der aktiven Spiral-Bauart über die gemeinsamen F2-
        Vorgaben gelegt (v156.0): a, b und N unterscheiden sich je
@@ -6983,51 +7556,11 @@ function setArchDefaults() {
         if (sliders[id]) sliders[id].setValue(d.sliders[id]);
     });
 
-    _archSlider('arch-param-a-min', d.a.min, 'arch-val-a-min', d.a.min.toFixed(1));
-    _archSlider('arch-param-a-max', d.a.max, 'arch-val-a-max', d.a.max.toFixed(1));
+    // Kurven-Parameter a, b, α, β, N — alle Blöcke (v156.6)
+    _archApplyCurveDefaults(d, null);
 
-    // Parametergrenzen in EINEM Store-Patch setzen; die Slider- und
-    // Anzeige-Synchronisation läuft im selben Durchgang mit
+    // Optimizer (Größen-Modulator, % )
     g4mStore.patchArch(function (p) {
-        /* a — Grenzen in den Store (v156.1). Zuvor setzte setArchDefaults
-           NUR die beiden Regler und ihre Anzeige (_archSlider schreibt
-           bewusst kein State); die Grenzen im Store blieben unberührt.
-           Bei der archimedischen Spirale fiel das nie auf, weil Vorgabe
-           und Store-Startwert beide 0…0 lauten. Die logarithmische
-           entlarvte es: dort ist a der SKALENFAKTOR — mit a = 0 wird
-           r = 0·e^(b·θ) = 0, alle Punkte fallen in den Mittelpunkt und
-           es erscheint nichts. */
-        p.a.min = d.a.min; p.a.max = d.a.max;
-
-        // b — Fein
-        p.b.useFine = d.b.useFine;
-        p.b.min = d.b.min; p.b.max = d.b.max;
-        p.b.fineMin = d.b.min; p.b.fineMax = d.b.max;
-        _archSlider('arch-param-b-fine-min', d.b.min, 'arch-val-b-fine-min', d.b.min.toFixed(2));
-        _archSlider('arch-param-b-fine-max', d.b.max, 'arch-val-b-fine-max', d.b.max.toFixed(2));
-        _archBtn('arch-b-fine-btn', true);  _archBtn('arch-b-coarse-btn', false);
-        _archShow('arch-b-fine', true);     _archShow('arch-b-coarse', false);
-
-        // alpha — Fein
-        p.alpha.useFine = d.alpha.useFine;
-        p.alpha.min = d.alpha.min; p.alpha.max = d.alpha.max;
-        p.alpha.fineMin = d.alpha.min; p.alpha.fineMax = d.alpha.max;
-        _archSlider('arch-param-alpha-fine-min', d.alpha.min, 'arch-val-alpha-fine-min', d.alpha.min + '°');
-        _archSlider('arch-param-alpha-fine-max', d.alpha.max, 'arch-val-alpha-fine-max', d.alpha.max + '°');
-        _archBtn('arch-alpha-fine-btn', true);  _archBtn('arch-alpha-coarse-btn', false);
-        _archShow('arch-alpha-fine', true);     _archShow('arch-alpha-coarse', false);
-
-        // beta
-        p.beta.min = d.beta.min; p.beta.max = d.beta.max;
-        _archSlider('arch-param-beta-min', d.beta.min, 'arch-val-beta-min', d.beta.min + '°');
-        _archSlider('arch-param-beta-max', d.beta.max, 'arch-val-beta-max', d.beta.max + '°');
-
-        // N
-        p.n.min = d.n.min; p.n.max = d.n.max;
-        _archSlider('arch-param-n-min', d.n.min, 'arch-val-n-min', String(d.n.min));
-        _archSlider('arch-param-n-max', d.n.max, 'arch-val-n-max', String(d.n.max));
-
-        // Optimizer (Größen-Modulator, % )
         if (!p.optimizer) p.optimizer = { min: 10, max: 100, enabled: true };
         p.optimizer.min = d.optimizer.min; p.optimizer.max = d.optimizer.max;
         p.optimizer.enabled = d.optimizer.enabled;
@@ -9425,6 +9958,12 @@ function g4mAlignRailsToTool(panelId) {
        u-proportionale CSS-Vorgabe (0.463u) wieder greift. */
     if (typeof g4mIsPortrait === 'function' && g4mIsPortrait()) {
         editor.style.removeProperty('--g4m-rails-shift');
+        const tEd = document.querySelector('.g4m-param-editor');
+        if (tEd) {                                            // v157.7/v157.8
+            tEd.style.removeProperty('--g4m-toprow-shift');
+            tEd.style.removeProperty('--g4m-val-w');
+            tEd.style.removeProperty('--g4m-val-h');
+        }
         return;
     }
 
@@ -9433,17 +9972,61 @@ function g4mAlignRailsToTool(panelId) {
     if (!toolRail || !maxRail) return;   // z. B. Funktions-Zeile ohne Rails aktiv
 
     function mid(el) { const r = el.getBoundingClientRect(); return r.top + r.height / 2; }
-    const delta = mid(toolRail) - mid(maxRail);
-    if (Math.abs(delta) < 0.75) return;   // bereits bündig — kein Nachstellen
-    if (Math.abs(delta) > 100)  return;   // Plausibilität: Layout noch nicht gesetzt
 
-    // Aktuell wirkende Absenkung aufgelöst in px vom aktiven Block lesen
-    // (getComputedStyle auf der Custom Property liefert nur den Token-Text)
-    const block = maxRail.closest('.g4m-arch-block');
-    const cur   = block ? (parseFloat(getComputedStyle(block).marginTop) || 0) : 0;
-    // Panel-Skala herausrechnen: 1 gemessenes px = 1/scale Panel-px
-    const scale = parseFloat(panel.style.getPropertyValue('--panel-scale')) || uiScale || 1;
-    editor.style.setProperty('--g4m-rails-shift', (cur + delta / scale) + 'px');
+    /* ── Wertefeld-Masse übernehmen (v157.8) ──────────────────────
+       Das Tool-Wertefeld erhält exakt die GERENDERTE Breite und Höhe
+       des F1-/F2-Wertefelds (die Panels sind transform-skaliert, CSS-
+       Masse allein träfen die gerenderte Grösse nicht). --g4m-val-w
+       speist auch die Spaltenbreite der Beschriftungszeile — Feld und
+       Spalte bleiben so deckungsgleich, die rechte Kante bündig auf
+       der Rail-Kante. Läuft als ERSTES: die Feldhöhe verschiebt die
+       Tool-Rail, also müssen Rail- und Beschriftungs-Angleichung auf
+       der fertigen Geometrie messen. */
+    const toolEd   = document.querySelector('.g4m-param-editor');
+    const panelVal = editor.querySelector('.g4m-arch-prow-active .g4m-val-box');
+    if (toolEd && panelVal) {
+        const vr = panelVal.getBoundingClientRect();
+        if (vr.width > 10 && vr.height > 10) {
+            toolEd.style.setProperty('--g4m-val-w', vr.width + 'px');
+            toolEd.style.setProperty('--g4m-val-h', vr.height + 'px');
+        }
+    }
+
+    const delta = mid(toolRail) - mid(maxRail);
+    if (Math.abs(delta) > 100)  return;   // Plausibilität: Layout noch nicht gesetzt
+    if (Math.abs(delta) >= 0.75) {        // sonst bereits bündig — kein Nachstellen
+        // Aktuell wirkende Absenkung aufgelöst in px vom aktiven Block lesen
+        // (getComputedStyle auf der Custom Property liefert nur den Token-Text)
+        const block = maxRail.closest('.g4m-arch-block');
+        const cur   = block ? (parseFloat(getComputedStyle(block).marginTop) || 0) : 0;
+        // Panel-Skala herausrechnen: 1 gemessenes px = 1/scale Panel-px
+        const scale = parseFloat(panel.style.getPropertyValue('--panel-scale')) || uiScale || 1;
+        editor.style.setProperty('--g4m-rails-shift', (cur + delta / scale) + 'px');
+    }
+
+    /* ── Beschriftungszeile nachziehen (v157.7) ───────────────────
+       Die Beschriftungszeile des Tool-Editors (Label + Wertefeld)
+       wird per translate exakt auf die TITELZEILE des F1-/F2-Slider-
+       Felds gehoben (g4m-note-text, «Parameter a …») — die Beschrif-
+       tungen beider Slider-Felder stehen damit auf gleicher Höhe.
+       Gemessen wird in Bildschirm-Pixeln; der Tool-Editor ist
+       unskaliert, translate wirkt dort 1:1 — keine Skalen-Rechnung
+       nötig. Idempotent über die bereits wirkende Verschiebung
+       (Custom Property am Editor). */
+    const noteEl  = editor.querySelector('.g4m-arch-prow-active .g4m-note-text');
+    const topRow  = document.querySelector('.g4m-param-editor .slider-row.g4m-row-active .slider-top-row');
+    if (noteEl && toolEd && topRow) {
+        /* Gemessen wird das LABEL selbst, nicht die Zeilenbox — deren
+           padding-bottom (Abstand zur Rail) zöge die Boxmitte unter
+           die Textmitte, und die Beschriftung landete zu hoch. */
+        const anchor = topRow.querySelector('.slider-label') || topRow;
+        const target = mid(noteEl);                          // Titelzeile des Panels
+        const curT   = parseFloat(toolEd.style.getPropertyValue('--g4m-toprow-shift')) || 0;
+        const d      = target - mid(anchor);
+        if (Math.abs(d) >= 0.75 && Math.abs(d) <= 100) {
+            toolEd.style.setProperty('--g4m-toprow-shift', (curT + d) + 'px');
+        }
+    }
 }
 
 /* ── Barrierefreiheit ─────────────────────────────────────────────
