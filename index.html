@@ -161,108 +161,67 @@ Kontakt: dd@danidubs.ch
             grid-column: span 2;
         }
 
+        /* QUADRATISCH 2u×2u (v157.33): die sechs Beschriftungen sind
+           in die frei gewordene Reserve-Reihe darunter hineingewachsen
+           (User-Spezifikation) — gleiche Kachelgrösse wie das Parameter-
+           Raster darüber. Der z-index deckt wie zuvor die leeren
+           Sub-Zeilen der middle-content ab; die überdeckte Fläche ist
+           exakt die Vereinigung von alter Button- und Reserve-Reihe,
+           an der Editor-Geometrie darunter ändert sich nichts. */
         .bottom-btn {
-            grid-row: 8;
+            grid-row: 8 / 10;
             grid-column: span 2;
-            position: relative;
-            z-index: 2;   /* deckt die leere Sub-Zeile 8 der middle-content ab */
-        }
-        /* Reserve-Reihe (u9): 6 Buttons à 2u, gleiche Optik wie tool-btn.
-           Liegt zwischen unterer Button-Zeile (u8) und Slider-Feld
-           (u10-12); deckt wie die Button-Zeile die darunterliegende
-           leere Sub-Zeile der middle-content ab. */
-        .reserve-btn {
-            grid-row: 9;
-            grid-column: span 2;
-            cursor: default;
             position: relative;
             z-index: 2;
         }
-        /* Reserve-Buttons (noch ohne Funktion) bekommen keinen Hover —
-           konsistent mit den Reserve-Feldern im F2-Panel. */
-        .tool-btn.reserve-btn:hover { background-color: #e0e0e0; }
+        /* Die Reserve-Reihe (u9, sechs leere 2u-Buttons samt ihrer
+           Klasse .reserve-btn) entfiel in v157.33 ersatzlos — ihre
+           Fläche gehört jetzt den quadratischen Beschriftungs-Buttons
+           darüber. */
 
-        /* ── Random-On/Off-Schalter unter "Random Tools" (u9, Spalte 11-13)
-           Container = ein 2u-Feld; darin liegen 9 Paare gestapelt (je
-           ein Paar pro Random-fähigem Parameter) plus ein grauer Reserve-
-           Look ganz unten (für Parameter ohne Random). Jeweils EIN Paar
-           wird über z-index/Sichtbarkeit nach vorn geholt — analog zur
-           Zellteilung im F2-Panel. */
-        .g4m-rnd-stack {
-            position: relative;
-            z-index: 2;          /* deckt wie reserve-btn die leere Sub-Zeile ab */
-        }
-        .g4m-rnd-stack > * {
-            position: absolute;
-            inset: 0;
-        }
-        /* Grauer Reserve-Look (unterste Ebene, immer da). Über die
-           Paare gelegt, wenn der aktive Parameter kein Random kennt. */
-        /* Der Strich (v156.2) macht sichtbar, dass dieser Parameter
-           keinen Zufallsmodus HAT — vorher stand hier ein leeres Feld,
-           nicht unterscheidbar von einem verlorenen Knopf. */
-        .g4m-rnd-blank {
-            z-index: 1;
-            display: flex; align-items: center; justify-content: center;
-            color: #b0b0b0;
-        }
-        /* Ausgegraute Beschriftung, wenn es nichts zu schalten gibt */
-        #g4m-random-caption.g4m-cap-inactive { color: #b0b0b0; }
+        /* ── Random-Schalter (v157.32): EIN Button statt Beschriftung
+           plus On/Off-Paar. #g4m-random-caption ist jetzt selbst der
+           Umschalter des AKTIVEN Parameters (bzw. der Normalization):
+           im eingeschalteten Zustand trägt er die gedämpfte Gruppen-
+           farbe mit weisser Schrift — dieselbe Aktiv-Optik, die vorher
+           das gewählte On/Off-Quadrat hatte; ausgeschaltet ist er ein
+           gewöhnlicher tool-btn. Der 9-Paare-Stapel unter der Zelle u9
+           entfiel; dort steht wieder ein Reservefeld. */
+        #g4m-random-caption.g4m-cap-on { color: #ffffff; }
+        #g4m-random-caption.g4m-cap-on.g4m-cap-green  { background-color: var(--g4m-active-tool-green); }
+        #g4m-random-caption.g4m-cap-on.g4m-cap-orange { background-color: var(--g4m-active-tool-orange); }
+        #g4m-random-caption.g4m-cap-on.g4m-cap-blue   { background-color: var(--g4m-active-tool-blue); }
+        /* Hover: eingeschaltet dunkelt die Gruppenfarbe minim ab (der
+           graue tool-btn-Hover verliert gegen die ID-Regel oben und
+           würde den Zustand optisch löschen). */
+        #g4m-random-caption.g4m-cap-on:hover { filter: brightness(0.95); }
+        /* Ausgegraut, wenn es nichts zu schalten gibt (Zoom/Pan/
+           Rotation): kein Hover, kein Zeiger — der Button sagt «hier
+           gibt es keinen Zufallsmodus», er verspricht nichts. */
+        #g4m-random-caption.g4m-cap-inactive { color: #b0b0b0; cursor: default; }
+        #g4m-random-caption.g4m-cap-inactive:hover { background-color: #e0e0e0; }
         /* Lange Beschriftung: gleiche Schriftgrösse wie «Random», nur
            minim enger gesetzt, damit sie in die 2u-Zelle passt (v156.3) */
         #g4m-random-caption.g4m-cap-long { letter-spacing: -0.05em; }
-        /* Ein On/Off-Paar = zwei 1u-Quadrate nebeneinander */
-        .g4m-rnd-pair {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            z-index: 0;                 /* versteckt; das aktive Paar hebt JS auf 5 */
-            visibility: hidden;
-        }
-        .g4m-rnd-pair.g4m-rnd-active {
-            z-index: 5;
-            visibility: visible;
-        }
-        .g4m-rnd-btn {
-            box-sizing: border-box;
-            background-color: #e0e0e0;
-            border: var(--g4m-notch) solid var(--g4m-notch-tool);
-            color: #666666;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: clamp(9px, calc(var(--u) * 0.269), 14px);
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-            transition: background-color 0.15s ease;
-        }
-        .g4m-rnd-btn:hover:not(.g4m-rnd-selected) { background-color: #d0d0d0; }
-        /* Nur das GEWÄHLTE Feld (g4m-rnd-selected) trägt die Gruppenfarbe
-           des Parameters, mit weisser Schrift — dieselbe Aktiv-Logik wie
-           die Parameter-Quadrate daneben. Seit v157.19 in den GEDÄMPFTEN
-           Tönen: das Tool-Panel steht dauerhaft da, die leuchtenden
-           Originale gehören auf die F-Panels (--g4m-active-tool-*). Das
-           Orange wartet noch auf sein gedämpftes Gegenstück. */
-        .g4m-rnd-btn.g4m-rnd-selected { color: #ffffff; }
-        /* Kein eigener Rahmenton mehr (v156.7) — die Kerbe gehoert der
-           Flaeche, nicht dem gewaehlten Knopf. */
-        .g4m-rnd-btn.g4m-rnd-selected.g4m-rnd-sel-green  { background-color: var(--g4m-active-tool-green); }
-        .g4m-rnd-btn.g4m-rnd-selected.g4m-rnd-sel-orange { background-color: var(--g4m-bright-orange); }
-        .g4m-rnd-btn.g4m-rnd-selected.g4m-rnd-sel-blue   { background-color: var(--g4m-active-tool-blue); }
 
         /* F6-F10 + Vollbild-Slot: orientierungsabhängige Platzierung
            (v150f). Standard = Quer-/Desktop-Format: F1-F10 lückenlos,
            letztes Doppelfeld (11-12) trägt den grauen Platzhalter.
            Das Hochformat überschreibt im @media-Block (gleiche
            Spezifität, spätere Quelle gewinnt dort). */
-        #f6-btn  { grid-column: 6; }
-        #f7-btn  { grid-column: 7; }
-        #f8-btn  { grid-column: 8; }
-        #f9-btn  { grid-column: 9; }
-        #f10-btn { grid-column: 10; }
-        #g4m-fs-tools    { grid-column: 6 / 8; }
-        #g4m-blank-tools { grid-column: 11 / 13; }
+        /* F-Reihe um 2u nach rechts (v157.40): die runden Ecken der
+           Handy-Displays schnitten F1 in der linken oberen Ecke an —
+           der Knopf war kaum bedienbar (User-Befund). Das Reservefeld
+           wandert dafür von rechts aussen (11-12) ganz nach links —
+           dort darf die Rundung getrost hineinschneiden, es schaltet
+           nichts. Gilt für beide Orientierungen (EINE F-Reihe seit
+           v157.33). */
+        #f6-btn  { grid-column: 8; }
+        #f7-btn  { grid-column: 9; }
+        #f8-btn  { grid-column: 10; }
+        #f9-btn  { grid-column: 11; }
+        #f10-btn { grid-column: 12; }
+        #g4m-blank-tools { grid-column: 1 / 3; }
 
         /* Mittelfläche = eigenes u-Raster (v150l): vorher feste
            Höhen 6u/4u PLUS Rahmenpixel ohne border-box — zusammen
@@ -313,10 +272,12 @@ Kontakt: dd@danidubs.ch
         /* Gruppenfarben (v150m): heller UND entsättigt ("dreckig"),
            damit keine Konkurrenz zu den Panel-Farben entsteht —
            Slider-Töne stark mit Hellgrau gebrochen statt mit
-           reinem Weiss (Originale: 4CAF50 / FFB74D / 2196F3). */
+           reinem Weiss. Seit v157.22 sind die drei untereinander in
+           CIELCh abgestimmt (L* 84, C* 10); das Orange war vorher der
+           Ausreisser — heller und deutlich bunter als Grün und Blau. */
         :root {
             --g4m-grp-green:  #C9D8C5;
-            --g4m-grp-orange: #ECDCBE;
+            --g4m-grp-orange: #DBD1BF;   /* v157.22: an Grün und Blau angeglichen, war #ECDCBE */
             --g4m-grp-blue:   #C2D2E0;
         }
         .g4m-sq-green  { background-color: var(--g4m-grp-green); }
@@ -331,7 +292,7 @@ Kontakt: dd@danidubs.ch
            Random-On/Off-Quadrate und die F1-/F2-Parameter-Quadrate.
            Die frühere Innenkontur entfiel. */
         .g4m-param-sq.g4m-sq-active.g4m-sq-green  { background-color: var(--g4m-active-tool-green); }
-        .g4m-param-sq.g4m-sq-active.g4m-sq-orange { background-color: var(--g4m-bright-orange); }
+        .g4m-param-sq.g4m-sq-active.g4m-sq-orange { background-color: var(--g4m-active-tool-orange); }
         .g4m-param-sq.g4m-sq-active.g4m-sq-blue   { background-color: var(--g4m-active-tool-blue); }
         .g4m-param-sq.g4m-sq-active .g4m-sq-label,
         .g4m-param-sq.g4m-sq-active .g4m-sq-value { color: #ffffff; }
@@ -359,7 +320,23 @@ Kontakt: dd@danidubs.ch
             display: flex;
             flex-direction: column;
             padding: calc(var(--u) * 0.15) calc(var(--u) * 0.1);
+            /* ── Vertikal-Kette von Wert- UND Bereichs-Ansicht (v157.31):
+               EINE Quelle für beide. Kopfhöhe, Block-Absenkung und
+               Zeilenhöhe — die Bereichs-Ansicht erbt sie (ihr gemessener
+               Feinversatz liegt als Inline-Variable darüber), die Wert-
+               Ansicht nutzt sie ab jetzt ebenfalls: gleiche Kette ⇒
+               gleiche Linien, ohne dass irgendwo nachgerechnet wird. */
+            --g4m-title-h:     calc(var(--u) * 0.55);
+            --g4m-rails-shift: calc(var(--u) * 0.463);
+            --g4m-row-h:       max(var(--g4m-arch-field-h), var(--g4m-slider-handle));
         }
+        /* Fokusfarbe des Wertefelds = Gruppenfarbe des aktiven
+           Parameters (v157.31) — der Editor trägt die Gruppe ohnehin
+           als Klasse (g4m-ed-*), die v157.20-Mechanik greift damit
+           auch hier statt des festen Grüns. */
+        .g4m-param-editor.g4m-ed-green  { --g4m-active: var(--g4m-active-tool-green); }
+        .g4m-param-editor.g4m-ed-orange { --g4m-active: var(--g4m-active-tool-orange); }
+        .g4m-param-editor.g4m-ed-blue   { --g4m-active: var(--g4m-active-tool-blue); }
         .g4m-param-editor .slider-row,
         .g4m-param-editor .normalization-row {
             display: none;
@@ -367,7 +344,18 @@ Kontakt: dd@danidubs.ch
                eingefaerbte Editor scheint vollflaechig durch */
             background-color: transparent;
         }
-        .g4m-param-editor .slider-row.g4m-row-active { display: grid; }
+        /* Aktive Zeile als ABSOLUTE Auflage über dem Editor — exakt
+           die Box der Bereichs-Ansicht (v157.31): gleiche Innenmasse,
+           damit Kopf und Rail bei Random On/Off am selben Ort stehen.
+           Vorher lag die Zeile im Flex-Fluss INNERHALB des Editor-
+           Paddings und sass dadurch um dieses verschoben. */
+        .g4m-param-editor .slider-row.g4m-row-active {
+            display: block;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            box-sizing: border-box;
+            padding: calc(var(--u) * 0.28) calc(var(--u) * 0.55) 0;
+        }
         .g4m-param-editor .normalization-row.g4m-row-active { display: block; }
         /* Vergrösserte Bedienung im Editor — fingertauglich */
         /* Rail bewusst fein (v150n, vorher 6px) — der grosse Griff
@@ -413,6 +401,16 @@ Kontakt: dd@danidubs.ch
            Grösse daher nicht. Die Fallbacks (76px-Spalte, Feldhöhe
            aus --g4m-arch-field-h) gelten, solange noch kein Panel
            geöffnet war. */
+        /* Kopfzeile der Wert-Ansicht = Anatomie des Bereichs-Kopfs
+           (g4m-arch-phead): gleiche Höhe, gleiche Spalten — das Label
+           steht bei On und Off am EXAKT gleichen Ort (v157.31). */
+        .g4m-param-editor .slider-row .slider-top-row {
+            grid-template-columns: 1fr var(--g4m-val-w);
+            column-gap: var(--g4m-arch-col-gap);
+            gap: var(--g4m-arch-col-gap);
+            height: var(--g4m-title-h);
+            padding-bottom: 0;
+        }
         .g4m-param-editor .value-display {
             padding: 0 4px;
             box-sizing: border-box;
@@ -426,11 +424,34 @@ Kontakt: dd@danidubs.ch
            Zentrum des Eingabefelds liegt damit exakt auf der Rail-
            Linie, und die Rail endet wie auf F1/F2 um Feldspalte plus
            Fuge (--g4m-arch-col-gap) vor der rechten Kante. */
+        /* Die Wert-Rail IST die Max-Zeile des Doppel-Reglers (v157.31,
+           User-Vorgabe): gleiches Spaltengerüst (Kappen-Spalte · Rail ·
+           Feld — die Kappen-Spalte bleibt bei Off einfach LEER), zwei
+           Zeilen-Slots in Griffhöhe, die Rail im UNTEREN (Max). Beim
+           Umschalten auf Random erscheint die Min-Zeile im oberen Slot,
+           die Rail selbst bewegt sich um keinen Pixel — Länge, Start
+           und Höhe sind per Konstruktion identisch, nicht per Messung.
+           Die Absenkung ist dieselbe Kette wie im Bereichs-Block. */
         .g4m-param-editor .slider-bottom-row {
             display: grid;
-            grid-template-columns: 1fr var(--g4m-val-w);
+            grid-template-columns: var(--g4m-arch-lbl-w) 1fr var(--g4m-val-w);
+            grid-template-rows: var(--g4m-row-h) var(--g4m-row-h);
             column-gap: var(--g4m-arch-col-gap);
+            row-gap: 4px;
             align-items: center;
+            margin-top: var(--g4m-rails-shift);
+        }
+        .g4m-param-editor .slider-bottom-row .slider-container { grid-column: 2; grid-row: 2; }
+        .g4m-param-editor .slider-bottom-row .value-display    { grid-column: 3; grid-row: 2; justify-self: end; }
+        /* Der Bereichs-Block übernimmt die GEMESSENE Feldspalte der
+           Wert-Ansicht (--g4m-val-w statt der reinen CSS-Grösse) —
+           beide Ansichten enden damit auf derselben rechten Kante. */
+        .g4m-param-editor .g4m-rr-lines .g4m-arch-block {
+            grid-template-columns: var(--g4m-arch-lbl-w) 1fr var(--g4m-val-w);
+        }
+        .g4m-param-editor .g4m-rr-lines .g4m-val-box {
+            min-width: var(--g4m-val-w);
+            height: var(--g4m-val-h, var(--g4m-arch-field-h));
         }
         /* EINE Typografie für alle Beschriftungen in Raster und
            Editor (v150o): Button-Schriftgrösse, fett — vorher
@@ -495,12 +516,18 @@ Kontakt: dd@danidubs.ch
             width: 100%;
         }
 
+        /* Der Rückfallwert im var() ist Absicht (v157.24): Löst die
+           Variable einmal nicht auf, berechnet CSS die Deklaration zu
+           «transparent» — Rail und Griff wären unsichtbar bzw. der Griff
+           ein Geisterquadrat, durch das die Rail läuft. Der Rückfall ist
+           bewusst ein neutrales Grau und keine Kopie der echten Farbe:
+           er soll auffallen, nicht die eine Quelle verdoppeln. */
         .slider-track {
             position: absolute;
             left: 0;
             top: 0;
             height: 100%;
-            background-color: var(--g4m-active-tool-green);
+            background-color: var(--g4m-active-tool-green, #9e9e9e);
         }
 
         .slider-handle {
@@ -509,7 +536,7 @@ Kontakt: dd@danidubs.ch
             transform: translate(-50%, -50%);
             width: 12px;
             height: 12px;
-            background-color: var(--g4m-active-tool-green);
+            background-color: var(--g4m-active-tool-green, #9e9e9e);
             cursor: pointer;
         }
 
@@ -538,7 +565,9 @@ Kontakt: dd@danidubs.ch
            einheitlich mit den F1-/F2-Wertefeldern. */
         .value-display:hover { background-color: #ffffff; }
         .value-display:focus {
-            border-color: var(--g4m-active-tool-green);   /* v157.20 */
+            /* Gruppenfarbe des aktiven Parameters (v157.31); der grüne
+               Rückfall entspricht dem alten Festwert von v157.20. */
+            border-color: var(--g4m-active, var(--g4m-active-tool-green));
             background-color: #ffffff;
         }
 
@@ -556,21 +585,21 @@ Kontakt: dd@danidubs.ch
            damit denselben Ton wie sein Parameter-Quadrat und sein
            Random-Schalter; vorher standen hier die leuchtenden
            Originale und der Regler leuchtete unter einem gedämpften
-           Quadrat. Orange wartet weiter auf sein gedämpftes
-           Gegenstück — der Name macht es zur Ein-Zeilen-Änderung. */
+           Quadrat. Seit v157.22 hat auch Orange sein gedämpftes
+           Gegenstück — der Satz ist vollständig. */
         .slider-green .slider-track,
         .slider-green .slider-handle {
-            background-color: var(--g4m-active-tool-green);
+            background-color: var(--g4m-active-tool-green, #9e9e9e);
         }
 
         .slider-orange .slider-track,
         .slider-orange .slider-handle {
-            background-color: var(--g4m-bright-orange);
+            background-color: var(--g4m-active-tool-orange, #9e9e9e);
         }
 
         .slider-blue .slider-track,
         .slider-blue .slider-handle {
-            background-color: var(--g4m-active-tool-blue);
+            background-color: var(--g4m-active-tool-blue, #9e9e9e);
         }
 
         /* Navigation Tool Styles */
@@ -599,7 +628,20 @@ Kontakt: dd@danidubs.ch
         .nav-btn:hover { filter: brightness(0.93); }
 
         /* Button Colors */
-        .btn-green { background-color: #4CAF50; }
+        /* Projects: Dunkelviolett statt Grün (v157.26). Das frühere
+           #4CAF50 war exakt der Ton, den F1 für aktive Knöpfe benutzte —
+           in der Nav ein Navigationsziel, im Panel ein Schaltzustand,
+           und dasselbe Grün für beides las sich als Zusammenhang, den
+           es nicht gibt. Deep Purple 700 hält die Materialsystematik
+           der übrigen Nav-Farben, ist mit L* 30 der dunkelste Ton der
+           Leiste und liegt weit genug vom Orchidee-Ton der Galleries
+           darüber (L* 69) entfernt, dass die beiden Kacheln trotz
+           verwandtem Farbton nicht ineinanderlaufen. Weisse Schrift
+           kommt aus .nav-btn und steht hier auf 9,2 : 1 — der beste
+           Wert der ganzen Leiste. KLASSENNAME mitgezogen: eine Regel
+           namens .btn-green auf einer violetten Kachel wäre eine
+           Falschaussage im Quelltext. */
+        .btn-violet { background-color: #512DA8; }
         .btn-purple { background-color: #CE93D8; }
         .btn-red { background-color: #EF9A9A; }
         .btn-pink-bright { background-color: #E040FB; }
@@ -608,11 +650,8 @@ Kontakt: dd@danidubs.ch
         .btn-gray { background-color: #757575; }
         
         /* Helle Buttons tragen dasselbe Button-Grau wie alle anderen
-           Beschriftungen (v150o) — keine #424242-Ausnahme mehr */
-        .btn-pink { 
-            background-color: #F8BBD0;
-            color: #666666;
-        }
+           Beschriftungen (v150o). .btn-pink (My Level) entfiel mit dem
+           Button in v157.33. */
         .btn-yellow { 
             background-color: #FFEB3B;
             color: #666666;
@@ -624,14 +663,22 @@ Kontakt: dd@danidubs.ch
             padding: 0;
         }
 
-        .dpad { 
+        /* Das D-Pad ist EIN Knopf (v157.25) — es soll sich von einer
+           leeren Kachel daneben durch nichts unterscheiden ausser den
+           vier Pfeilen darin. Darum exakt die Werte der .tool-btn:
+           dieselbe Fläche (#e0e0e0), padding 0 und derselbe Übergang.
+           Das frühere padding: 4px war der letzte sichtbare Unterschied:
+           ein fester Pixelwert, der nicht mit --u mitwuchs und die
+           Pfeilzellen gegenüber der Nachbarkachel nach innen rückte. */
+        .dpad {
             grid-column: span 2;
             grid-row: span 2;
-            background-color: #E0E0E0; 
+            background-color: #e0e0e0;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            padding: 4px;
+            padding: 0;
+            transition: all 0.15s ease;   /* wie .tool-btn */
         }
         
         .go-btn { 
@@ -642,6 +689,9 @@ Kontakt: dd@danidubs.ch
             font-weight: 700;   /* fett wie Raster/Editor (v150o) */
         }
         
+        /* Die Pfeilzellen bleiben durchsichtig — sie sind Teile EINER
+           Kachel, keine vier Knöpfe. Sichtbar reagiert immer nur das
+           D-Pad als Ganzes (Regel darunter). */
         .dpad-btn {
             background-color: transparent;
             border: none;
@@ -651,23 +701,22 @@ Kontakt: dd@danidubs.ch
             justify-content: center;
             font-size: 24px;
             color: #333;
-            transition: background-color 0.15s ease;   /* wie tool-btn (v157.6) */
         }
 
-        /* Hover-/Druck-Feedback wie die Buttons daneben (v157.6):
-           Vorher dunkelte der Hover nur hauchzart ab (rgba 5%) und ein
-           Druck blieb ohne Relief-Antwort — dadurch wirkte das D-Pad
-           anders als seine Nachbarn. Jetzt: Hover im selben Ton wie
-           tool-btn (#e0e0e0 → #d0d0d0), und beim Drücken eines Pfeils
-           sinkt die GANZE Kachel mit --g4m-press ein — das D-Pad ist
-           EIN Bedienfeld, also drückt es auch als eines. */
-        .dpad-btn:hover {
-            background-color: #d0d0d0;
-        }
-        .dpad-btn:active {
+        /* Hover und Druck greifen auf die GANZE Kachel (v157.25).
+           Bis v157.24 färbte der Hover nur die berührte Drittelzelle:
+           #d0d0d0 auf einem Neuntel der Fläche, Rest #e0e0e0 — das war
+           der Rest-Unterschied zu den Nachbarn, die als Ganzes
+           reagieren. Der Druck tat es schon richtig (v157.6), der Hover
+           zog nur nicht mit. Der Ton ist derselbe, den .tool-btn beim
+           Hover annimmt und den .nav-btn über filter: brightness(0.93)
+           erreicht — auf #e0e0e0 rechnet das exakt auf #d0d0d0 hinaus,
+           die Kachel passt also zu beiden Nachbarschaften. */
+        .dpad:has(.dpad-btn:hover) {
             background-color: #d0d0d0;
         }
         .dpad:has(.dpad-btn:active) {
+            background-color: #d0d0d0;
             box-shadow: var(--g4m-press);
         }
 
@@ -720,6 +769,56 @@ Kontakt: dd@danidubs.ch
             margin-bottom: 5px;
         }
 
+        /* ── Pull-up-Menüs Formula/Canvas/Drawing (v157.34) ─────────
+           EINE Grösse für alle drei: 2u breit (Ankerbreite, Prinzip
+           v150f) × 6u hoch — das Formel-Menü hatte sie schon, Canvas
+           (4u) und Drawing (1u je Eintrag) ziehen nach; die Höhe setzen
+           die Builder aus der Live-Messung. Dazu ein GEWORFENER
+           Schatten nach unten rechts (das Licht bleibt oben links wie
+           beim Relief) und ein langsames Ausrollen von unten nach oben.
+           Gilt für ALLE Menüs der App (v157.35), auch das Auflösungs-
+           Menü am Save-Image-Button und den Spiral-Wähler im F2-Panel
+           (beide in ihrer bisherigen Grösse).
+
+           TECHNIK seit v157.36: statischer Clip-RAHMEN + transform-
+           Fahrt statt animiertem clip-path. Der erste Wurf animierte
+           clip-path — das läuft auf dem HAUPTTHREAD und zeichnet den
+           grossen weichen Schatten in jedem Frame neu; jede parallele
+           Hauptthread-Arbeit (Fokus, Listener-Registrierung, Layout
+           der Nachbarelemente) wurde als Ruckler sichtbar, am Save-
+           Image-Menü als kurzes Hängen auf Höhe des Go-Buttons
+           (User-Befund). Jetzt wird das Menü EINMAL gemalt und fährt
+           als fertige Ebene per transform hoch — Transform komponiert
+           die GPU, der Hauptthread ist unbeteiligt, die Fahrt ist
+           flüssig per Konstruktion. Der Rahmen (g4mWrapDropdownForRoll,
+           §2) ist um die Schattenreserve grösser als das Menü, damit
+           der Schatten seitlich und oben von Anfang an mitläuft; nur
+           die UNTERKANTE liegt exakt auf der Anker-Oberkante — dort
+           taucht das Menü auf. Nach der Landung gibt der Rahmen sein
+           overflow frei, damit auch der untere Schattensaum steht. */
+        @keyframes g4m-dd-slideup {
+            from { transform: translateY(100%); }
+            to   { transform: translateY(0); }
+        }
+        .g4m-dd-frame {
+            position: absolute;
+            z-index: 1000;
+            overflow: hidden;
+            /* Der Rahmen ist grösser als das Menü — er darf Klicks auf
+               das, was unter seinem Rand liegt (z. B. Go neben dem
+               Save-Image-Menü), nicht abfangen. */
+            pointer-events: none;
+        }
+        .g4m-dd-frame > * {
+            pointer-events: auto;
+            animation: g4m-dd-slideup var(--g4m-anim-dd-roll, 0.9s) ease-out;
+            will-change: transform;
+        }
+        #g4m-mode-dropdown, #display-mode-dropdown, #canvas-color-dropdown,
+        #resolution-dropdown, #arch-spiral-dropdown {
+            box-shadow: calc(var(--u) * 0.14) calc(var(--u) * 0.14) calc(var(--u) * 0.34) rgba(0, 0, 0, 0.42);
+        }
+
         /* Dropdown-Styles */
         #resolution-dropdown, #display-mode-dropdown, #canvas-color-dropdown {
             position: absolute;
@@ -753,10 +852,10 @@ Kontakt: dd@danidubs.ch
 
         /* Formel-Menü am Modus-Indikator (v153.1i): weisses Feld im
            Look der Canvas-/Drawing-Menüs — F1-F10 als EINE Spalte,
-           gleichmässig von oben nach unten verteilt (je 0.6u bei
-           6u Menühöhe). Die früheren Farbkacheln (2 Spalten, Modus-
-           Farben) entfielen. Geometrie (2u x 6u am u-Raster) setzt
-           createModeDropdown aus der Live-Messung. */
+           gleichmässig von oben nach unten verteilt (je 0.7u bei
+           7u Menühöhe, v157.41). Die früheren Farbkacheln (2 Spalten,
+           Modus-Farben) entfielen. Geometrie (2u x 7u am u-Raster)
+           setzt createModeDropdown aus der Live-Messung. */
         #g4m-mode-dropdown {
             position: absolute;
             z-index: 1000;
@@ -876,22 +975,61 @@ Kontakt: dd@danidubs.ch
                stehen hier als eine Quelle, jede Verwendung greift auf
                den Namen zu.
 
-               Die gedämpften Töne sind die Originale auf HSL S 25 % /
-               L 48 % zurückgenommen, Farbton unverändert. Ein Gegenstück
-               zum Orange gibt es (noch) nicht — im Tool-Panel bleibt die
-               orange Gruppe darum vorerst kräftig; passend wäre #99815D
-               (Farbton 36°, gleiches S/L wie die beiden anderen). */
-            --g4m-bright-green:  #4CAF50;
-            --g4m-bright-orange: #FFB74D;
+               Beide Sätze sind seit v157.22 in CIELCh abgestimmt statt
+               in HSL. Der Grund: Gleiche HSL-Sättigung heisst NICHT
+               gleiche wahrgenommene Buntheit. Die alten gedämpften Töne
+               standen zwar beide auf S 25 % / L 48 %, unterschieden sich
+               im tatsächlichen Buntwert aber um den Faktor 2,1 (Grün
+               C* 36,7 gegen Blau C* 17,8) — das Grün war spürbar weniger
+               gedämpft als das Blau, obwohl die Zahlen Gleichheit
+               suggerierten.
+
+               GEDÄMPFT: alle drei auf L* 56 / C* 27, Farbtöne
+               unverändert. Gleiche Helligkeit heisst zugleich gleicher
+               Kontrast zur weissen Beschriftung — für alle drei jetzt
+               3,6 : 1. Das Orange kam von L* 79 / C* 64 (es war schlicht
+               der unveränderte Leuchtton) und wird damit erstmals ein
+               echtes Ockergrau.
+
+               LEUCHTEND: Massstab ist der ABSTAND ZUM EIGENEN
+               PANELGRUND, nicht die Helligkeit für sich. F1 liegt auf
+               #D9FFB2 (L* 95,8), F2 auf #B1DAFA (L* 85,2) — bei
+               gleichem L* der Knöpfe wirkt der auf dem helleren Grund
+               dunkler. Genau das war zu sehen. Das Blau hat 24,8 L*
+               Abstand zu seinem Grund; das Grün ist von L* 64 auf 71
+               aufgehellt und hat damit denselben. */
+            --g4m-bright-green:  #60C362;   /* v157.22, war #4CAF50 */
             --g4m-bright-blue:   #2196F3;
-            --g4m-muted-green:   #7A9A5C;
-            --g4m-muted-blue:    #5E8199;
+            /* Der dritte Leuchtton hat derzeit keinen Ort — F3-F10
+               warten. Er bleibt als Vorrat stehen und liefert den
+               Farbton, aus dem das gedämpfte Ocker abgeleitet ist. */
+            --g4m-bright-orange: #FFB74D;
+            --g4m-muted-green:   #778E60;   /* v157.22, war #7A9A5C */
+            /* Schmutziges Senfgelb (v157.24, dritter Anlauf).
+                Anlauf 1 (#A18159) erbte den Farbton des Leuchttons —
+                h 75° ist Orange, kein Gelb; abgedunkelt gibt das Ocker.
+                Anlauf 2 (#A28F54) korrigierte den Farbton auf 92°, liess
+                die Buntheit aber bei C* 34 — und ein Gelb mit so wenig
+                Buntheit liest sich weiter als Braun, weil Gelb erst mit
+                Sättigung als Gelb kenntlich wird.
+                Jetzt L* 62 / C* 48 bei h 90°. Das ist deutlich bunter
+                als Grün und Blau (beide C* 27) und darf es sein: Der
+                Buntwert ist eine Messgrösse, keine Wirkungsgrösse, und
+                Gelb braucht bei gleicher Zahl mehr davon, um überhaupt
+                als Farbton dazustehen. Gegen den Leuchtton (#FFB74D,
+                L* 79 / C* 64) bleibt es klar zurückgenommen — Messing
+                statt Signalgelb. Weisse Schrift: 3,0 : 1.
+                Der Gruppenname bleibt «orange» — er benennt die Spalte
+                im Tool-Panel, nicht mehr den Ton. */
+            --g4m-muted-orange:  #AE933D;   /* v157.24, war #A28F54 */
+            --g4m-muted-blue:    #4F8DB2;   /* v157.22, war #5E8199 */
             /* Aktivfarbe je Ort — HIER wird zugeordnet. Ein Tausch ist
-               von nun an ein Vertauschen dieser vier Zeilen. */
+               von nun an ein Vertauschen dieser Zeilen. */
             --g4m-active-sf:     var(--g4m-bright-green);   /* F1-Panel */
             --g4m-active-arch:   var(--g4m-bright-blue);    /* F2-Panel */
-            --g4m-active-tool-green: var(--g4m-muted-green);
-            --g4m-active-tool-blue:  var(--g4m-muted-blue);
+            --g4m-active-tool-green:  var(--g4m-muted-green);
+            --g4m-active-tool-orange: var(--g4m-muted-orange);
+            --g4m-active-tool-blue:   var(--g4m-muted-blue);
             /* ── HAARLINIEN-RASTER (v156.9) ────────────────────────────
                Die Buttons bleiben randlos im Sinne von v156.8 — sie
                tragen keine Umrandung, keine Kerbe, keine Fuge. Das
@@ -1039,6 +1177,22 @@ Kontakt: dd@danidubs.ch
             --g4m-raise:
                 inset var(--g4m-bevel) var(--g4m-bevel) var(--g4m-bevel-blur) var(--g4m-bevel-light),
                 inset calc(var(--g4m-bevel) * -1) calc(var(--g4m-bevel) * -1) var(--g4m-bevel-blur) var(--g4m-bevel-dark);
+            /* KNAPPE Schulter für die Slider-Griffe (v157.46): gleiche
+               Kanten und Lichtwerte, aber Weichzeichnung 0. Die normale
+               Schulter (~0.11u Blur) frisst auf einem 12-30px-Griff bis
+               zur Hälfte der Fläche — zusammen mit dem Wurfschatten
+               (v157.45) wirkte das fusselig (User-Befund). Kacheln und
+               Buttons behalten die weiche Schulter; nur kleine Griffe
+               brauchen die harte Kante, um scharf zu bleiben. */
+            --g4m-raise-crisp:
+                inset var(--g4m-bevel) var(--g4m-bevel) 0 var(--g4m-bevel-light),
+                inset calc(var(--g4m-bevel) * -1) calc(var(--g4m-bevel) * -1) 0 var(--g4m-bevel-dark);
+            /* Geworfener Schatten der Slider-Griffe (v157.45): gleiche
+               Lichtquelle oben links und gleiche Deckung wie die
+               Pull-up-Menüs (42 %), die Reichweite auf die Griffgrösse
+               skaliert — die Menü-Masse (0.14u/0.34u) liessen einen
+               12-30px-Griff zentimeterhoch über der Rail schweben. */
+            --g4m-handle-shadow: calc(var(--u) * 0.05) calc(var(--u) * 0.05) calc(var(--u) * 0.12) rgba(0, 0, 0, 0.42);
             /* eingedrückt — dieselbe Lichtquelle, Schulter andersherum */
             --g4m-press:
                 inset var(--g4m-bevel) var(--g4m-bevel) var(--g4m-bevel-blur) var(--g4m-bevel-dark),
@@ -1049,14 +1203,30 @@ Kontakt: dd@danidubs.ch
                (F2) und 12px (F1, Basis-Thumb) auseinander. */
             --g4m-slider-handle: min(30px, calc(var(--u) * 0.58));
             --g4m-slider-rail-h: 2px;
-            --g4m-mode-color-f3:  #FFDBA6;
-            --g4m-mode-color-f4:  #E6C9EB;
-            --g4m-mode-color-f5:  #F7CCCC;
-            --g4m-mode-color-f6:  #D7DEE2;
-            --g4m-mode-color-f7:  #BFE5E1;
-            --g4m-mode-color-f8:  #FFEFC0;
-            --g4m-mode-color-f9:  #D2EAD3;
-            --g4m-mode-color-f10: #F9C7D8;
+            /* ── F3-F10 in CIELCh abgestimmt (v157.43) ────────────────
+               Anker sind F1 (#D9FFB2, h127) und F2 (#B1DAFA, h253) —
+               unverändert per User-Vorgabe. Der Befund davor: F6 stand
+               bei C* 3 (praktisch das Tool-Grau, dE 3 zu #e0e0e0), F9
+               bei C* 15 UND auf F1s Farbtonseite; F3 und F8 lagen nur
+               14° auseinander. Neu: Farbtöne mit sauberen Abständen
+               über den ganzen Kreis (20/55/90/·127·/178/219/·253·/
+               290/325/355), Helligkeit im Band L* 83.5-87, Buntheit je
+               Farbton so hoch, wie der sRGB-Gamut im Pastellbereich
+               hergibt (Rot deckelt bei C* 22, Gold erreicht 33 — GLEICHE
+               Zahlen wären wieder ungleich bunt, vgl. Senfgelb-Lektion
+               v157.24). Schwächster Grau-Abstand jetzt dE 22, vorher 3.
+               Identitäten blieben, wo es ging: F3 Orange, F4 Lila,
+               F5 Rot, F7 Türkis, F8 Gold, F10 Rosé; NEU sind F6 (Cyan
+               statt Graublau) und F9 (Veilchenblau statt Blassgrün —
+               das Grün konkurrierte mit F1). */
+            --g4m-mode-color-f3:  #FFCBAF;   /* Orange   h55  (war #FFDBA6) */
+            --g4m-mode-color-f4:  #F4CAF5;   /* Lila     h325 (war #E6C9EB) */
+            --g4m-mode-color-f5:  #FEC5C6;   /* Rot      h20  (war #F7CCCC) */
+            --g4m-mode-color-f6:  #86E7FC;   /* Cyan     h219 (war #D7DEE2, C*3!) */
+            --g4m-mode-color-f7:  #9BE7D6;   /* Türkis   h178 (war #BFE5E1) */
+            --g4m-mode-color-f8:  #F0D89B;   /* Gold     h90  (war #FFEFC0) */
+            --g4m-mode-color-f9:  #C9CDFF;   /* Veilchen h290 (war #D2EAD3) */
+            --g4m-mode-color-f10: #FFC5D9;   /* Rosé     h355 (war #F9C7D8) */
         }
         #f1-btn.g4m-btn-active { background-color: var(--g4m-mode-color-superformula); }
         #f2-btn.g4m-btn-active { background-color: var(--g4m-mode-color-archimedean); }
@@ -1082,9 +1252,20 @@ Kontakt: dd@danidubs.ch
         /* Unsichtbare Pfeil-Buttons: optisch weg UND nicht bedienbar */
         .dpad-btn.g4m-arrow-hidden { opacity: 0; pointer-events: none; }
 
-        /* Slider-Zeile im Random-Modus eingefroren */
+        /* ── Slider-Zeile im Random-Modus eingefroren ──────────────
+           Bis v157.23 lag opacity: 0.5 auf dem GANZEN .slider-container.
+           Das nahm auch den Griff mit: Er wurde halbdurchsichtig, die
+           Rail lief sichtbar durch ihn hindurch, und das las sich als
+           Darstellungsfehler statt als «gesperrt». Jetzt bekommen Rail
+           und Griff eigene, DECKENDE Grautöne — gesperrt sieht man an
+           der entfärbten Zeile, nicht an einem durchscheinenden Element.
+           Abgeblendet wird nur noch das Wertefeld. */
         .slider-row.g4m-frozen .slider-container,
-        .slider-row.g4m-frozen .value-display { opacity: 0.5; pointer-events: none; }
+        .slider-row.g4m-frozen .value-display { pointer-events: none; }
+        .slider-row.g4m-frozen .value-display { opacity: 0.5; }
+        .slider-row.g4m-frozen .slider-container { background-color: #cfcfcf; }
+        .slider-row.g4m-frozen .slider-track,
+        .slider-row.g4m-frozen .slider-handle { background-color: #b3b3b3; }
         .slider-row.g4m-frozen .slider-handle { cursor: not-allowed; }
 
         .g4m-dd-active    { background-color: #f0f0f0; }
@@ -1777,29 +1958,22 @@ html, body { overflow: hidden; }
     .navigation-tool .btn-gray       { grid-row: 1;     grid-column: 1; }       /* Home       */
     .navigation-tool .btn-teal       { grid-row: 2;     grid-column: 1; }       /* Guestbook  */
     .navigation-tool .btn-purple     { grid-row: 1;     grid-column: 2 / 4; }   /* Galleries  */
-    .navigation-tool .btn-green      { grid-row: 2;     grid-column: 2 / 4; }   /* Projects   */
+    .navigation-tool .btn-violet     { grid-row: 2;     grid-column: 2 / 4; }   /* Projects   */
     .navigation-tool .dpad           { grid-row: 1 / 3; grid-column: 4 / 6; }   /* D-Pad      */
     .navigation-tool .go-btn         { grid-row: 1 / 3; grid-column: 6 / 8; }   /* Go — Mitte */
-    .navigation-tool .btn-red        { grid-row: 1;     grid-column: 8 / 10; }  /* Save Image */
-    .navigation-tool .btn-pink       { grid-row: 2;     grid-column: 8 / 10; }  /* My Level   */
-    .navigation-tool .btn-orange     { grid-row: 1;     grid-column: 10 / 12; } /* My Images  */
+    .navigation-tool #g4m-fs-nav    { grid-row: 1 / 3; grid-column: 8 / 10; }  /* Vollbild 2u×2u, rechts neben Go (v157.33) */
+    .navigation-tool .btn-red        { grid-row: 1;     grid-column: 10 / 12; } /* Save Image — um 2u nach rechts (v157.33) */
+    .navigation-tool .btn-orange     { grid-row: 2;     grid-column: 10 / 12; } /* My Images — um 1u nach unten (v157.33) */
     .navigation-tool .btn-yellow     { grid-row: 1;     grid-column: 12; }      /* Info       */
     .navigation-tool .btn-pink-bright{ grid-row: 2;     grid-column: 12; }      /* My Profile */
 
-    /* Vollbild-Tausch (v150b/f): im Hochformat rücken F6-F10 um zwei
-       Felder nach rechts (8-12), der Vollbild-Button nimmt 6-7 ein —
-       exakt unter dem zentrierten Go; die Nav-Instanz weicht dem
-       grauen Platzhalter (Zeile 2, Spalten 10-11). */
-    #f6-btn  { grid-column: 8; }
-    #f7-btn  { grid-column: 9; }
-    #f8-btn  { grid-column: 10; }
-    #f9-btn  { grid-column: 11; }
-    #f10-btn { grid-column: 12; }
-    #g4m-fs-tools  { display: flex; }
-    #g4m-blank-tools { display: none; }
-    #g4m-fs-nav    { display: none; }
-    #g4m-blank-nav { display: block; }
-    .navigation-tool #g4m-blank-nav { grid-row: 2; grid-column: 10 / 12; }
+    /* Der Vollbild-Tausch (v150b/f: Zweitinstanz zwischen F5 und F6,
+       F6-F10 nach rechts gerückt, Platzhalter-Weiche) entfiel in
+       v157.33 — My Levels Wegfall schafft in der Hochformat-Nav den
+       2u×2u-Platz rechts neben Go, alle 24 Zellen sind belegt:
+       Home/Guestbook (1) · Galleries/Projects (2-3) · D-Pad (4-5) ·
+       Go (6-7) · Vollbild (8-9) · Save Image/My Images (10-11) ·
+       Info/My Profile (12). */
 }
 
 /* ================================================================
@@ -1888,14 +2062,17 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
     transition: none !important;
 }
 
-/* Vollbild-Button: seit Design-Revision v150b ZWEI Instanzen mit
-   gemeinsamer Klasse, da ein Element nicht zwischen zwei Grid-
-   Containern wandern kann — die Orientierungsregel zeigt immer genau
-   EINE: Querformat im Navigation-Tool direkt unter Go (#g4m-fs-nav),
-   Hochformat in der Tool-Reihe zwischen F5 und F6 (#g4m-fs-tools,
-   dort exakt unter dem zentrierten Go). Der jeweils andere Slot
-   trägt einen funktionslosen hellgrauen Platzhalter (.g4m-slot-blank).
-   Die Klick-Logik bindet beide Instanzen (initFullscreenButton). */
+/* Vollbild-Button: von v150b bis v157.32 ZWEI Instanzen (Nav im Quer-,
+   Tool-Reihe im Hochformat, plus Platzhalter-Weiche), weil die 2-zeilige
+   Hochformat-Nav keinen Platz hatte. Seit v157.33 schafft der Wegfall
+   von My Level diesen Platz: EINE Instanz (#g4m-fs-nav, 2u×2u) in
+   beiden Orientierungen, die gesamte Tauschmechanik entfiel.
+   initFullscreenButton bindet weiterhin über die Klasse (und erfasst
+   damit auch die Home-Instanz #g4m-fs-home). */
+/* Vollbild quadratisch 2u×2u (v157.33): im Querformat über die
+   Zeilen-Spanne, im Hochformat über die explizite Platzierung rechts
+   neben Go (siehe @media-Block). */
+#g4m-fs-nav { grid-row: span 2; }
 /* Gedimmt wird NUR das Symbol — opacity auf dem ganzen Button machte
    den Hintergrund durchscheinend, und in der Nav schimmerten die
    dahinter fahrenden Panels durch */
@@ -1948,6 +2125,13 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
 }
 #g4m-fs-home.g4m-fs-push[data-on="1"] { transition-delay: 0s, 0s, 0s, 0s; }
 #g4m-fs-home { flex-direction: column; gap: calc(var(--u) * 0.08); }
+/* Angedockt (v157.37): exakt die Anatomie des Nav-Buttons — NUR das
+   flex-zentrierte Symbol in derselben Box. Beschriftung und Fuge
+   fallen weg (display statt visibility: eine unsichtbare Beschriftung
+   bliebe im Fluss und schöbe das Symbol weiter aus dem Zentrum);
+   das Symbol beider Instanzen liegt damit auf demselben Punkt. */
+#g4m-fs-home[data-pos="dock"] { gap: 0; }
+#g4m-fs-home[data-pos="dock"] .g4m-fs-home-label { display: none; }
 #g4m-fs-home svg { opacity: 1; flex-shrink: 0; }   /* voll deckend — kein 0.45-Dimmen der Button-Instanzen */
 .g4m-fs-home-label {
     color: #ffffff;
@@ -1964,10 +2148,6 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
    wuerden ihn bei gleicher Spezifitaet ueberstimmen (Quelltext-
    Reihenfolge entscheidet) — der Vollbild-Button fehlte dadurch
    auf Mobile komplett. */
-@media (orientation: landscape) {
-    #g4m-fs-tools  { display: none; }
-    #g4m-blank-nav { display: none; }
-}
 
 /* D-Pad-Zellen fest verankern — Auto-Platzierung darf nie verrutschen */
 #dpad-up        { grid-area: 1 / 2; }
@@ -2459,7 +2639,6 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
            GAR NICHT: die grosse Canvas (v157.11) — sie bleibt flach,
            weil das Bild bis über die Reliefkante hinausreicht. */
         .tool-btn,
-        .g4m-rnd-btn,
         .g4m-param-sq,
         .g4m-arch-cell,
         .g4m-param-editor,
@@ -2479,14 +2658,107 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
            Pseudo-Elemente. Webkit und Firefox brauchen GETRENNTE
            Regeln — ein unbekannter Pseudo-Selektor in der Liste würde
            die ganze Regel im jeweils anderen Browser entwerten. */
+        /* Wurfschatten + Relief (v157.45): box-shadow schichtet — der
+           geworfene Schatten (erste Schicht, unten rechts) und die
+           Relief-Insets (--g4m-raise) leben nebeneinander in EINER
+           Deklaration; eine getrennte Regel hätte die andere
+           überschrieben. */
+        /* EXPERIMENT (v157.48, User-Wunsch): Griffe ganz OHNE Relief —
+           nur die flache Farbfläche mit Wurfschatten. Rückweg: in den
+           drei Regeln «, var(--g4m-raise-crisp)» wieder anhängen; die
+           Definition der knappen Schulter (v157.46) steht dafür
+           unverändert bereit. */
         .slider-handle {
-            box-shadow: var(--g4m-raise);
+            box-shadow: var(--g4m-handle-shadow);
         }
         input[type=range]::-webkit-slider-thumb {
-            box-shadow: var(--g4m-raise);
+            box-shadow: var(--g4m-handle-shadow);
         }
         input[type=range]::-moz-range-thumb {
-            box-shadow: var(--g4m-raise);
+            box-shadow: var(--g4m-handle-shadow);
+        }
+
+        /* ── Zufallsbereich in der Editor-Zone (v157.28, Optik v157.29)
+           Steht der AKTIVE Parameter auf Random, zeigt der Editor statt
+           der eingefrorenen Wert-Rail die beiden BEREICHS-Rails (Min und
+           Max). Seit v157.29 ist das wörtlich derselbe Baustein wie auf
+           F1/F2: der Container IST ein .g4m-arch-block (gleiche Spalten-
+           geometrie aus den :root-Variablen, gleiche Zeilenhöhe, gleiche
+           Grid-Plätze über die lbl-/rail-/field-Klassen), die Felder
+           sind .g4m-val-box und laufen über die generische Editier-
+           Mechanik g4mInitValBoxEditing — NICHTS davon ist nachgebaut.
+           Hier stehen nur die Teile, die dort panel-gebunden sind:
+           Sichtbarkeit, Zeilenhöhe, Typografie ohne /panel-scale (das
+           Tool-Panel wird nicht skaliert) und die Farbgebung. */
+        /* Positionsanker für die absolut gelegten Bereichs-Ansichten */
+        .g4m-param-editor { position: relative; }
+        .g4m-rr-lines {
+            display: none;
+            /* WIE die F-Parameterzeile (g4m-arch-prow-active): absolute
+               Auflage über dem GANZEN Editor mit denselben Innenmassen —
+               Kopfzeilenhöhe, pad-top, pad-x und die Block-Absenkung
+               (--g4m-rails-shift, Vorgabe 0.463u wie dort; die exakte
+               Feinstellung misst g4mAlignRandomRangeRows nach, gleiche
+               Philosophie wie g4mAlignRailsToTool). Dieselbe innere
+               Kette — Kopf → Absenkung → Min-Zeile → Max-Zeile — plus
+               derselbe Anker (die Tool-Rail-Linie, an der auch F1/F2
+               hängen) ergibt Deckungsgleichheit ALLER Elemente, ohne
+               dass je Element einzeln gerechnet würde. */
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            box-sizing: border-box;
+            padding: calc(var(--u) * 0.28) calc(var(--u) * 0.55) 0;
+            /* Kopfhöhe, Absenkung und Zeilenhöhe kommen seit v157.31
+               vom EDITOR (eine Quelle für Wert- und Bereichs-Ansicht);
+               der gemessene Feinversatz liegt weiterhin als Inline-
+               Variable auf diesem Element und gewinnt gegen das Erbe. */
+            /* Fokusrahmen der g4m-val-box (v157.20-Mechanik): Aktivfarbe
+               im Geltungsbereich = Gruppenfarbe der Zeile */
+            --g4m-active: var(--g4m-rr-col, #666666);
+        }
+        /* Wert-Ansicht der Zeile im Random-Zustand: UNSICHTBAR, aber im
+           Fluss (visibility statt display) — die Rail bleibt so der
+           messbare Anker, an dem Max ausgerichtet wird, und die
+           Editor-Geometrie springt beim Umschalten nicht. Das Label
+           ersetzt der eigene Kopf (Anatomie von F1/F2 samt zulässiger
+           Spanne in Klammern). */
+        .slider-row.g4m-frozen .slider-top-row,
+        .slider-row.g4m-frozen .slider-bottom-row { visibility: hidden; }
+        .slider-row.g4m-frozen .g4m-rr-lines { display: block; }
+        /* Typografie wie im F-Editor (dieselbe clamp-Formel), nur ohne
+           die /panel-scale-Teilung. */
+        .g4m-param-editor .g4m-param-label-sm,
+        .g4m-param-editor .g4m-note-text,
+        .g4m-param-editor .g4m-val-box {
+            font-size: clamp(10px, calc(var(--u) * 0.269), 14px);
+            font-weight: 700;
+            color: #666666;
+        }
+        /* Rails und Griffe: exakt die F-Editor-Technik — Farbschicht in
+           Railstärke über grauer Basislinie, Track transparent, Griff
+           in --g4m-slider-handle — in der GEDÄMPFTEN Gruppenfarbe.
+           WICHTIG (Fund v157.29): --track-color der generischen Input-
+           Regel ist DIREKT AUF dem Element deklariert und gewinnt damit
+           gegen jeden geerbten Wert vom Container — deshalb blieb die
+           Füllung in v157.28 grau. Darum hier die Schichttechnik statt
+           --track-color, wie auf F1/F2. */
+        .g4m-param-editor .g4m-rr-lines input[type=range] {
+            background:
+                linear-gradient(var(--g4m-rr-col, #666666), var(--g4m-rr-col, #666666)) left center / var(--fill-percent, 0%) var(--g4m-slider-rail-h) no-repeat,
+                linear-gradient(#9e9e9e, #9e9e9e) left center / 100% var(--g4m-slider-rail-h) no-repeat;
+        }
+        .g4m-param-editor .g4m-rr-lines input[type=range]::-webkit-slider-runnable-track { background: transparent; }
+        .g4m-param-editor .g4m-rr-lines input[type=range]::-moz-range-track { background: transparent; }
+        .g4m-param-editor .g4m-rr-lines input[type=range]::-webkit-slider-thumb {
+            width: var(--g4m-slider-handle);
+            height: var(--g4m-slider-handle);
+            margin-top: calc((var(--g4m-slider-rail-h) - var(--g4m-slider-handle)) / 2);
+            background: var(--g4m-rr-col, #666666);
+        }
+        .g4m-param-editor .g4m-rr-lines input[type=range]::-moz-range-thumb {
+            width: var(--g4m-slider-handle);
+            height: var(--g4m-slider-handle);
+            background: var(--g4m-rr-col, #666666);
         }
 
         /* ── Relief als Auflage (v157.2) ──────────────────────────────
@@ -2517,9 +2789,9 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
         }
         /* Drücken kehrt die Schulter um: dieselbe Lichtquelle, die
            Kachel sinkt ein. Nur für das, was wirklich etwas auslöst —
-           Reserve- und Platzhalterfelder bleiben ruhig liegen. */
-        .tool-btn:not(.reserve-btn):not(.g4m-slot-blank):active,
-        .g4m-rnd-btn:active,
+           Platzhalterfelder bleiben ruhig liegen (die Reserve-Ausnahme
+           entfiel mit der Reserve-Reihe, v157.33). */
+        .tool-btn:not(.g4m-slot-blank):active,
         .g4m-param-sq:not(.g4m-sq-blank):active,
         button.g4m-arch-cell:not(.g4m-arch-reserve):active,
         .g4m-arch-segbtn:active,
@@ -2644,11 +2916,11 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
                  unter dem zentrierten Go-Button (beide Spalten 6-7).
                  Hover zeigt den Formelnamen (title), F1 = Superformula,
                  F2 = Archimedean, F3-F10 folgen (Design-Revision v150). -->
-            <button type="button" class="tool-btn top-btn" style="grid-column: 1;" id="f1-btn">F1</button>
-            <button type="button" class="tool-btn top-btn" style="grid-column: 2;" id="f2-btn">F2</button>
-            <button type="button" class="tool-btn top-btn" style="grid-column: 3;" id="f3-btn">F3</button>
-            <button type="button" class="tool-btn top-btn" style="grid-column: 4;" id="f4-btn">F4</button>
-            <button type="button" class="tool-btn top-btn" style="grid-column: 5;" id="f5-btn">F5</button>
+            <button type="button" class="tool-btn top-btn" style="grid-column: 3;" id="f1-btn">F1</button>
+            <button type="button" class="tool-btn top-btn" style="grid-column: 4;" id="f2-btn">F2</button>
+            <button type="button" class="tool-btn top-btn" style="grid-column: 5;" id="f3-btn">F3</button>
+            <button type="button" class="tool-btn top-btn" style="grid-column: 6;" id="f4-btn">F4</button>
+            <button type="button" class="tool-btn top-btn" style="grid-column: 7;" id="f5-btn">F5</button>
             <!-- F6-F10 und Vollbild-Slot sind orientierungsabhängig
                  platziert — die grid-columns liegen darum im CSS, nicht
                  inline (Inline würde die Media-Queries überstimmen):
@@ -2656,11 +2928,6 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
                  graue Platzhalter füllt das leere Doppelfeld 11-12.
                  Hochformat: F6-F10 rücken auf 8-12, der Vollbild-Button
                  nimmt 6-7 ein (exakt unter dem zentrierten Go). v150f -->
-            <button type="button" class="tool-btn top-btn g4m-fullscreen-btn" id="g4m-fs-tools" title="Toggle fullscreen">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="#666666" stroke-width="2.5" stroke-linecap="round"/>
-                </svg>
-            </button>
             <div class="tool-btn top-btn g4m-slot-blank" id="g4m-blank-tools"></div>
             <button type="button" class="tool-btn top-btn" id="f6-btn">F6</button>
             <button type="button" class="tool-btn top-btn" id="f7-btn">F7</button>
@@ -2697,15 +2964,9 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
                          G4M_SLIDER_ROWS generiert (buildToolSliderRows, §2)
                          — EINE Quelle statt 13 Markup-Kopien (Befund 1) -->
 
-                    <!-- Normalization row -->
-                    <div class="normalization-row" id="normalization-row">
-                        <div class="slider-top-row no-radio">
-                            <div class="slider-label">Normalization (Make Visible on Canvas)</div>
-                            <!-- On/Off-Text-Umschalter entfernt (v153.1h):
-                                 geschaltet wird über die On/Off-Quadrate im
-                                 Stack (Spalte 11-13) — wie bei allen anderen. -->
-                        </div>
-                    </div>
+                    <!-- Die Normalization-Editor-Zeile entfiel (v157.42):
+                         die Kachel neben Rotation schaltet direkt, es
+                         gibt nichts mehr auszuwählen oder anzuzeigen. -->
                 </div>
                 </div><!-- /g4m-param-editor -->
             </div>
@@ -2726,23 +2987,9 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
             <button type="button" class="tool-btn bottom-btn" style="grid-column: 9 / 11;">Modulator</button>
             <button type="button" id="g4m-random-caption" class="tool-btn bottom-btn" style="grid-column: 11 / 13;">Random</button>
 
-            <!-- Unterste Reihe (u12): 6 Reserve-Buttons à 2u. Frei
-                 geworden, nachdem das Slider-Feld auf 3u verkleinert und
-                 die obere Button-Zeile um 4u nach oben gerückt ist. -->
-            <button type="button" class="tool-btn reserve-btn" style="grid-column: 1 / 3;" aria-label="Reserve"></button>
-            <button type="button" class="tool-btn reserve-btn" style="grid-column: 3 / 5;" aria-label="Reserve"></button>
-            <button type="button" class="tool-btn reserve-btn" style="grid-column: 5 / 7;" aria-label="Reserve"></button>
-            <button type="button" class="tool-btn reserve-btn" style="grid-column: 7 / 9;" aria-label="Reserve"></button>
-            <button type="button" class="tool-btn reserve-btn" style="grid-column: 9 / 11;" aria-label="Reserve"></button>
-            <!-- Unter "Random Tools" (Spalte 11-13): zwei 1u-Quadrate
-                 On/Off als Random-Schalter des AKTIVEN Slider-Parameters.
-                 9 Paare (eines je Random-fähigem Parameter) liegen hier
-                 gestapelt auf z-index-Ebenen; g4mSelectParam blendet das
-                 zum aktiven Parameter passende ein (analog F2-Panel).
-                 Inhalt generiert buildRandomToggleStack (§2). -->
-            <div class="g4m-rnd-stack" id="g4m-rnd-stack" style="grid-row: 9; grid-column: 11 / 13;">
-                <div class="tool-btn reserve-btn g4m-rnd-blank" aria-hidden="true">&mdash;</div>
-            </div>
+            <!-- Die sechs Reserve-Buttons dieser Reihe entfielen in
+                 v157.33 — die Beschriftungs-Buttons darüber sind zu
+                 2u×2u-Quadraten in die Reihe hineingewachsen. -->
         </div>
 
         <!-- Navigation Tool (Mitte) -->
@@ -2755,7 +3002,7 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
             <button type="button" class="nav-btn btn-gray" id="default-btn">Home</button>
             
             <!-- Zeile 2 -->
-            <button type="button" class="nav-btn btn-green double-square">Projects</button>
+            <button type="button" class="nav-btn btn-violet double-square">Projects</button>
             
             <!-- Zeile 3 -->
             <button type="button" class="nav-btn btn-purple double-square">Galleries</button>
@@ -2796,25 +3043,22 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
             <!-- Zeile 6-7: Go Button -->
             <button type="button" class="nav-btn go-btn" id="generate-btn">Go</button>
             
-            <!-- Zeile 8: Vollbild-Slot direkt unter Go (Design-Revision
-                 v150b). Querformat: Vollbild-Button; Hochformat: dieser
-                 ist ausgeblendet (er erscheint dann zwischen F5 und F6
-                 in der Tool-Reihe) und der graue Platzhalter füllt die
-                 Zelle — Sichtbarkeit rein per CSS-Orientierungsregel. -->
+            <!-- Zeilen 8-9: Vollbild, seit v157.33 QUADRATISCH 2u×2u
+                 und die EINZIGE Instanz — die Hochformat-Kopie in der
+                 Tool-Reihe und beide Platzhalter (v150b) entfielen, weil
+                 der Wegfall von My Level in beiden Orientierungen Platz
+                 schafft. Save Image rückt dadurch im Fluss um 1u nach
+                 unten (Zeile 10), My Images auf Zeile 11. -->
             <button type="button" class="tool-btn double-square g4m-fullscreen-btn" id="g4m-fs-nav" title="Toggle fullscreen">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                     <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="#666666" stroke-width="2.5" stroke-linecap="round"/>
                 </svg>
             </button>
-            <div class="tool-btn double-square g4m-slot-blank" id="g4m-blank-nav"></div>
-            
-            <!-- Zeile 9 -->
+
+            <!-- Zeile 10 (My Level entfiel ersatzlos, v157.33) -->
             <button type="button" class="nav-btn btn-red double-square" id="download-btn">Save Image</button>
-            
-            <!-- Zeile 9 -->
-            <button type="button" class="nav-btn btn-pink double-square">My Level</button>
-            
-            <!-- Zeile 10 -->
+
+            <!-- Zeile 11 -->
             <button type="button" class="nav-btn btn-orange double-square">My Images</button>
             
             <!-- Zeile 12: My Profile + Info (entspricht gedreht der
@@ -3427,6 +3671,7 @@ Max. 100%</span>
 <div id="f10-panel" data-panel-open="0" style="position:fixed;top:0;left:0;width:calc(var(--u)*12);height:calc(var(--u)*12);background-color:var(--g4m-mode-color-f10);transition:transform var(--g4m-anim-sub-panel,0.55s) var(--g4m-panel-ease,ease-in-out);display:flex;flex-direction:column;font-family:'JetBrains Mono',monospace;color:black;z-index:10;transform:translateX(-100%);overflow:hidden;">
     <div class="g4m-panel-watermark">F10 — coming soon</div>
 </div>
+
 <!-- Zeichenlogik ist direkt in generateSuperformulas() integriert -->
 <!-- ============================================================ -->
 
@@ -3599,7 +3844,7 @@ const G4M_PERSIST = (function () {
         'currentDisplayMode', 'spiralType', 'canvasBackgroundColor', 'normalizationEnabled',
         'archConnectingLines', 'archimedeanParams', 'archUseRandomColors',
         'archDefaultColor', 'useRandomColors', 'defaultCurveColor',
-        'viewParams', 'superformulaParams', 'archModulation', 'sfModulation', 'randomModes'
+        'viewParams', 'superformulaParams', 'archModulation', 'sfModulation', 'randomModes', 'randomRanges'
     ];
     function isPlainObject(o) {
         return o && typeof o === 'object' && !Array.isArray(o);
@@ -3635,6 +3880,18 @@ const G4M_PERSIST = (function () {
                     if (isPlainObject(saved.randomModes)) {
                         Object.keys(saved.randomModes).forEach(function (id) {
                             state.randomModes[id] = saved.randomModes[id] === true;
+                        });
+                    }
+                } else if (k === 'randomRanges') {
+                    // wie randomModes: dynamische Slider-Ids, kein deepMerge.
+                    // Nur numerische min/max übernehmen — alles andere fällt
+                    // beim Lesen auf die volle Slider-Spanne zurück (v157.27).
+                    if (isPlainObject(saved.randomRanges)) {
+                        Object.keys(saved.randomRanges).forEach(function (id) {
+                            const r = saved.randomRanges[id];
+                            if (isPlainObject(r) && isFinite(r.min) && isFinite(r.max)) {
+                                state.randomRanges[id] = { min: +r.min, max: +r.max };
+                            }
                         });
                     }
                 } else if (isPlainObject(state[k]) && isPlainObject(saved[k])) {
@@ -3765,7 +4022,13 @@ const g4mStore = (function () {
 
         // Random/Fixed-Modus pro Slider (Slider-Id -> bool) —
         // einzige Wahrheitsquelle; Radio-Klassen sind nur Anzeige
-        randomModes: {}
+        randomModes: {},
+        /* Zufalls-Wertebereiche des Random-Panels (v157.27): je Slider-Id
+           {min,max}. Fehlt ein Eintrag, gilt die volle Slider-Spanne —
+           der Rückfall liegt im Leser (g4mGetRandomRange), nicht hier,
+           damit eine spätere Änderung der Slider-Spannen automatisch
+           durchschlägt. */
+        randomRanges: {}
     };
 
     /* Gespeicherte Sitzung über die Defaults legen (falls vorhanden),
@@ -3777,7 +4040,7 @@ const g4mStore = (function () {
     /* panels und randomModes sind vollständig store-privat: kein
        Lese- oder Schreibzugriff ausserhalb der Store-Methoden — auch
        nicht über die Fassade. */
-    const FACADE_HIDDEN = { panels: true, randomModes: true };
+    const FACADE_HIDDEN = { panels: true, randomModes: true, randomRanges: true };
 
     const facade = {};
     Object.keys(state).forEach(function (key) {
@@ -3821,6 +4084,15 @@ const g4mStore = (function () {
         isPanelOpenFlag:   function (id)       { return state.panels[id] === true; },
         setRandomModeFlag: function (id, r)    { state.randomModes[id] = !!r; },
         isRandomModeFlag:  function (id)       { return state.randomModes[id] === true; },
+        /* Zufallsbereiche (v157.27) — Kopien rein/raus, nie die lebende
+           Referenz: dieselbe Disziplin wie bei randomModes. */
+        setRandomRangeFlag: function (id, r) {
+            state.randomRanges[id] = { min: +r.min, max: +r.max };
+        },
+        getRandomRangeFlag: function (id) {
+            const r = state.randomRanges[id];
+            return r ? { min: r.min, max: r.max } : null;
+        },
 
         /* Schmaler, kontrollierter Persistenz-Kanal für den sonst
            fassaden-verborgenen randomModes-Teilbaum: export liefert eine
@@ -3838,6 +4110,23 @@ const g4mStore = (function () {
             if (!obj || typeof obj !== 'object') return;
             Object.keys(obj).forEach(function (k) {
                 state.randomModes[k] = obj[k] === true;
+            });
+        },
+        exportRandomRanges: function () {
+            const out = {};
+            Object.keys(state.randomRanges).forEach(function (k) {
+                const r = state.randomRanges[k];
+                out[k] = { min: r.min, max: r.max };
+            });
+            return out;
+        },
+        importRandomRanges: function (obj) {
+            if (!isPlainObject(obj)) return;
+            Object.keys(obj).forEach(function (k) {
+                const r = obj[k];
+                if (isPlainObject(r) && isFinite(r.min) && isFinite(r.max)) {
+                    state.randomRanges[k] = { min: +r.min, max: +r.max };
+                }
             });
         },
 
@@ -3994,16 +4283,16 @@ function g4mStateRawForSave() {
     });
     // randomModes liegt fassaden-verborgen — über den Store-Kanal holen
     out.randomModes = g4mStore.exportRandomModes();
+    out.randomRanges = g4mStore.exportRandomRanges();
     return out;
 }
 g4mBus.on('state', g4mScheduleSettingsSave);
 g4mBus.on('randomMode', g4mScheduleSettingsSave);   // Random/Fixed-Schalter mitspeichern
-g4mBus.on('randomMode', function (e) {
-    // On/Off-Quadrate unter "Random Tools" mit jeder Random-Änderung
-    // (Editor-Radios, Defaults, Sitzungswiederherstellung) abgleichen.
-    if (e && e.sliderId && typeof g4mUpdateRandomToggle === 'function') {
-        g4mUpdateRandomToggle(e.sliderId);
-    }
+g4mBus.on('randomMode', function () {
+    // Random-Schalter mit jeder Random-Änderung (Defaults, Sitzungs-
+    // wiederherstellung, Klick) abgleichen — die Senke liest den
+    // aktiven Parameter selbst (v157.32).
+    if (typeof g4mUpdateRandomCaption === 'function') g4mUpdateRandomCaption();
 });
 
 /* Zeichenmodus zentral wechseln — Konsumenten hören auf dem Bus mit */
@@ -4508,7 +4797,439 @@ const sliderData = {
    Verwender — .tool-btn.active und .g4m-dot.g4m-on. Beide tragen noch
    #4CAF50; sie greifen nirgends, wären beim Wiederbeleben aber die
    nächste Fundstelle. */
-const G4M_RELEASE = Object.freeze({ version: 'v157.20', date: '29.07.2026' });
+/* v157.21: Der hochauflösende Export war keine Vergrösserung des
+   Displaybildes, sondern zeigte einen winzigen Ausschnitt formatfüllend
+   aufgeblasen — bei durchscheinenden Layern eine fast einfarbige
+   Fläche, die wie ein «verblasstes» Bild aussieht. Vermessung der
+   Beispieldateien: 300 und 600 dpi enthalten rund 15-mal weniger
+   Formkanten pro Bildbreite als der 72-dpi-Export, und beide zeigen
+   DENSELBEN Ausschnitt — die Vergrösserung wächst also nicht mit der
+   dpi-Zahl. Das weist auf den gemeinsamen Nenner: die Bezugskante der
+   sichtbaren Canvas, aus der sich der Massstab errechnet.
+
+   Drei Korrekturen:
+   1. BEZUGSGRÖSSE geprüft statt blind gelesen (g4mExportSource). Weicht
+      der Pixelpuffer stark vom Layout-Kasten ab, zieht resizeCanvas ihn
+      nach; bleibt er unbrauchbar, bricht der Export mit Meldung ab,
+      statt eine wertlose Datei zu schreiben.
+   2. Der KONTEXT wird skaliert statt der Parameter. Vorher wurden
+      size, lineWidth und pointSize einzeln multipliziert — eine Liste,
+      die vollständig sein muss und es nicht war: panX/panY blieben
+      unskaliert, ein verschobenes Bild landete fast zentriert in der
+      Datei. Mit exportCtx.scale kann nichts mehr vergessen werden.
+   3. Der Export ist von aussen nicht mehr abbrechbar (detached).
+      Bisher galt g4mActiveRender auch für ihn: Jeder Neuaufbau der
+      Anzeige während des Laufs — Slider, Orientierungswechsel, auf dem
+      Handy schon die einfahrende Adressleiste — brach ihn ab, sein
+      onDone feuerte trotzdem, und in der Datei fehlten Layer. Dazu
+      arbeitet er auf einer Momentaufnahme der Layer-Liste.
+
+   VORÜBERGEHEND: G4M_EXPORT_DEBUG hängt die gemessenen Zahlen an den
+   Dateinamen (src/box/buf/sf, dazu -fix bei nachgezogenem Puffer),
+   auch beim 72-dpi-Export als Referenz. Nach der Diagnose auf false. */
+/* v157.22: Beide Farbsätze in CIELCh abgestimmt statt in HSL — gleiche
+   HSL-Sättigung heisst nicht gleiche wahrgenommene Buntheit, und genau
+   daran waren die «gedämpften» Töne auseinandergelaufen: Grün stand bei
+   C* 36,7, Blau bei C* 17,8, Faktor 2,1 Unterschied, obwohl beide auf
+   S 25 % / L 48 % gerechnet waren. Neu liegen alle drei auf L* 56 /
+   C* 27 bei unveränderten Farbtönen — womit auch der Kontrast zur
+   weissen Beschriftung für alle drei gleich ist (3,6 : 1). Das Orange
+   war gar nicht gedämpft, sondern noch der reine Leuchtton (L* 79 /
+   C* 64) und ist jetzt ein Ockergrau (#A18159). LEUCHTEND: Massgeblich
+   ist der Abstand zum EIGENEN Panelgrund, nicht das absolute L*. F1
+   liegt auf einem 10 L* helleren Grund als F2, darum wirkte das Grün
+   dunkler, obwohl es gemessen heller war als das Blau. Aufgehellt von
+   L* 64 auf 71 (#60C362) — gleicher Abstand zum Grund wie beim Blau
+   (24,8). Mitgezogen: das Gruppen-Pastell der orangen Spalte war auch
+   dort der Ausreisser (L* 88 / C* 17 gegen L* 84 / C* 10) und ist an
+   Grün und Blau angeglichen. OFFEN: Weisse Schrift auf dem helleren
+   Grün kommt nur noch auf 2,2 : 1 (vorher 2,8). */
+/* v157.23: Das gedämpfte Gelb der Modulations-Spalte war braun. Ursache:
+   Es hatte den Farbton des Leuchttons geerbt (h 75° — das ist Orange,
+   nicht Gelb), und auf L* 56 heruntergezogen wird daraus Ocker. Neu
+   h 92° und, gegen die Systematik von v157.22, etwas heller und bunter
+   (L* 60 / C* 34 statt 56 / 27): Gelb braucht beides, um als Farbton
+   lesbar zu bleiben — bei den Werten von Grün und Blau fällt es in
+   Graubraun. Gleiche Zahlen ergeben eben nicht über alle Farbtöne
+   gleiche Wirkung; hier zählt die Wirkung. Preis: weisse Schrift
+   3,2 : 1 statt 3,6 : 1.
+   Ausserdem: G4M_EXPORT_DEBUG wieder auf false — die Exporte auf dem
+   Handy stimmen (72/300/600 dpi geprüft), die Diagnose-Kennung im
+   Dateinamen hat ihren Zweck erfüllt. Der Umbau von v157.21 selbst
+   bleibt: Kontext-Skalierung, geprüfte Bezugsgrösse, entkoppelter
+   Export-Lauf. */
+/* v157.24: Zwei Befunde am Tool-Panel-Slider.
+   GRIFF: Er wirkte durchscheinend, die Rail lief sichtbar hindurch.
+   Ursache ist der eingefrorene Zustand (Random an), der bis hier
+   opacity: 0.5 auf den GANZEN .slider-container legte — der Griff wurde
+   damit halbdurchsichtig, und weil sein Relief aus INSET-Schatten
+   besteht, blieb ein Geisterquadrat mit weicher Kante stehen. Neu
+   bekommen Rail und Griff im gefrorenen Zustand eigene, deckende
+   Grautöne; abgeblendet wird nur noch das Wertefeld. Zusätzlich tragen
+   alle Slider-Farben jetzt einen Rückfallwert im var() — löst eine
+   Variable einmal nicht auf, berechnet CSS die Deklaration zu
+   «transparent», und genau dieses Schadensbild wäre nicht von einem
+   Farbfehler zu unterscheiden. Der Rückfall ist absichtlich ein
+   neutrales Grau statt einer Kopie der echten Farbe: er soll auffallen,
+   nicht die eine Quelle verdoppeln.
+   GELB: dritter Anlauf. Anlauf 1 hatte den falschen Farbton (Orange),
+   Anlauf 2 den richtigen, aber zu wenig Buntheit — und ein Gelb mit
+   C* 34 bleibt braun, weil Gelb erst mit Sättigung als Gelb kenntlich
+   wird. Jetzt #AE933D, L* 62 / C* 48 bei h 90°: bunter als Grün und
+   Blau, gegenüber dem Leuchtton aber klar zurückgenommen — Messing
+   statt Signalgelb. */
+/* v157.25: Das D-Pad trägt jetzt exakt die Optik einer leeren Kachel
+   daneben. Zwei Reste waren übrig:
+   1. padding: 4px — ein fester Pixelwert, der nicht mit --u mitwuchs
+      und die Pfeilzellen gegenüber der Nachbarkachel nach innen rückte.
+      Auf 0, wie bei .tool-btn und .nav-btn.
+   2. Der Hover färbte nur die berührte Drittelzelle: #d0d0d0 auf einem
+      Neuntel der Fläche, der Rest blieb #e0e0e0. Die Nachbarn reagieren
+      als Ganzes. Der Druck tat es schon seit v157.6 richtig, der Hover
+      zog nur nicht mit — jetzt beide über :has() auf der ganzen Kachel.
+   Der Hover-Ton ist derselbe, den .tool-btn direkt setzt und den
+   .nav-btn über filter: brightness(0.93) erreicht — auf #e0e0e0
+   rechnet der Filter exakt auf #d0d0d0, die Kachel passt damit in
+   beide Nachbarschaften. Preis: Am Desktop zeigt der Zeiger nicht mehr,
+   welcher der vier Pfeile unter ihm liegt. Das ist die Folge davon, das
+   D-Pad wie EINEN Knopf aussehen zu lassen; die Pfeilsymbole selbst
+   bleiben die Orientierung. */
+/* v157.26: Der Projects-Knopf in der Navigation wird dunkelviolett
+   (#512DA8, Deep Purple 700) mit weisser Schrift. Sein Grün war exakt
+   #4CAF50 — derselbe Ton, den F1 bis v157.22 für aktive Knöpfe trug.
+   In der Nav bezeichnet Farbe ein Navigationsziel, im Panel einen
+   Schaltzustand; dasselbe Grün für beides behauptete einen Zusammenhang,
+   den es nicht gibt. Der neue Ton bleibt in der Material-Systematik der
+   übrigen Nav-Farben, ist mit L* 30 der dunkelste der Leiste und liegt
+   weit genug vom Orchidee-Ton der Galleries darüber (L* 69), dass die
+   gestapelten Kacheln trotz verwandtem Farbton nicht ineinanderlaufen.
+   Weisse Schrift steht auf 9,2 : 1 — der beste Kontrast der Leiste.
+   Der Klassenname ist mitgezogen (.btn-green -> .btn-violet): eine
+   Regel namens .btn-green auf einer violetten Kachel wäre eine
+   Falschaussage im Quelltext. Drei Fundstellen, keine davon im JS. */
+/* v157.27: RANDOM-PANEL — einstellbare Zufallsbereiche für die Tool-
+   Parameter. Der Random-Button des Tool-Panels öffnet (Toggle) ein
+   Panel über der Canvas, das wie die F-Panels von links unter der
+   Navigation hervorfährt; je zufallsfähigem Parameter eine Min- und
+   eine Max-Rail nach dem Boundary-Muster von F1/F2, Akzente in den
+   gedämpften Tool-Farben der Gruppe, Wertefelder editierbar, Schliessen
+   auch über den D-Pad-Pfeil. Bereiche liegen im (bereits vorbereiteten)
+   Store-Ast randomRanges und überleben die Sitzung.
+
+   KERN dahinter, wichtiger als die Optik: Random wirkte bisher nur bei
+   3 von 9 Parametern (Points/Line/Size) mit fest verdrahteten Grenzen —
+   F1 und F2 sogar mit VERSCHIEDENEN (Line 0.5-100 gegen 0.5-10). Bei
+   den übrigen 6 schaltete On/Off den Zustand, die Generierung las ihn
+   nie. Neu läuft alles durch EINE Senke, g4mRandomizedValue(id, fest):
+   Random an zieht aus dem User-Bereich (Vorgabe = volle Slider-Spanne),
+   gerastet auf den Slider-Schritt; Random aus liefert den festen Wert.
+   Gezogen wird PRO LAYER (User-Entscheid 29.07.); number-of-layers
+   naturgemäss pro Go. Transparency und die drei Modulationen wandern
+   dazu als optionale Felder in den Kurven-Parametersatz
+   (g4mPerLayerRandomFields) — die Zeichner lesen sie mit Vorrang,
+   fehlen sie (Random aus, ältere Tokens), gilt unverändert der globale
+   Slider samt Live-Wirkung. VERHALTENSÄNDERUNGEN, gewollt: F2-Zufall
+   für Line/Size nutzt jetzt denselben (weiteren) Bereich wie F1, und
+   die Vorgabe für Points ist die volle Spanne 2-500 statt des alten
+   festen 3-100. number-of-pixels bleibt wie sein Slider reserviert
+   ohne Zeichenwirkung. */
+/* v157.28: Die Zufallsbereiche ziehen aus dem separaten Random-Panel
+   in die EDITOR-ZONE des Tool-Panels um; das Panel aus v157.27 ist
+   vollständig zurückgebaut (CSS, Markup, Registry, Öffnen/Schliessen,
+   Pfeil- und Resize-Verdrahtung), der Random-Button ist wieder reine
+   Beschriftung über dem On/Off-Paar. Begründung: Mit dem gewünschten
+   Kachel-Muster wäre das Panel ein Beinahe-Klon des Tool-Panels
+   gewesen — dieselben Parameter an einem zweiten Ort — und hätte
+   seine einzige Stärke, die Gesamtübersicht, dabei selbst aufgegeben.
+   Neu nutzt der Bereichs-Editor den Platz, der vorher TOT war: die im
+   Random-Zustand eingefrorene Slider-Zeile. Kachel wählen → On →
+   der Editor zeigt statt der Wert-Rail die Min/Max-Rails (natives
+   F1/F2-Boundary-Muster, Gruppenfarbe über --track-color/--g4m-rr-col,
+   editierbare Wertefelder); Off → wieder die Wert-Rail. Die Kachel
+   zeigt bei Random den BEREICH («5–120») statt des eingefrorenen
+   Werts — die Übersicht wandert damit ins Raster. Die gesamte Logik
+   unter der Oberfläche (randomRanges, g4mRandomizedValue, Per-Layer-
+   Felder, Generierungs-Verdrahtung) blieb von v157.27 unverändert;
+   auch die Element-IDs (g4m-rp-…), sodass Commit und Sync ohne
+   Anpassung weiterlaufen. */
+/* v157.29: Die Bereichs-Zeilen im Tool-Editor sind jetzt WÖRTLICH der
+   F1/F2-Baustein statt einer Nachempfindung (User-Befund: Griffe zu
+   klein, Felder anders). Der Container ist ein .g4m-arch-block —
+   Spaltengeometrie, Zeilenhöhe (--g4m-row-h ≥ Griff) und Grid-Plätze
+   kommen aus den bestehenden F-Editor-Regeln (alle Variablen liegen im
+   :root); die Wertefelder sind .g4m-val-box und laufen über die
+   generische Editier-Mechanik g4mInitValBoxEditing (Enter/Blur,
+   Einfüge-Härtung, Komma→Punkt, Clamp+Step) — die eigenen Feld-Handler
+   aus v157.28 sind ersatzlos entfernt, EINE Mechanik für beide Orte.
+   Der Fokusrahmen der Felder nimmt über --g4m-active die Gruppenfarbe
+   an (v157.20-Mechanik). Griffe: --g4m-slider-handle (30px-Klasse) in
+   der gedämpften Gruppenfarbe, Rails in der F-Schichttechnik. FUND
+   dabei, der die graue Füllung von v157.28 erklärt: --track-color der
+   generischen Input-Regel ist direkt AUF dem Element deklariert und
+   gewinnt gegen jeden vom Container geerbten Wert — die Variable vom
+   Container zu setzen war wirkungslos. Die Kopplungs-Kette der
+   F-Editoren greift hier bewusst nicht (Guard auf .g4m-arch-editor);
+   das Kreuzen fängt weiterhin g4mCommitRandomBound. */
+/* v157.30: Feinpositionierung — die Bereichs-Ansicht ist jetzt auch in
+   der LAGE deckungsgleich mit F1/F2, nicht nur in den Bausteinen
+   (User-Befund am Screenshot: Rails und Beschriftung sassen tiefer und
+   anders gestaffelt). Drei Züge: (1) Die Ansicht ist eine ABSOLUTE
+   Auflage über dem ganzen Editor mit eigener Kopfzeile — g4m-arch-phead
+   samt zulässiger Spanne in Klammern («Number of Pixels [50 … 1000]»),
+   exakt die Anatomie einer F-Parameterzeile; Wert-Label und Wert-Rail
+   der Zeile werden per visibility versteckt statt per display entfernt,
+   damit die Rail im Fluss und MESSBAR bleibt. (2) g4mAlignRandomRange-
+   Rows misst die Max-Rail auf die Tool-Rail-Linie — denselben Anker,
+   an dem g4mAlignRailsToTool schon die F-Editoren ausrichtet: liegt
+   Max exakt darauf, ist die Ansicht transitiv deckungsgleich mit
+   F1/F2, ohne dass je Element einzeln gerechnet würde. Gelesen wird
+   der wirksame Versatz über die berechnete margin-top (der Inline-Wert
+   wäre beim ersten Lauf leer, während die CSS-Vorgabe 0.463u längst
+   wirkt). (3) Gemessen wird an jeder Stelle, an der die Ansicht neu
+   erscheinen kann: Random-Umschalter, ZEILENWECHSEL (g4mSelectParam —
+   diese Lücke bestand: der Freeze-Kommentar behauptete den Durchlauf,
+   den es nicht gab) und Resize; stets per rAF auf fertiger Geometrie.
+   Im Hochformat gilt die u-Vorgabe — dort gibt es den gemeinsamen
+   Anker nicht, wie beim F-Pendant. */
+/* v157.31: Wert- und Bereichs-Ansicht des Tool-Editors sind jetzt
+   dasselbe Skelett (User-Vorgabe: der Doppel-Regler ist die Referenz,
+   der Einzel-Regler passt sich an). Die aktive Zeile liegt als absolute
+   Auflage mit den Innenmassen der Bereichs-Ansicht über dem Editor
+   (vorher sass sie im Flex-Fluss und damit um das Editor-Padding
+   verschoben); die Kopfzeile trägt die Anatomie des Bereichs-Kopfs —
+   das Label steht bei On und Off am exakt gleichen Ort. Die Wert-Rail
+   sitzt im SPALTENGERÜST des Doppel-Reglers (Kappen-Spalte · Rail ·
+   Feld) auf dem UNTEREN Zeilen-Slot, also exakt auf der Max-Linie:
+   gleiche Länge, gleicher Start, gleiche Höhe per Konstruktion — beim
+   Umschalten erscheint nur die Min-Zeile im leeren oberen Slot, die
+   Rail bewegt sich um keinen Pixel. Kappen gibt es bei Off keine (die
+   Spalte bleibt leer). Kopfhöhe, Absenkung und Zeilenhöhe wohnen als
+   EINE Quelle auf dem Editor, beide Ansichten erben sie; der Bereichs-
+   Block übernimmt zudem die gemessene Feldspalte (--g4m-val-w) der
+   Wert-Ansicht, damit beide auf derselben rechten Kante enden.
+   Mitgenommen: der Fokusrahmen des Wertefelds nimmt die Gruppenfarbe
+   des aktiven Parameters an (g4m-ed-* setzt --g4m-active) statt des
+   festen Grüns aus v157.20. Die Messfunktion v157.30 bleibt als
+   Sicherheitsnetz — sie misst jetzt in aller Regel ~0. */
+/* v157.32: EIN Random-Schalter statt Beschriftung plus On/Off-Paar
+   (User-Wunsch). #g4m-random-caption schaltet jetzt selbst: Klick
+   toggelt den Zufallsmodus des aktiven Parameters (bzw. die
+   Normalization, wenn deren Kachel aktiv ist), eingeschaltet trägt der
+   Button die gedämpfte Gruppenfarbe mit weisser Schrift — exakt die
+   Aktiv-Optik des früheren gewählten On-Quadrats. Der 9-Paare-Stapel
+   in Zelle u9 ist restlos zurückgebaut (Markup, CSS, buildRandomToggle-
+   Stack, g4mUpdateRandomToggle, g4mShowRandomToggleFor samt aller
+   Aufrufer, Relief-Listen, Paar-ARIA); die Zelle ist wieder Reserve.
+   Die Wirkkette des Klicks ist unverändert die des alten On/Off-Klicks
+   (g4mSetRandomMode → handleRandomModeChange → applySliderFreezeState),
+   Optik und ARIA (role=switch, aria-checked) pflegt die neue Senke
+   g4mUpdateRandomCaption — gerufen von Kachelwechsel, Klick, Bus
+   (Defaults/Restore) und setNormalization; die frühere Inline-Pflege
+   in g4mSelectParam entfiel. Parameter ohne Zufallsmodus zeigen wie
+   bisher die ausgegraute Beschriftung, jetzt ohne Hover und Zeiger. */
+/* v157.33: Umbau von Navigation und Tool-Panel-Unterkante nach User-
+   Spezifikation, in beiden Orientierungen aufgehend:
+   NAV: My Level entfällt ersatzlos (Button, .btn-pink-Palette, Hoch-
+   format-Platz). Der Vollbild-Button wird 2u×2u — im Querformat per
+   Zeilen-Spanne (Save Image rückt im Fluss von selbst 1u nach unten
+   auf My Levels alten Platz), im Hochformat explizit RECHTS NEBEN Go
+   (Spalten 8-9 über beide Zeilen); Save Image rückt dort 2u nach
+   rechts (Zeile 1, Spalten 10-11), My Images 1u nach unten darunter.
+   Alle 24 Hochformat-Zellen belegt, vom User vorgerechnet und hier
+   bestätigt. Damit entfiel die GESAMTE v150b-Tauschmechanik: die
+   Zweitinstanz #g4m-fs-tools zwischen F5/F6, beide Platzhalter-Weichen
+   (#g4m-blank-nav ganz, #g4m-blank-tools bleibt als permanentes
+   Reservefeld der F-Reihe), die F6-F10-Hochformat-Verschiebung und
+   der Orientierungs-Landscape-Block. g4mPlaceFsHome dockt jetzt immer
+   an der Nav-Instanz.
+   TOOL-PANEL: Die sechs Beschriftungs-Buttons (Formula-Indikator,
+   Canvas, Drawing, Filter, Modulator, Random) wachsen zu 2u×2u-
+   Quadraten in die Reihe darunter; die sechs leeren Reserve-Buttons
+   dort entfallen ersatzlos (samt Klasse .reserve-btn). Die überdeckte
+   Fläche ist exakt die Vereinigung der beiden alten Reihen — an der
+   Editor-Geometrie darunter ändert sich nichts. */
+/* v157.34: Die Pull-up-Menüs der drei Beschriftungs-Buttons Formula,
+   Canvas und Drawing sind vereinheitlicht — EINE Grösse (2u breit ×
+   6u hoch; das Formel-Menü hatte sie schon, Canvas kam von 4u, Drawing
+   von 1u je Eintrag), ein geworfener Schatten nach unten rechts (Licht
+   bleibt oben links, wie das Relief der Kacheln) und ein langsames
+   Ausrollen von unten nach oben (0.6s, G4M_ANIM.DD_ROLL_MS → CSS-Var
+   --g4m-anim-dd-roll, dieselbe Quelle-zu-Variable-Mechanik wie alle
+   übrigen Zeiten). Technik des Ausrollens: clip-path-Keyframes statt
+   height oder scaleY — der Inhalt wird aufgedeckt statt gestaucht, und
+   negative Insets lassen den Schatten seitlich/unten von Beginn an
+   mitlaufen statt ihn abzuschneiden. Die Menüs von Save Image
+   (Auflösungen) und des F2-Spiral-Wählers sind bewusst NICHT angefasst
+   — der Auftrag nannte die drei Beschriftungs-Menüs; ein Nachziehen
+   wäre je eine Selektorzeile. */
+/* v157.35: Menü-Feinschliff nach Sichtprüfung. Schatten kräftiger
+   (Versatz 0.14u statt 0.1u, Weichzeichnung 0.34u statt 0.28u,
+   Deckung 42 % statt 30 %), Ausrollen langsamer (900 ms statt 600),
+   und beides gilt jetzt für ALLE Menüs: das Auflösungs-Menü am
+   Save-Image-Button und der Spiral-Wähler im F2-Panel rollen ebenso
+   nach oben aus — beide unverändert in ihrer Grösse (Save Image behält
+   seine eigene Rastergeometrie, der Spiral-Wähler seine 4u). Beide
+   laufen über dieselbe g4mToggleDropdown-Mechanik, die Animation
+   greift also beim Einfügen von selbst; die clip-path-Reserve wuchs
+   von 60 auf 80 px, damit der kräftigere Schatten während der Fahrt
+   nirgends angeschnitten wird. */
+/* v157.36: Das Menü-Ausrollen ruckelte (User-Befund: Save Image blieb
+   auf Höhe des Go-Buttons kurz hängen, Canvas/Drawing zögerten). Die
+   Ursache war die Technik: animiertes clip-path läuft auf dem HAUPT-
+   THREAD und zeichnet den grossen weichen Schatten in jedem Frame neu
+   — jede parallele Hauptthread-Arbeit (Fokus, Listener, Layout) wurde
+   als Ruckler sichtbar. Neu: statischer Clip-Rahmen (.g4m-dd-frame,
+   um die Schattenreserve grösser, Unterkante exakt auf der Anker-
+   Oberkante, pointer-events:none gegen verdeckte Nachbarklicks) und
+   darin die transform-Fahrt translateY(100%) → 0 — das Menü wird
+   EINMAL gemalt und fährt als fertige Compositor-Ebene hoch, der
+   Hauptthread ist unbeteiligt. g4mWrapDropdownForRoll misst das fertig
+   gebaute Menü und fixiert es im Rahmen; das deckt alle Geometrie-
+   Varianten der fünf Builder ab (top-, bottom- und inhaltsgetriebene
+   Höhen), ohne einen davon anzufassen. Nach der Landung gibt der
+   Rahmen sein overflow frei (unterer Schattensaum) und will-change
+   wird zurückgenommen. Entfernen (Toggle wie Outside-Click) räumt den
+   Rahmen mit ab; der Fokus des ersten Eintrags folgt mit preventScroll
+   NACH dem Umzug, weil appendChild den Fokus sonst wieder entzieht. */
+/* v157.37: Das Vollbild-Symbol des Home-Panels liegt beim Andocken
+   wieder EXAKT auf dem Symbol des (seit v157.33 doppelt so hohen)
+   Vollbild-Buttons. Zwei Ursachen der Abweichung: g4mPlaceFsHome
+   übernahm nur BREITE und Ecke des Buttons, nicht die Höhe — bei der
+   2u-Kachel sass das Symbol dadurch zu hoch; und die Home-Instanz
+   trägt unter dem Symbol die Beschriftung «Full Screen» samt Fuge,
+   die das Symbol zusätzlich aus dem Zentrum schob. Jetzt übernimmt
+   der Dock-Zustand auch die Höhe, und [data-pos="dock"] blendet
+   Beschriftung und Fuge aus (display, nicht visibility — unsichtbar
+   bliebe sie im Fluss): beide Instanzen sind dann identische Flex-
+   Boxen mit demselben zentrierten Symbol (gleiche svg-Grösse aus
+   .g4m-fullscreen-btn) — Deckung per Konstruktion, ohne Mess-Offsets.
+   Die freie Position (Home-Ecke) räumt die feste Höhe wieder, BEVOR
+   sie mit el.offsetHeight rechnet, und zeigt Beschriftung wie bisher. */
+/* v157.38: Das Save-Image-Menü wurde im Hochformat rechts abgeschnitten
+   — die 300px-Grundbreite lief ab der linken Kante des Save-Buttons
+   (Spalte 10 von 12) aus dem Bild. Neu spannen es im Hochformat zwei
+   Rasterkanten auf: links bündig mit der linken D-Pad-Kante (User-
+   Vorgabe), rechts bündig mit der rechten Save-Image-Kante — acht
+   Nav-Spalten Breite, endet damit auf jedem Gerät sicher im Bild und
+   sitzt wie die Querformat-Variante am Raster statt auf einer Pixel-
+   Konstante. Der Roll-Rahmen (v157.36) misst nach dem Bau und deckt
+   die neue Geometrie ohne Anpassung ab. */
+/* v157.39: Save-Image-Menü auf EINE Geometrie für beide
+   Orientierungen — 10u breit, 6u hoch, vier Zeilen gleichmässig
+   verteilt (g4m-dd-grid nun auch im Hochformat). Verankert am
+   Save-Image-Button: Querformat ab seiner linken Kante, Hochformat
+   endet auf seiner rechten (Menü beginnt bei 1u; die D-Pad-Anbindung
+   aus v157.38 ist damit überholt — 10u passen dort nicht ins Bild).
+   Behobene Handy-Befunde: Im Querformat war die alte Box (Go-Ober-
+   kante bis Save-Oberkante) seit dem Nav-Umbau v157.33 kleiner als
+   ihr Inhalt — Flex-Kinder schrumpfen nicht unter ihre Mindesthöhe,
+   die unterste Zeile (1200 dpi) ragte unter dem weissen Grund hervor
+   und stand transparent im Bild. Im Hochformat drängten sich die
+   Zeilen in der inhaltsgetriebenen Eigenhöhe. 6u / 4 Einträge =
+   1.5u pro Zeile. */
+/* v157.40: Die F-Reihe rückt um 2u nach rechts (F1 beginnt auf
+   Spalte 3, F10 endet auf 12), das leere 2u-Reservefeld wandert von
+   rechts aussen ganz nach links (Spalten 1-2). Grund: die runden Ecken
+   der Handy-Displays schnitten F1 an und machten es schwer bedienbar
+   (User-Befund und -Vorschlag) — in der Ecke liegt jetzt das Feld, das
+   nichts schaltet. F1-F5 stehen als Inline-Spalten im Markup, F6-F10
+   als ID-Regeln im Stylesheet; beide Orte sind nachgezogen, die Reihe
+   gilt seit v157.33 unverändert für beide Orientierungen. */
+/* v157.41: Das Formel-Menü wächst von 6u auf 7u Höhe — die zehn
+   Einträge bekommen 0.7u statt 0.6u je Zeile und damit spürbar mehr
+   Luft (User-Wunsch). Formula ist so die bewusste Ausnahme der
+   6u-Einheitshöhe aus v157.34: es trägt zehn Einträge, Canvas und
+   Drawing deutlich weniger — deren 6u bleiben. Breite unverändert
+   2u (Ankerbreite); Roll-Rahmen, Schatten und Ausrollen greifen
+   unverändert, der Rahmen misst ja nach dem Bau. */
+/* v157.42: Normalization wird EIN Schalter — die Kachel neben Rotation
+   (User-Vorgabe, analog dem Random-Button). Klick auf die Kachel
+   toggelt direkt (setNormalization), eingeschaltet trägt sie die
+   Aktiv-Optik (g4m-sq-active: gedämpftes Blau, weisse Schrift), das
+   Wertefeld zeigt weiter On/Off, dazu role=switch/aria-checked.
+   Behobenes Ärgernis: Vorher WÄHLTE die Kachel die Normalization-
+   Zeile aus, wodurch der Random-Button zum «Normalization»-Schalter
+   umbeschriftet wurde — der Random-Button heisst jetzt IMMER «Random»
+   und behält seine Funktion; sein Normalization-Sonderfall ist aus
+   Senke und Klickpfad entfernt (samt g4m-cap-long, «Random» ist nie
+   lang). Die tote Normalization-Editor-Zeile ist ausgebaut; der
+   Zeilen-Anker in buildToolSliderRows wird null und insertBefore(el,
+   null) hängt ans Ende — dasselbe Verhalten wie zuvor. Der Editor
+   bleibt beim Klick auf die Normalization-Kachel unverändert auf dem
+   zuletzt gewählten Parameter stehen. */
+/* v157.43: Farbpalette F3-F10 in CIELCh neu abgestimmt, verankert an
+   den unveränderten F1/F2 (User-Vorgabe). Befund: F6 (#D7DEE2) hatte
+   C* 3.2 — bei L* 88 praktisch DAS Tool-Grau (dE 3), F9 (#D2EAD3)
+   C* 15 und obendrein F1s Farbton-Familie; F3/F8 lagen als Gelb-Orange-
+   Doubletten nur 14° auseinander. Neu: zehn Farbtöne mit sauberen
+   Abständen über den Kreis (inkl. Anker: 20·55·90·127·178·219·253·
+   290·325·355), Helligkeitsband L* 83.5-87, Buntheit je Farbton am
+   Pastell-Gamut ausgereizt statt zahlengleich (Rot kann bei dieser
+   Helligkeit nur C* 22, Gold 33 — die Senfgelb-Lektion aus v157.24
+   gilt auch hier: gleiche Zahlen sind nicht gleiche Wirkung).
+   Schwächster Abstand zum Tool-Grau jetzt dE 22 (F5), vorher 3 (F6);
+   schwächste Nachbar-Naht dE 16 (F9-F2, verschiedene Farbtöne).
+   Identitäten blieben wo möglich; F6 wurde Cyan, F9 Veilchenblau.
+   Nur die acht Variablen geändert — Buttons, Aktivzustände und
+   Coming-soon-Panels hängen alle an ihnen. */
+/* v157.44: Offene Menüs schliessen jetzt zuverlässig bei JEDER
+   Interaktion ausserhalb (User-Befund: Canvas-Menü blieb beim Öffnen
+   von F1/F2 stehen). Ursache: Der Outside-Listener hing als Bubble-
+   click auf document, und etliche Handler der App — darunter genau
+   die F-Panel-Klicks — rufen e.stopPropagation(); das Ereignis kam
+   dort nie an. Neu lauscht der Listener auf pointerdown in der
+   CAPTURE-Phase: die läuft von der Wurzel zum Ziel, bevor irgendein
+   Handler stoppen kann — strukturell immun gegen Propagations-Stopps,
+   und pointerdown deckt Touch mit ab und feuert vor dem fremden
+   Handler. Der Anker-Ausschluss prüft jetzt auch contains (das
+   Vollbild-/Formel-Symbol im Anker war sonst ein «Aussen»-Treffer und
+   hätte Toggle plus Sofort-Schliessen doppelt gefeuert). Kein Handler
+   der App wurde angefasst. */
+/* v157.45: Alle Slider-Griffe werfen einen Schatten nach unten rechts
+   (Licht bleibt oben links) — gleiche Deckung wie die Pull-up-Menüs
+   (42 %), Reichweite auf die Griffgrösse skaliert (0.05u Versatz,
+   0.12u Weichzeichnung; die Menü-Masse hätten einen 12-30px-Griff
+   schweben lassen wie ein Blatt überm Tisch). Der Wurf liegt als
+   ERSTE Schicht in derselben box-shadow-Deklaration wie die Relief-
+   Insets von v157.6 — getrennte Regeln hätten einander überschrieben.
+   Gilt für die Div-Griffe des Tool-Panels wie die nativen Thumbs auf
+   F1/F2 und im Bereichs-Editor (Webkit und Firefox getrennt, wie
+   gehabt). In den transform-skalierten F-Panels skaliert der Schatten
+   mit dem Panel mit — auf dem Handy minimal kleiner, bewusst nicht
+   gegengerechnet. */
+/* v157.46: Die Slider-Griffe bekommen eine KNAPPE Schulter — gleiche
+   Kantenbreite und Lichtwerte wie das übrige Relief, aber ohne
+   Weichzeichnung (--g4m-raise-crisp, Blur 0). Die normale Schulter
+   weichzeichnet mit ~0.11u; auf einem 12-30px-Griff ist das bis zur
+   halben Fläche, und zusammen mit dem Wurfschatten aus v157.45 wirkten
+   die Griffe fusselig (User-Befund). Mit harter Innenkante steht der
+   Griff wieder scharf, der Wurfschatten darunter bleibt weich — die
+   Trennung von KÖRPER (scharf) und SCHATTEN (weich) ist genau das,
+   was Tiefe lesbar macht. Kacheln und Buttons behalten die weiche
+   Schulter unverändert. */
+/* v157.47: Griffe folgten teils der BLOSSEN Maus (User-Befund an
+   Number of Layers). Rekonstruierter Mechanismus: startDrag hängt an
+   Griff UND Container; ein Druck auf den Griff bubbelt zum Container,
+   BEIDE starteten, der zweite setPointerCapture-Aufruf zog die Capture
+   auf den Container — das pointerup erreichte die Griff-Listener nie,
+   deren onMove blieb verwaist hängen, und pointermove feuert auch ohne
+   gedrückte Taste: der Griff folgte fortan jedem Überfahren. Zwei
+   Riegel: (1) e.stopPropagation() in startDrag — pro Druck startet
+   genau EIN Drag-Pfad (die Menü-Schliesser von v157.44 laufen in der
+   Capture-Phase und sind davon unberührt); (2) Selbstheilung in
+   onMove — ein Move mit buttons === 0 bedeutet, dass der Drag
+   anderweitig endete (Capture-Fehlschlag, Loslassen ausserhalb),
+   und räumt auf statt zu folgen. Betrifft alle 13 Tool-Slider; dass
+   es zuerst bei Number of Layers auffiel, ist nur seine Position als
+   meistbenutzter erster Slider. */
+/* v157.48 (EXPERIMENT): Die Griffe aller Slider stehen ganz OHNE
+   Relief — flache Farbfläche, nur der Wurfschatten von v157.45 bleibt
+   (Licht oben links). Ausdrücklich zum Anschauen (User: «ggf. gehen
+   wir wieder zurück»); der Rückweg ist das Wiederanhängen von
+   «, var(--g4m-raise-crisp)» in den drei Griff-Regeln — die knappe
+   Schulter aus v157.46 bleibt dafür definiert. Alle übrigen Reliefs
+   (Kacheln, Buttons, D-Pad) sind unberührt. */
+const G4M_RELEASE = Object.freeze({ version: 'v157.48', date: '29.07.2026' });
 const G4M_BUILD = G4M_RELEASE.version;   // Kurzform für Titel und Konsole
 document.title = document.title + ' · ' + G4M_BUILD;
 console.log('g4m build', G4M_BUILD, '·', G4M_RELEASE.date);
@@ -4535,6 +5256,10 @@ const G4M_ANIM = {
                            Hochformat SEHR langsam von hinten nach vorne
                            durch die gelandete Fläche — eigene Dauer, damit
                            die übrigen Ein-/Ausblendungen flott bleiben */
+    DD_ROLL_MS: 900,    /* Pull-up-Menüs: langsames Ausrollen von unten
+                           nach oben (v157.34; v157.35 von 600 auf 900 —
+                           «noch etwas langsamer» — und auf ALLE Menüs
+                           ausgeweitet, auch Save Image und F2-Spiralen) */
     FS_FADE_MS: 600,    /* Ein-/Ausblend-Dauer des Home-Vollbild-Symbols
                            (v151h) — eine Quelle für CSS-Transition UND
                            den Abflug-Timer: der Flug startet erst nach
@@ -4613,6 +5338,7 @@ document.documentElement.style.setProperty('--g4m-anim-shake',     (G4M_ANIM.SHA
 document.documentElement.style.setProperty('--g4m-anim-cover',     (G4M_ANIM.COVER_MS / 1000) + 's');
 document.documentElement.style.setProperty('--g4m-anim-fs-fade',   (G4M_ANIM.FS_FADE_MS / 1000) + 's');
 document.documentElement.style.setProperty('--g4m-anim-fs-push',   (G4M_ANIM.FS_PUSH_MS / 1000) + 's');
+document.documentElement.style.setProperty('--g4m-anim-dd-roll',   (G4M_ANIM.DD_ROLL_MS / 1000) + 's');
 
 /* ── Konfiguration (→ künftige config.js) ─────────────────────────
    Default-Werte und Anzeigeformate gesammelt an einer Stelle,
@@ -4881,6 +5607,13 @@ const G4M_TEXT = Object.freeze({
                'limit of this device/browser. Please choose a smaller dpi level.';
     },
     exportFailed:    'Export failed \u2014 the image could not be created.',
+    /* Abbruch statt Schrottdatei (v157.21): ohne brauchbare Bezugsgrösse
+       der sichtbaren Canvas wäre der Massstab beliebig. */
+    exportNoSource:  function (px) {
+        return 'Export cancelled \u2014 the canvas currently measures only '
+             + Math.round(px) + ' px, which is too small to scale from. '
+             + 'Please rotate the device or reload the page, then try again.';
+    },
     imageNotLoaded:  'Image could not be loaded',
     fileNotFound:    function (src) { return "The file '" + src + "' was not found."; },
     customColor:     'Custom color',
@@ -4963,8 +5696,10 @@ function g4mFormatSliderValue(id, value) {
 function buildToolSliderRows() {
     const container = document.querySelector('.sliders-container');
     if (!container) return;
-    // Zeilen vor der Normalization-Zeile einfügen (bisherige Position)
-    const anchor = container.querySelector('.normalization-row');
+    /* Anker entfiel mit der Normalization-Editor-Zeile (v157.42):
+       insertBefore(el, null) hängt ans Ende — exakt das bisherige
+       Verhalten, die Zeilen standen ohnehin davor. */
+    const anchor = container.querySelector('.normalization-row');   // null seit v157.42
 
     G4M_SLIDER_ROWS.forEach(function (row) {
         const data = sliderData[row.id];
@@ -5017,6 +5752,223 @@ function buildToolSliderRows() {
 }
 buildToolSliderRows();
 
+/* ══════════════════════════════════════════════════════════════════
+   ZUFALLSBEREICHE (v157.27, UI seit v157.28 im Tool-Panel-Editor)
+   ══════════════════════════════════════════════════════════════════
+   Bis hier zog Random seine Werte aus FEST VERDRAHTETEN Bereichen —
+   und das nur bei drei von neun zufallsfähigen Parametern (Points,
+   Line, Size); F1 und F2 benutzten dabei sogar verschiedene Grenzen.
+   Bei den übrigen sechs schaltete On/Off zwar den Zustand, aber die
+   Generierung las ihn nirgends.
+
+   Neu gilt EIN Weg für alle: g4mRandomizedValue(id, fest) — Random an
+   zieht aus dem User-Bereich (g4mRandomRange, Vorgabe = volle Slider-
+   Spanne, gespeichert im Store-Ast randomRanges), Random aus liefert
+   unverändert den festen Wert. Gezogen wird PRO LAYER (User-Vorgabe
+   29.07.), auf den Slider-Schritt gerastet: jeder Zufallswert ist ein
+   Wert, den der Regler auch anzeigen könnte. number-of-layers ist der
+   eine Parameter, der naturgemäss PRO GO gezogen wird (er bestimmt,
+   wie viele Kurven es überhaupt gibt); number-of-pixels bleibt wie
+   sein Slider reserviert ohne Zeichenwirkung. */
+function g4mRandomRange(id) {
+    const base = sliderData[id] || { min: 0, max: 100 };
+    const r = g4mStore.getRandomRangeFlag(id);
+    if (!r) return { min: base.min, max: base.max };
+    /* In die Slider-Spanne klemmen: gespeicherte Bereiche könnten aus
+       einer Sitzung mit anderen Grenzen stammen. */
+    const lo = Math.max(base.min, Math.min(r.min, r.max));
+    const hi = Math.min(base.max, Math.max(r.min, r.max));
+    return { min: lo, max: hi };
+}
+function g4mSetRandomRange(id, lo, hi) {
+    g4mStore.setRandomRangeFlag(id, { min: lo, max: hi });
+}
+function g4mRandomizedValue(id, fixedValue) {
+    if (!g4mIsRandomMode(id)) return fixedValue;
+    const r = g4mRandomRange(id);
+    if (r.min === r.max) return r.min;
+    const step = (sliderData[id] || {}).step || 1;
+    const raw = getRandomNumber(r.min, r.max);
+    return Math.min(r.max, Math.round((raw - r.min) / step) * step + r.min);
+}
+/* Felder, die eine Kurve nur trägt, wenn ihr Parameter beim Generieren
+   auf Random stand. Die Zeichner lesen sie mit VORRANG vor dem globalen
+   Zustand; fehlt das Feld (Random aus, ältere Tokens), gilt unverändert
+   der globale Slider — inklusive dessen Live-Verhalten. Genau darum
+   werden die Felder NICHT immer gesetzt: ein fester Wert bliebe sonst
+   in der Kurve eingefroren, und der Transparency-Slider verlöre seine
+   Wirkung auf bereits gezeichnete Layer. */
+function g4mPerLayerRandomFields() {
+    const f = {};
+    if (g4mIsRandomMode('transparency'))
+        f.transparency = g4mRandomizedValue('transparency', g4mState.viewParams.transparency);
+    if (g4mIsRandomMode('modulation-amplitude'))
+        f.modAmplitude = g4mRandomizedValue('modulation-amplitude', g4mState.viewParams.modAmplitude);
+    if (g4mIsRandomMode('modulation-frequency'))
+        f.modFrequency = g4mRandomizedValue('modulation-frequency', g4mState.viewParams.modFrequency);
+    if (g4mIsRandomMode('modulation-phase'))
+        f.modPhase = g4mRandomizedValue('modulation-phase', g4mState.viewParams.modPhase);
+    return f;
+}
+/* Anzeigeformat: Nachkommastellen aus dem Slider-Schritt — dieselbe
+   Zahl, die der Parameter auch im Tool-Panel zeigen würde. */
+function g4mFmtRandomVal(id, v) {
+    const st = (sliderData[id] || {}).step || 1;
+    return st >= 1 ? String(Math.round(v)) : (st >= 0.1 ? (+v).toFixed(1) : (+v).toFixed(2));
+}
+/* Eine Grenze übernehmen. Kreuzen Min und Max, zieht die bewegte Seite
+   die andere mit (statt hart zu blockieren) — beim Durchziehen eines
+   Reglers fühlt sich das wie EIN Band an, dessen Ende man verschiebt. */
+function g4mCommitRandomBound(id, side, value) {
+    const base = sliderData[id];
+    if (!base || !isFinite(value)) { g4mSyncRandomRow(id); return; }
+    const v = Math.max(base.min, Math.min(base.max, value));
+    const r = g4mRandomRange(id);
+    let lo = r.min, hi = r.max;
+    if (side === 'min') { lo = v; if (lo > hi) hi = lo; }
+    else                { hi = v; if (hi < lo) lo = hi; }
+    g4mSetRandomRange(id, lo, hi);
+    g4mSyncRandomRow(id);
+}
+/* UI ist Produkt des Zustands: nach jedem Commit werden BEIDE Zeilen
+   aus dem Store zurückgelesen — Rail-Position, Füllung und Wertefeld
+   können nicht auseinanderlaufen. Ein gerade editiertes Feld wird
+   nicht überschrieben (Cursor bliebe sonst nicht stehen). */
+function g4mSyncRandomRow(id) {
+    const r = g4mRandomRange(id);
+    [['min', r.min], ['max', r.max]].forEach(function (sd) {
+        const input = document.getElementById('g4m-rp-' + id + '-' + sd[0]);
+        const box   = document.getElementById('g4m-rp-box-' + id + '-' + sd[0]);
+        if (input) { input.value = sd[1]; setRangeFill(input); }
+        if (box && document.activeElement !== box) box.textContent = g4mFmtRandomVal(id, sd[1]);
+    });
+    /* Kachel zeigt den Bereich live mit (v157.28) — nur solange Random
+       an ist; bei Fixed pflegt handleSliderChange das Feld. */
+    if (g4mIsRandomMode(id)) g4mUpdateSqValueDisplay(id, true);
+}
+/* Bereichs-Zeilen in die BESTEHENDEN Slider-Zeilen einhängen
+   (v157.28): je zufallsfähigem Parameter zwei Zeilen (Min/Max) nach
+   dem Boundary-Muster von F1/F2, sichtbar nur im g4m-frozen-Zustand
+   (CSS). Läuft NACH buildToolSliderRows — die Zeilen existieren. */
+function buildRandomRangeLines() {
+    g4mRandomCapableRows().forEach(function (row) {
+        const sliderRow = document.getElementById(row.id);
+        const data = sliderData[row.id];
+        if (!sliderRow || !data) return;
+        const range = g4mRandomRange(row.id);
+
+        /* Anatomie WIE die F-Parameterzeile (v157.30): eine absolute
+           Auflage (.g4m-rr-lines, CSS oben) mit Kopfzeile (g4m-arch-
+           phead + g4m-note-text, samt zulässiger Spanne in Klammern wie
+           «Parameter a [0.1 … 5.0]») und darunter dem g4m-arch-block.
+           Spalten, Zeilenhöhen und Grid-Plätze kommen aus den F-Editor-
+           Regeln; die Felder laufen über g4mInitValBoxEditing (läuft in
+           der Init NACH diesem Bau, Paarung über die DOM-Nachbarschaft
+           input → val-box). Eigene Feld-Handler gibt es bewusst NICHT.
+           Die Kopplungs-Kette der F-Editoren greift hier nicht (Guard
+           auf .g4m-arch-editor); das Kreuzen von Min und Max fängt
+           g4mCommitRandomBound mit dem Mitziehen der Gegenseite. */
+        const lines = document.createElement('div');
+        lines.className = 'g4m-rr-lines';
+        lines.style.setProperty('--g4m-rr-col', 'var(--g4m-active-tool-' + row.color + ')');
+
+        const head = document.createElement('div');
+        head.className = 'g4m-arch-phead';
+        const note = document.createElement('span');
+        note.className = 'g4m-note-text';
+        note.textContent = g4mShortParamLabel(row.label)
+            + ' [' + g4mFmtRandomVal(row.id, data.min)
+            + ' \u2026 ' + g4mFmtRandomVal(row.id, data.max) + ']';
+        const spacer = document.createElement('span');
+        spacer.className = 'g4m-arch-seg-spacer';
+        head.appendChild(note); head.appendChild(spacer);
+        lines.appendChild(head);
+
+        const block = document.createElement('div');
+        block.className = 'g4m-arch-block';
+
+        [['min', 'Min'], ['max', 'Max']].forEach(function (side) {
+            const cap = document.createElement('span');
+            cap.className = 'g4m-param-label-sm g4m-arch-lbl-' + side[0];
+            cap.textContent = side[1];
+            block.appendChild(cap);
+
+            const input = document.createElement('input');
+            input.type = 'range';
+            input.id = 'g4m-rp-' + row.id + '-' + side[0];
+            input.className = 'g4m-row-flex g4m-arch-rail-' + side[0];
+            input.min = data.min; input.max = data.max;
+            input.step = data.step; input.value = range[side[0]];
+            input.setAttribute('aria-label', side[1] + ' random ' + g4mShortParamLabel(row.label));
+            setRangeFill(input);
+            input.addEventListener('input', function () {
+                g4mCommitRandomBound(row.id, side[0], parseFloat(input.value));
+            });
+            block.appendChild(input);
+
+            const box = document.createElement('div');
+            box.className = 'g4m-val-box g4m-arch-field-' + side[0];
+            box.id = 'g4m-rp-box-' + row.id + '-' + side[0];
+            box.textContent = g4mFmtRandomVal(row.id, range[side[0]]);
+            block.appendChild(box);
+        });
+        lines.appendChild(block);
+        sliderRow.appendChild(lines);
+    });
+}
+buildRandomRangeLines();
+
+/* ── Max-Rail auf die Tool-Rail-Linie messen (v157.30) ────────────
+   Dieselbe Mess-Philosophie wie g4mAlignRailsToTool, nur mit
+   umgekehrter Rolle: DIE TOOL-RAIL ist der Anker, an dem schon die
+   F-Editoren hängen — liegt die Max-Rail der Bereichs-Ansicht exakt
+   darauf, ist sie transitiv deckungsgleich mit F1/F2. Die Wert-
+   Ansicht bleibt im Random-Zustand per visibility im Fluss (CSS) und
+   damit messbar. Gelesen wird der WIRKSAME Versatz über die
+   berechnete margin-top des Blocks (aufgelöste Pixel) — nicht über
+   den Inline-Wert, der beim ersten Lauf leer wäre, während die
+   CSS-Vorgabe längst wirkt. Im Hochformat gilt die u-proportionale
+   Vorgabe (kein gemeinsamer Anker — wie beim F-Pendant). */
+function g4mAlignRandomRangeRows() {
+    const toolEd = document.querySelector('.g4m-param-editor');
+    if (!toolEd) return;
+    const row = toolEd.querySelector('.slider-row.g4m-row-active.g4m-frozen');
+    if (!row) return;
+    const lines = row.querySelector('.g4m-rr-lines');
+    const block = lines ? lines.querySelector('.g4m-arch-block') : null;
+    if (!lines || !block) return;
+    if (typeof g4mIsPortrait === 'function' && g4mIsPortrait()) {
+        lines.style.removeProperty('--g4m-rails-shift');
+        return;
+    }
+    const anchor  = row.querySelector('.slider-container');
+    const maxRail = block.querySelector('.g4m-arch-rail-max');
+    if (!anchor || !maxRail) return;
+    function mid(el) { const r = el.getBoundingClientRect(); return r.top + r.height / 2; }
+    const delta = mid(anchor) - mid(maxRail);
+    if (Math.abs(delta) < 0.75 || Math.abs(delta) > 200) return;   // Rauschen/Messfehler
+    const cur = parseFloat(getComputedStyle(block).marginTop) || 0;
+    lines.style.setProperty('--g4m-rails-shift', (cur + delta) + 'px');
+}
+
+/* Kachel-Wertefeld je Zustand (v157.28): bei Random der BEREICH
+   («5–120») — die Übersicht, die ein separates Panel versprochen
+   hätte, direkt im Raster; bei Fixed wie bisher der Wert. */
+function g4mUpdateSqValueDisplay(id, isRandom) {
+    const sq = document.getElementById('g4m-sqval-' + id);
+    if (!sq) return;
+    if (isRandom) {
+        const r = g4mRandomRange(id);
+        sq.textContent = g4mFmtRandomVal(id, r.min) + '\u2013' + g4mFmtRandomVal(id, r.max);
+    } else {
+        const so = sliders[id];
+        const v = (so && typeof so.getValue === 'function') ? so.getValue()
+                : (sliderData[id] ? sliderData[id].value : 0);
+        sq.textContent = g4mFormatSliderValue(id, v);
+    }
+}
+
+
 /* ── Parameter-Raster (v150k) ─────────────────────────────────────
    18 Quadrate à 2u: 13 Slider (Reihenfolge = G4M_SLIDER_ROWS, also
    die bisherige Liste von oben nach unten, zeilenweise von links
@@ -5040,6 +5992,12 @@ function g4mSelectParam(id) {
     if (row) row.classList.add('g4m-row-active');
     if (sq)  sq.classList.add('g4m-sq-active');
 
+    /* Wechsel auf eine bereits GEFRORENE Zeile: ihr Overlay erscheint
+       jetzt erstmals — die Absenkung an der Tool-Rail nachmessen
+       (v157.30). Ohne aktive gefrorene Zeile ist der Aufruf ein No-op;
+       rAF, damit auf der fertigen Geometrie gemessen wird. */
+    requestAnimationFrame(g4mAlignRandomRangeRows);
+
     // Editor-Hintergrund = Gruppenfarbe des aktiven Parameters (v150m)
     const editor = document.querySelector('.g4m-param-editor');
     if (editor && sq) {
@@ -5052,38 +6010,13 @@ function g4mSelectParam(id) {
     // (v153d) — Random-Fähigkeit kommt jetzt aus der Parameter-Liste.
     // Der «Random On Off»-Editor-Kopf entfiel (v153.1h) — die
     // «Random»-Beschriftung lebt allein beim Stack (s. u.).
-    /* «Random»-Beschriftung über den On/Off-Quadraten (v153.1h): nur
-       sichtbar, wenn das aktive Paar wirklich RANDOM steuert. Schalten
-       die Quadrate stattdessen etwas ein/aus (z. B. Normalization),
-       wäre «Random» darüber irreführend — Zelle bleibt leer. */
-    const rndCaption = document.getElementById('g4m-random-caption');
-    if (rndCaption) {
-        /* Die Beschriftung verschwand früher ganz, sobald der aktive
-           Parameter keinen Zufallsmodus kennt (Zoom, Pan-X, Pan-Y,
-           Rotation). Zusammen mit dem leeren Feld darunter sah das aus
-           wie ein FEHLENDER Knopf statt wie «hier gibt es nichts zu
-           schalten» (User-Befund 26.07.). Jetzt bleibt die Zeile immer
-           besetzt und sagt, was Sache ist (v156.2):
-             · Zufallsfähiger Parameter → «Random», normal
-             · Normalization            → «Normalization» (die Quadrate
-               darunter schalten sie, nicht einen Zufallsmodus)
-             · Zoom/Pan/Rotation        → «Random», ausgegraut */
-        const capable = g4mIsRandomCapable(id);
-        const isNorm  = (id === 'normalization-row');
-        const text    = isNorm ? 'Normalization' : 'Random';
-        rndCaption.style.visibility = 'visible';
-        rndCaption.textContent = text;
-        rndCaption.classList.toggle('g4m-cap-inactive', !capable && !isNorm);
-        /* «Normalization» ist 13 Zeichen lang und läuft bei gleicher
-           Schriftgrösse rund 5 % über die 2u-Breite. Statt die Schrift
-           zu verkleinern (v156.2, wirkte neben «Random» wie ein anderer
-           Rang) rückt v156.3 die Zeichen minim enger zusammen — der
-           Schriftgrad bleibt exakt der von «Random». */
-        rndCaption.classList.toggle('g4m-cap-long', text.length > 8);
-    }
+    /* Text, Zustand und Farbe des Random-Schalters pflegt seit v157.32
+       ausschliesslich g4mUpdateRandomCaption (Aufruf unten) — die
+       frühere Inline-Pflege hier hätte den On-Zustand nicht gekannt
+       und ihn beim Kachelwechsel stillschweigend entfärbt. */
     // On/Off-Schalter unter "Random Tools": passendes Paar einblenden
     // (bei Parametern ohne Random bleibt der graue Reserve-Look).
-    if (typeof g4mShowRandomToggleFor === 'function') g4mShowRandomToggleFor(id);
+    if (typeof g4mUpdateRandomCaption === 'function') g4mUpdateRandomCaption();
 }
 /* ── Raster der weissen Tools-Abdeckung (v155.1) ──────────────────
    Zeichnet als feine hellgraue Linien nach, was UNTER der Abdeckung
@@ -5183,7 +6116,22 @@ function buildParamGrid() {
         val.id = 'g4m-sqval-' + en.id;
         val.textContent = en.value;
         b.appendChild(lab); b.appendChild(val);
-        b.addEventListener('click', function () { g4mSelectParam(en.id); });
+        if (en.id === 'normalization-row') {
+            /* Normalization ist seit v157.42 ein DIREKTER Schalter
+               (analog dem Random-Button): Klick toggelt, die Kachel
+               zeigt den Zustand selbst (On/Off im Wertefeld plus
+               Aktivfarbe). Sie WÄHLT nichts mehr aus — vorher machte
+               die Auswahl den Random-Button zum «Normalization»-
+               Schalter und überschrieb dessen Beschriftung, was der
+               User zu Recht als unschön befand. Der Editor bleibt beim
+               zuletzt gewählten Parameter stehen. */
+            b.setAttribute('role', 'switch');
+            b.addEventListener('click', function () {
+                setNormalization(!g4mState.normalizationEnabled);
+            });
+        } else {
+            b.addEventListener('click', function () { g4mSelectParam(en.id); });
+        }
         grid.appendChild(b);
     });
 
@@ -5217,94 +6165,66 @@ function g4mRandomCapableRows() {
    früh (direkt nach G4M_SLIDER_ROWS) definiert, damit g4mSelectParam es
    schon beim ersten buildParamGrid()-Lauf nutzen kann (kein TDZ). */
 function g4mIsRandomCapable(id) { return G4M_RANDOM_CAPABLE_IDS.has(id); }
-function buildRandomToggleStack() {
-    const stack = document.getElementById('g4m-rnd-stack');
-    if (!stack) return;
-    g4mRandomCapableRows().forEach(function (row) {
-        const pair = document.createElement('div');
-        pair.className = 'g4m-rnd-pair';
-        pair.id = 'g4m-rnd-pair-' + row.id;
+/* ── Random-Schalter (v157.32): der «Random»-Button schaltet selbst ──
+   Ersetzt den 9-Paare-Stapel (buildRandomToggleStack, v153.1h bis
+   v157.31): EIN Button, der den Zustand des AKTIVEN Parameters trägt
+   und umschaltet — weniger Fläche, ein Begriff, und mobil ein grosses
+   Ziel statt zweier kleiner. Sonderfall unverändert: steht die
+   Normalization-Kachel aktiv, schaltet der Button die Normalization
+   (Text «Normalization», Zustand aus g4mState.normalizationEnabled).
+   Bei Parametern ohne Zufallsmodus (Zoom/Pan/Rotation) bleibt er als
+   ausgegraute Beschriftung stehen — «hier gibt es nichts zu schalten»
+   statt eines fehlenden Knopfs (User-Befund 26.07., unverändert). */
+function g4mActiveEditorRowId() {
+    const row = document.querySelector('.sliders-container .g4m-row-active');
+    return row && row.id ? row.id : null;
+}
+/* Optik und ARIA des Schalters aus dem Zustand — EINE Senke, gerufen
+   von Kachelwechsel, Klick und Bus (Defaults/Restore). Der frühere
+   Normalization-Sonderfall entfiel (v157.42): der Button heisst immer
+   «Random» und wird nie mehr überschrieben — Normalization schaltet
+   ihre eigene Kachel neben Rotation. */
+function g4mUpdateRandomCaption() {
+    const cap = document.getElementById('g4m-random-caption');
+    if (!cap) return;
+    const id      = g4mActiveEditorRowId();
+    const capable = !!id && g4mIsRandomCapable(id);
+    cap.textContent = 'Random';
+    cap.classList.remove('g4m-cap-long');   // «Random» ist nie lang
+    cap.classList.toggle('g4m-cap-inactive', !capable);
 
-        function makeBtn(isOn) {
-            const b = document.createElement('button');
-            b.type = 'button';
-            b.className = 'g4m-rnd-btn ' + (isOn ? 'g4m-rnd-on' : 'g4m-rnd-off')
-                        + ' g4m-rnd-sel-' + row.color;
-            b.textContent = isOn ? 'On' : 'Off';
-            b.setAttribute('aria-label',
-                (isOn ? 'Random on' : 'Random off') + ' for ' + g4mShortParamLabel(row.label));
-            b.addEventListener('click', function () {
-                // On = Random an, Off = Fixed. Zustand über die zentrale
-                // Senke; Slider-Freeze und Quadrat-Grau ziehen mit.
-                g4mSetRandomMode(row.id, isOn);
-                handleRandomModeChange(row.id, isOn);
-                const sliderRow = document.getElementById(row.id);
-                if (sliderRow) applySliderFreezeState(sliderRow);
-                g4mUpdateRandomToggle(row.id);
-            });
-            return b;
-        }
-        pair.appendChild(makeBtn(true));    // links: On
-        pair.appendChild(makeBtn(false));   // rechts: Off
-        stack.appendChild(pair);
-    });
-
-    /* Normalization-Paar (v153.1h): gleiche On/Off-Quadrate wie die
-       Random-Paare (blaue Gruppe), schaltet aber Normalization DIREKT —
-       der frühere kleine On/Off-Text im Slider-Feld entfiel. Die
-       Aktiv-Optik pflegt g4mUpdateRandomToggle (Sonderfall). */
-    const normPair = document.createElement('div');
-    normPair.className = 'g4m-rnd-pair';
-    normPair.id = 'g4m-rnd-pair-normalization-row';
-    function makeNormBtn(isOn) {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'g4m-rnd-btn ' + (isOn ? 'g4m-rnd-on' : 'g4m-rnd-off') + ' g4m-rnd-sel-blue';
-        b.textContent = isOn ? 'On' : 'Off';
-        b.setAttribute('aria-label', isOn ? 'Normalization on' : 'Normalization off');
-        b.addEventListener('click', function () { setNormalization(isOn); });
-        return b;
+    const isOn = capable && g4mIsRandomMode(id);
+    cap.classList.toggle('g4m-cap-on', isOn);
+    ['green', 'orange', 'blue'].forEach(function (c) { cap.classList.remove('g4m-cap-' + c); });
+    if (isOn) {
+        const row = G4M_SLIDER_ROWS.find(function (r) { return r.id === id; });
+        cap.classList.add('g4m-cap-' + (row ? row.color : 'blue'));
     }
-    normPair.appendChild(makeNormBtn(true));
-    normPair.appendChild(makeNormBtn(false));
-    stack.appendChild(normPair);
+    cap.setAttribute('role', 'switch');
+    cap.setAttribute('aria-checked', isOn ? 'true' : 'false');
+    if (capable) cap.removeAttribute('aria-disabled');
+    else cap.setAttribute('aria-disabled', 'true');
+    cap.style.visibility = 'visible';
 }
-buildRandomToggleStack();
-// Stapel entsteht nach dem ersten g4mSelectParam (in buildParamGrid);
-// daher das initial gewählte Paar jetzt nachziehen.
-g4mShowRandomToggleFor(G4M_SLIDER_ROWS[0].id);
-
-/* Aktiv-Optik eines Paares an den aktuellen Random-Zustand angleichen:
-   das gewählte Feld (On bei Random, sonst Off) trägt die Gruppenfarbe. */
-function g4mUpdateRandomToggle(id) {
-    const pair = document.getElementById('g4m-rnd-pair-' + id);
-    if (!pair) return;
-    /* Sonderfall Normalization (v153.1h): das Paar spiegelt den
-       Normalization-Zustand, nicht einen Random-Modus. */
-    const isOn = (id === 'normalization-row')
-        ? !!g4mState.normalizationEnabled
-        : g4mIsRandomMode(id);
-    const onBtn  = pair.querySelector('.g4m-rnd-on');
-    const offBtn = pair.querySelector('.g4m-rnd-off');
-    if (onBtn)  onBtn.classList.toggle('g4m-rnd-selected', isOn);
-    if (offBtn) offBtn.classList.toggle('g4m-rnd-selected', !isOn);
-}
-
-/* Das zum aktiven Parameter passende Paar nach vorn holen; bei Parametern
-   ohne Random bleibt der graue Reserve-Look sichtbar. Wird von
-   g4mSelectParam aufgerufen. */
-function g4mShowRandomToggleFor(id) {
-    const stack = document.getElementById('g4m-rnd-stack');
-    if (!stack) return;
-    stack.querySelectorAll('.g4m-rnd-pair').forEach(function (p) {
-        p.classList.remove('g4m-rnd-active');
+(function initRandomCaptionSwitch() {
+    const cap = document.getElementById('g4m-random-caption');
+    if (!cap) return;
+    cap.addEventListener('click', function () {
+        const id = g4mActiveEditorRowId();
+        if (!id) return;
+        if (!g4mIsRandomCapable(id)) return;   // ausgegraut: bewusst kein Effekt
+        // (Normalization läuft seit v157.42 über ihre eigene Kachel)
+        /* Exakt die Wirkkette des früheren On/Off-Klicks — Zustand über
+           die zentrale Senke, Freeze und Kachel ziehen mit. */
+        const next = !g4mIsRandomMode(id);
+        g4mSetRandomMode(id, next);
+        handleRandomModeChange(id, next);
+        const sliderRow = document.getElementById(id);
+        if (sliderRow) applySliderFreezeState(sliderRow);
+        g4mUpdateRandomCaption();
     });
-    const pair = document.getElementById('g4m-rnd-pair-' + id);
-    if (pair) {
-        pair.classList.add('g4m-rnd-active');
-        g4mUpdateRandomToggle(id);
-    }
-}
+})();
+g4mUpdateRandomCaption();   // Startzustand (die erste Kachel ist bereits gewählt)
 
 /* ── Generierung der Superformula-Boundary-Zeilen ─────────────────
    Die 6 strukturgleichen Parameterzeilen (a, b, m, n1–n3) entstehen
@@ -5538,11 +6458,27 @@ document.querySelectorAll('.slider-row').forEach(sliderRow => {
         // Nur Primär-Taste/-Kontakt startet den Drag
         if (e.button !== undefined && e.button !== 0) return;
         e.preventDefault();
+        /* DOPPELSTART unterbinden (v157.47): startDrag hängt an Griff
+           UND Container, und ein Druck auf den Griff bubbelt zum
+           Container — beide starteten, der zweite setPointerCapture
+           zog die Capture auf den Container, und das pointerup erreichte
+           die Listener des Griffs nie mehr. Die verwaisten onMove-
+           Listener liessen den Griff fortan der BLOSSEN Maus folgen
+           (pointermove feuert auch ohne gedrückte Taste) — der
+           User-Befund «bewegt sich beim Darüberfahren». */
+        e.stopPropagation();
         const target = e.currentTarget;
         try { target.setPointerCapture(e.pointerId); } catch (err) { /* z. B. Pointer schon weg */ }
         updateFromEvent(e);
 
-        function onMove(ev) { updateFromEvent(ev); }
+        function onMove(ev) {
+            /* Selbstheilung (v157.47): läuft ein Move ohne gedrückte
+               Taste ein, ist der Drag anderweitig zu Ende gegangen
+               (Capture fehlgeschlagen, Loslassen ausserhalb, verlorenes
+               pointerup) — aufräumen statt dem Zeiger zu folgen. */
+            if (ev.buttons === 0) { onEnd(ev); return; }
+            updateFromEvent(ev);
+        }
         function onEnd(ev) {
             try { target.releasePointerCapture(ev.pointerId); } catch (err) { /* bereits freigegeben */ }
             target.removeEventListener('pointermove', onMove);
@@ -5596,21 +6532,26 @@ function setNormalization(enabled) {
     /* On/Off-Quadrate im Stack nachziehen (v153.1h) — der frühere
        Text-Toggle im Slider-Feld entfiel. */
     g4mStore.set('normalizationEnabled', enabled);
-    if (typeof g4mUpdateRandomToggle === 'function') g4mUpdateRandomToggle('normalization-row');
     const g4mSqNorm = document.getElementById('g4m-sqval-normalization-row');
     if (g4mSqNorm) g4mSqNorm.textContent = enabled ? 'On' : 'Off';   // Quadrat-Spiegel (v150k)
+    /* Kachel IST der Schalter (v157.42): eingeschaltet trägt sie die
+       gedämpfte Gruppenfarbe mit weisser Schrift — dieselbe Aktiv-
+       Optik wie der Random-Button (g4m-sq-active liefert exakt die
+       Klassenmechanik: blaue Kachel + weisse Beschriftung). */
+    const g4mSqBtn = document.getElementById('g4m-sq-normalization-row');
+    if (g4mSqBtn) {
+        g4mSqBtn.classList.toggle('g4m-sq-active', enabled);
+        g4mSqBtn.setAttribute('aria-checked', enabled ? 'true' : 'false');
+    }
     if (storedCurveParameters.length > 0) {
         redrawStoredImage();
     }
 }
 
-/* Der frühere Normalization-Text-Toggle entfiel (v153.1h) — geschaltet
-   wird über das On/Off-Paar im Stack (buildRandomToggleStack, §2). */
-
-// Radio-Button-Klick-Handler entfernt (v153d): die Slider-Random/Fixed-
-// Radios und die Normalization-Radios gibt es nicht mehr. Random/Fixed
-// läuft über die On/Off-Quadrate unter "Random Tools"; Normalization
-// über das On/Off-Paar im Stack (buildRandomToggleStack, v153.1h).
+/* Geschichte der Schalter an dieser Stelle: Text-Toggle (bis v153.1h)
+   → On/Off-Quadrate im Stack (bis v157.31) → seit v157.32 schaltet
+   der «Random»-Button selbst (initRandomCaptionSwitch, §2); die
+   Normalization schaltet derselbe Button, wenn ihre Kachel aktiv ist. */
 
 // Slider change handlers
 /* Tool-Slider -> Store-Schlüssel: welche Slider Ansichts-/Effekt-
@@ -5869,17 +6810,19 @@ function generateSuperformulaParameters(maxSize) {
         Object.assign(p, PARAM_DEFAULTS, { m: 5 });
     }
 
-    const randomPoints = g4mIsRandomMode('number-of-points');
-    const randomLines = g4mIsRandomMode('line-thickness');
-    const randomSize = g4mIsRandomMode('point-size');
-
-    const pointDensity = randomPoints ? getRandomInt(3, 100) : g4mState.viewParams.toolPoints;
-    const lineWidth = randomLines ? getRandomNumber(0.5, 100) : g4mState.viewParams.lineWidth;
-    const pointSize = randomSize ? getRandomInt(1, 500) : g4mState.viewParams.pointSize;
+    /* Zufallswerte aus den USER-BEREICHEN (v157.27) — eine Senke für
+       alle Parameter statt fest verdrahteter Grenzen je Fundstelle.
+       Vorher hier: Points 3-100, Line 0.5-100, Size 1-500 im Code. */
+    const pointDensity = g4mRandomizedValue('number-of-points', g4mState.viewParams.toolPoints);
+    const lineWidth    = g4mRandomizedValue('line-thickness',   g4mState.viewParams.lineWidth);
+    const pointSize    = g4mRandomizedValue('point-size',       g4mState.viewParams.pointSize);
 
     const color = g4mState.useRandomColors ? getRandomColor() : g4mState.defaultCurveColor;
 
-    return {
+    /* Per-Layer-Zufallsfelder (v157.27): nur gesetzt, wenn der
+       jeweilige Parameter auf Random steht — siehe
+       g4mPerLayerRandomFields. */
+    return Object.assign({
         param_a: p.a,
         param_b: p.b,
         m: p.m,
@@ -5891,7 +6834,7 @@ function generateSuperformulaParameters(maxSize) {
         pointDensity,
         lineWidth,
         pointSize
-    };
+    }, g4mPerLayerRandomFields());
 }
 
 // Drawing functions
@@ -5915,11 +6858,15 @@ function applyViewTransform(ctx, centerX, centerY) {
 
 /* Radiale Modulation (Amplitude/Frequenz/Phase aus den Tool-Slidern)
    auf kartesische Punkte anwenden — verändert das Array in place */
-function applyRadialModulation(cartesianPoints, centerX, centerY) {
+function applyRadialModulation(cartesianPoints, centerX, centerY, ov) {
+    /* ov: die Parameter der gerade gezeichneten Kurve (v157.27). Trägt
+       sie eigene Modulationswerte (Random beim Generieren an), gelten
+       diese; sonst der globale Zustand — exakt das bisherige Verhalten
+       für Random-aus und für ältere Tokens ohne die Felder. */
     const vp = g4mState.viewParams;
-    const modAmplitude = vp.modAmplitude;
-    const modFrequency = vp.modFrequency;
-    const modPhase     = vp.modPhase;
+    const modAmplitude = (ov && ov.modAmplitude !== undefined) ? ov.modAmplitude : vp.modAmplitude;
+    const modFrequency = (ov && ov.modFrequency !== undefined) ? ov.modFrequency : vp.modFrequency;
+    const modPhase     = (ov && ov.modPhase     !== undefined) ? ov.modPhase     : vp.modPhase;
     if (modAmplitude <= 0) return;
 
     const phaseRad = modPhase * Math.PI / 180;
@@ -6029,9 +6976,14 @@ function drawSuperformula(ctx, centerX, centerY, params) {
         cartesianPoints.push({ x, y });
     }
     
-    applyRadialModulation(cartesianPoints, centerX, centerY);
+    applyRadialModulation(cartesianPoints, centerX, centerY, params);
     
-    const transparency = g4mState.viewParams.transparency / 100;
+    /* Per-Layer-Vorrang (v157.27): trägt die Kurve einen eigenen Wert
+       (Random stand beim Generieren an), gilt er; sonst wie bisher der
+       globale Slider — ältere Tokens und Random-aus bleiben identisch,
+       samt Live-Wirkung des Sliders auf bestehende Layer. */
+    const transparency = (params.transparency !== undefined
+        ? params.transparency : g4mState.viewParams.transparency) / 100;
     const colorWithTransparency = hexToRgba(params.color, 1 - transparency);
     
     renderByDisplayMode(ctx, cartesianPoints, colorWithTransparency, params, true);
@@ -6284,7 +7236,10 @@ function runGeneration(rendererId, opts) {
         storedCurveParameters  = [];
         allGeneratedParameters = [];
 
-        const numCurves = Math.round(g4mState.viewParams.numLayers);
+        /* Layer-Zahl: der EINE Parameter, dessen Zufall pro Go gezogen
+           wird — er bestimmt, wie viele Kurven es überhaupt gibt
+           (v157.27). Random aus => unverändert der Slider-Wert. */
+        const numCurves = Math.round(g4mRandomizedValue('number-of-layers', g4mState.viewParams.numLayers));
 
         // Parameter zuerst vollständig erzeugen (günstig) ...
         // Die Größen-Entscheidung liegt jetzt im jeweiligen Renderer
@@ -6431,22 +7386,25 @@ function generateArchimedeanParameters(maxSize) {
     const size = g4mOptimizerSize(maxSize, seeds.size, p.optimizer || { min:100, max:100, enabled:false });
     const vals = g4mArchValsFromSeeds(seeds, p);
 
-    const randomLines  = g4mIsRandomMode('line-thickness');
-    const randomSize   = g4mIsRandomMode('point-size');
-    const lineWidth    = randomLines  ? getRandomNumber(0.5, 10) : g4mState.viewParams.lineWidth;
-    const pointSize    = randomSize   ? getRandomInt(1, 20)      : g4mState.viewParams.pointSize;
+    /* User-Bereiche statt fest verdrahteter Grenzen (v157.27). Damit
+       endet nebenbei eine stille Diskrepanz: F2 zog Line/Size bisher
+       aus ENGEREN Bereichen als F1 (0.5-10 / 1-20 gegen 0.5-100 /
+       1-500) — jetzt gilt für beide derselbe eingestellte Bereich. */
+    const lineWidth = g4mRandomizedValue('line-thickness', g4mState.viewParams.lineWidth);
+    const pointSize = g4mRandomizedValue('point-size',     g4mState.viewParams.pointSize);
 
     const color = (g4mState.archUseRandomColors !== false) ? getRandomColor() : (g4mState.archDefaultColor || '#2196F3');
 
     /* Punktdichte der Arch-Kurven steuert AUSSCHLIESSLICH nSteps
        (eigener N-Slider im F2-Panel). */
-    return {
+    /* Per-Layer-Zufallsfelder (v157.27) — wie im F1-Generator. */
+    return Object.assign({
         a: vals.a, b: vals.b, alpha: vals.alpha, beta: vals.beta, size,
         color, nSteps: vals.nSteps, lineWidth, pointSize,
         _type: 'archimedean',
         _seeds: seeds, _maxSizeRef: maxSize,
         _sizeSeed: seeds.size   // Rückwärtskompatibel zu g4mApplyOptimizerLive
-    };
+    }, g4mPerLayerRandomFields());
 }
 
 /* Zentrale Keim→Wert-Abbildung (EINE Quelle, von Generierung,
@@ -6537,9 +7495,14 @@ function drawArchimedeanSpiral(ctx, centerX, centerY, params) {
         };
     });
 
-    applyRadialModulation(cartesianPoints, centerX, centerY);
+    applyRadialModulation(cartesianPoints, centerX, centerY, params);
 
-    const transparency = g4mState.viewParams.transparency / 100;
+    /* Per-Layer-Vorrang (v157.27): trägt die Kurve einen eigenen Wert
+       (Random stand beim Generieren an), gilt er; sonst wie bisher der
+       globale Slider — ältere Tokens und Random-aus bleiben identisch,
+       samt Live-Wirkung des Sliders auf bestehende Layer. */
+    const transparency = (params.transparency !== undefined
+        ? params.transparency : g4mState.viewParams.transparency) / 100;
     const colorWithTransparency = hexToRgba(params.color, 1 - transparency);
 
     renderByDisplayMode(ctx, cartesianPoints, colorWithTransparency, params, false);
@@ -6578,9 +7541,25 @@ function drawArchimedeanSpiral(ctx, centerX, centerY, params) {
 const G4M_CHUNK_BUDGET_MS = 12;   // Zeitbudget pro Frame (~60 FPS minus Reserve)
 let g4mActiveRender = null;       // Abbruch-Schnittstelle des laufenden Laufs
 
-function g4mRenderInChunks(items, drawOne, onDone) {
+/* opts.detached (v157.21): Der Lauf trägt sich NICHT als g4mActiveRender
+   ein und ist damit für redrawStoredImage unsichtbar.
+
+   Grund: Der hochauflösende Export läuft über viele Frames — bei 1200
+   dpi Sekunden. Jeder Neuaufbau der sichtbaren Canvas in dieser Zeit
+   rief bisher g4mActiveRender.cancel(true) und traf damit den EXPORT,
+   nicht die Anzeige: sein onDone feuerte vorzeitig, und in die Datei
+   kam ein halb gezeichnetes Bild — es fehlten schlicht Layer. Auslöser
+   braucht es dafür kaum: ein Slider, ein Orientierungswechsel oder auf
+   dem Handy schon die einfahrende Adressleiste, die ein resize und
+   damit resizeCanvas → redrawStoredImage auslöst.
+
+   Die Anzeige darf sich weiterhin jederzeit selbst abbrechen; nur der
+   Export wird nicht mehr von aussen gestoppt. Er zeichnet ohnehin auf
+   eine eigene Canvas und stört niemanden. */
+function g4mRenderInChunks(items, drawOne, onDone, opts) {
     let i = 0;
     let cancelled = false;
+    const detached = !!(opts && opts.detached);
     function step() {
         if (cancelled) return;
         const t0 = performance.now();
@@ -6591,19 +7570,21 @@ function g4mRenderInChunks(items, drawOne, onDone) {
         if (i < items.length) {
             requestAnimationFrame(step);
         } else {
-            g4mActiveRender = null;
+            if (g4mActiveRender === handle) g4mActiveRender = null;
             if (onDone) onDone();
         }
     }
-    g4mActiveRender = {
+    const handle = {
         // finish=true: Abschlussarbeiten (Buttons, Token) trotzdem ausführen
         cancel: function (finish) {
             cancelled = true;
-            g4mActiveRender = null;
+            if (g4mActiveRender === handle) g4mActiveRender = null;
             if (finish && onDone) onDone();
         }
     };
+    if (!detached) g4mActiveRender = handle;
     step();
+    return handle;
 }
 
 /* Zeichnet das Gesamtbild (alle gespeicherten Kurven) in die kleinen
@@ -6857,11 +7838,34 @@ function generateCodeNumber() {
 
 /* Eine Stelle für Export-Dateinamen — vorher zweimal identisch
    (72-dpi-Zweig und High-Res) und ohne die Code-Nummer aufgebaut. */
-function g4mExportFileName(code, dpi, timestamp, fileExtension) {
+/* ── Diagnose-Kennung im Dateinamen (v157.21, VORÜBERGEHEND) ──────
+   Hängt die Zahlen an, aus denen sich der Massstab ergibt, damit sich
+   am fertigen Download ablesen lässt, was die App im Moment des
+   Exports gemessen hat:
+     src  Bezugskante, mit der gerechnet wurde
+     box  Kantenlänge des Layout-Kastens
+     buf  Pixelpuffer der Canvas VOR einer eventuellen Reparatur
+     sf   Massstab (Exportkante / Bezugskante)
+     fix  steht dabei, wenn der Puffer nachgezogen werden musste
+   Stimmen src, box und buf überein, war die Bezugsgrösse gesund und
+   die Ursache liegt woanders. Zum Abschalten: G4M_EXPORT_DEBUG auf
+   false — dann bleiben die Dateinamen wie bisher. */
+const G4M_EXPORT_DEBUG = false;   /* Diagnose erledigt (v157.23) */
+function g4mExportDebugTag(source, scaleFactor) {
+    if (!G4M_EXPORT_DEBUG) return '';
+    let t = '_dbg-src' + Math.round(source.src)
+          + '-box' + Math.round(source.box)
+          + '-buf' + Math.round(source.before)
+          + '-sf' + (Math.round(scaleFactor * 10) / 10);
+    if (source.repaired) t += '-fix';
+    return t;
+}
+function g4mExportFileName(code, dpi, timestamp, fileExtension, debugTag) {
     let fileName = `g4m_TOKEN_${lastGeneratedTokenId}_${code}_${dpi}dpi_${timestamp}`;
     if (currentVersionNumber > 0) {
         fileName += `_Version_${currentVersionNumber.toString().padStart(2, '0')}`;
     }
+    if (debugTag) fileName += debugTag;
     return fileName + `.${fileExtension}`;
 }
 
@@ -6904,10 +7908,47 @@ function saveTokenCounter() {
    Positionierung darüber, Schliessen bei Aussenklick. Das Aussehen
    liegt vollständig im Stylesheet (g4m-dd-*-Klassen); die übergebene
    build-Factory liefert nur Struktur und Verhalten. */
+/* Menü nach dem Einfügen in seinen Roll-Rahmen setzen (v157.36):
+   Erst wird das fertig gebaute Menü regulär gemessen (das deckt ALLE
+   Geometrie-Varianten der Builder ab — top-, bottom- und inhalts-
+   getriebene Höhen), dann wandert es in einen um die Schattenreserve
+   grösseren Rahmen, dessen UNTERKANTE exakt auf der Menü-Unterkante
+   liegt; seine Position wird darin als Pixel fixiert. Die transform-
+   Fahrt (CSS .g4m-dd-frame > *) startet mit dem Umzug. */
+const G4M_DD_ROLL_PAD = 80;   // >= Schattenreichweite (0.14u + 0.34u bei u<=52)
+function g4mWrapDropdownForRoll(dropdown) {
+    const r = dropdown.getBoundingClientRect();
+    const frame = document.createElement('div');
+    frame.className = 'g4m-dd-frame';
+    frame.style.left   = (r.left - G4M_DD_ROLL_PAD) + 'px';
+    frame.style.top    = (r.top  - G4M_DD_ROLL_PAD) + 'px';
+    frame.style.width  = (r.width  + 2 * G4M_DD_ROLL_PAD) + 'px';
+    frame.style.height = (r.height + G4M_DD_ROLL_PAD) + 'px';
+    document.body.appendChild(frame);
+    dropdown.style.left   = G4M_DD_ROLL_PAD + 'px';
+    dropdown.style.top    = G4M_DD_ROLL_PAD + 'px';
+    dropdown.style.bottom = 'auto';
+    dropdown.style.width  = r.width + 'px';
+    dropdown.style.height = r.height + 'px';
+    frame.appendChild(dropdown);
+    /* Nach der Landung: Clip freigeben (der untere Schattensaum lag
+       während der Fahrt bewusst hinter der Kante) und die Compositor-
+       Ebene wieder abgeben. */
+    dropdown.addEventListener('animationend', function () {
+        frame.style.overflow = 'visible';
+        dropdown.style.willChange = 'auto';
+    }, { once: true });
+    return frame;
+}
+function g4mDropdownRoot(el) {
+    const f = el.closest ? el.closest('.g4m-dd-frame') : null;
+    return f || el;
+}
 function g4mToggleDropdown(id, anchorBtn, build) {
     const existing = document.getElementById(id);
     if (existing) {
-        document.body.removeChild(existing);
+        const root = g4mDropdownRoot(existing);
+        if (root.parentNode) root.parentNode.removeChild(root);
         return;
     }
     const btnRect = anchorBtn.getBoundingClientRect();
@@ -6917,11 +7958,23 @@ function g4mToggleDropdown(id, anchorBtn, build) {
     dropdown.style.bottom = (window.innerHeight - btnRect.top + 2) + 'px';
 
     function close() {
-        if (dropdown.parentNode) document.body.removeChild(dropdown);
-        document.removeEventListener('click', onOutsideClick);
+        const root = g4mDropdownRoot(dropdown);
+        if (root.parentNode) root.parentNode.removeChild(root);
+        document.removeEventListener('pointerdown', onOutsideClick, true);
     }
+    /* CAPTURE-Phase + pointerdown statt Bubble-click (v157.44): Der
+       alte Bubble-Listener wurde von jedem e.stopPropagation() eines
+       fremden Handlers ausgehungert — die F-Panel-Klicks stoppen die
+       Propagation, das Menü blieb beim Öffnen von F1/F2 stehen
+       (User-Befund). Die Capture-Phase läuft von der Wurzel ZUM Ziel,
+       BEVOR irgendein Handler stoppen kann — jede Interaktion
+       ausserhalb des Menüs schliesst es damit strukturell zuverlässig,
+       egal was der angeklickte Handler mit dem Ereignis tut.
+       pointerdown statt click deckt zusätzlich Touch/Drag ab und
+       feuert, bevor der fremde Handler überhaupt läuft. */
     function onOutsideClick(e) {
-        if (!dropdown.contains(e.target) && e.target !== anchorBtn) close();
+        if (!dropdown.contains(e.target) &&
+            e.target !== anchorBtn && !anchorBtn.contains(e.target)) close();
     }
 
     build(dropdown, close);
@@ -6952,9 +8005,14 @@ function g4mToggleDropdown(id, anchorBtn, build) {
     });
 
     document.body.appendChild(dropdown);
-    if (items.length) items[0].focus();
+    g4mWrapDropdownForRoll(dropdown);
+    /* Fokus NACH dem Umzug in den Rahmen — ein appendChild entzieht
+       einem fokussierten Element den Fokus wieder. preventScroll: das
+       Menü steht beim Start noch unter der Rahmenkante, der Browser
+       darf ihm nicht hinterherscrollen. */
+    if (items.length) items[0].focus({ preventScroll: true });
     // Verzögert registrieren, damit der öffnende Klick nicht sofort schliesst
-    setTimeout(function () { document.addEventListener('click', onOutsideClick); }, G4M_ANIM.DEFER_MS);
+    setTimeout(function () { document.addEventListener('pointerdown', onOutsideClick, true); }, G4M_ANIM.DEFER_MS);
 }
 
 // Download functions
@@ -6981,18 +8039,21 @@ function createModeDropdown() {
     if (!anchor || !toolsContainer) return;
     g4mToggleDropdown('g4m-mode-dropdown', anchor, function (dropdown, close) {
         /* Geometrie aus der Live-Messung: 1 u = Panel-Höhe / 12.
-           EINE Spalte in Indikatorbreite (2u), 6u hoch — F1-F10
-           verteilen sich gleichmässig (CSS flex). Top-verankert
-           (Unterkante = Indikator-Oberkante, rechnerisch exakt am
-           u-Raster — wie Canvas-/Drawing-Menü, v153.1i). */
+           EINE Spalte in Indikatorbreite (2u), 7u hoch (v157.41, war
+           6u) — zehn Einträge bekommen so 0.7u statt 0.6u je Zeile,
+           «alles hat ein bisschen besser Platz» (User). Formula ist
+           damit die bewusste Ausnahme der 6u-Einheitshöhe von
+           v157.34: es trägt zehn Einträge, Canvas und Drawing deutlich
+           weniger. Top-verankert (Unterkante = Indikator-Oberkante,
+           rechnerisch exakt am u-Raster — wie Canvas/Drawing). */
         const panelRect = toolsContainer.getBoundingClientRect();
         const u = panelRect.height / 12;
         const aRect = anchor.getBoundingClientRect();
         dropdown.style.left   = aRect.left + 'px';
-        dropdown.style.top    = (aRect.top - u * 6) + 'px';
+        dropdown.style.top    = (aRect.top - u * 7) + 'px';
         dropdown.style.bottom = 'auto';
         dropdown.style.width  = aRect.width + 'px';
-        dropdown.style.height = (u * 6) + 'px';
+        dropdown.style.height = (u * 7) + 'px';
 
         Object.keys(G4M_MODE_BUTTONS).forEach(function (mode) {
             const item = document.createElement('div');
@@ -7020,26 +8081,33 @@ function createModeDropdown() {
 
 function createResolutionDropdown() {
     g4mToggleDropdown('resolution-dropdown', document.getElementById('download-btn'), function (dropdown, close) {
-        /* u-Raster-Geometrie (v153.1d, nur Querformat): das Pull-up-
-           Menü richtet sich an den Rasterkanten aus — Oberkante bündig
-           mit der Oberkante des Go-Buttons, links und unten wie bisher
-           (linke Kante / Oberkante des Save-Image-Buttons), rechte
-           Kante bündig mit der rechten Kante des Color-Quadrats der
-           Panels (= Canvas-Linke + 4u). Die vier Einträge füllen die
-           Rasterhöhe gleichmässig (Flex). Im Hochformat (Nav liegt
-           horizontal, Go und Save Image auf gleicher Höhe) bleibt die
-           bisherige inhaltsgetriebene Geometrie. */
-        if (!g4mIsPortrait()) {
-            const go = document.getElementById('generate-btn');
-            const cv = canvasContainer ? canvasContainer.getBoundingClientRect() : null;
-            if (go && cv && cv.width > 0) {
-                const goTop = go.getBoundingClientRect().top;
-                const u     = cv.width / 12;
-                const left  = parseFloat(dropdown.style.left) || 0;
-                dropdown.style.top   = goTop + 'px';
-                dropdown.style.width = Math.round(cv.left + 4 * u - left) + 'px';
-                dropdown.classList.add('g4m-dd-grid');
-            }
+        /* EINE Geometrie für beide Orientierungen (v157.39,
+           User-Vorgabe): 10u BREIT und 6u HOCH, die vier Einträge
+           gleichmässig über die Höhe verteilt (g4m-dd-grid). Verankert
+           am Save-Image-Button: im Querformat ab dessen LINKER Kante
+           nach rechts über die Canvas, im Hochformat endet die RECHTE
+           Kante auf seiner rechten Kante (bei 12u Nav-Breite beginnt
+           das Menü damit bei 1u — die D-Pad-Anbindung von v157.38 ist
+           überholt, 10u passen rechts der D-Pad-Kante nicht ins Bild).
+           Die festen 6u lösen zugleich zwei Handy-Befunde: im
+           Querformat war die Box (Go-Oberkante bis Save-Oberkante)
+           kleiner als ihr Inhalt — die unterste Zeile (1200 dpi) ragte
+           unter dem weissen Grund hervor und stand transparent im
+           Bild; im Hochformat drängten sich die Zeilen in der knappen
+           Eigenhöhe. 6u / 4 Zeilen = 1.5u pro Eintrag, gut wählbar. */
+        const save  = document.getElementById('download-btn');
+        const cv    = canvasContainer ? canvasContainer.getBoundingClientRect() : null;
+        const bRect = save ? save.getBoundingClientRect() : null;
+        if (bRect && cv && cv.width > 0) {
+            const u = cv.width / 12;
+            dropdown.style.top    = (bRect.top - u * 6) + 'px';
+            dropdown.style.bottom = 'auto';
+            dropdown.style.height = (u * 6) + 'px';
+            dropdown.style.width  = Math.round(u * 10) + 'px';
+            dropdown.style.left   = (g4mIsPortrait()
+                ? (bRect.right - u * 10)
+                : bRect.left) + 'px';
+            dropdown.classList.add('g4m-dd-grid');
         }
 
         const options = [
@@ -7082,7 +8150,13 @@ function createResolutionDropdown() {
                     incrementVersionNumber();
                     const link = document.createElement('a');
 
-                    const fileName = g4mExportFileName(code, dpi, timestamp, 'jpg');
+                    /* Derselbe Messwert wie beim Hochauflösenden, damit
+                       sich die beiden Dateinamen vergleichen lassen —
+                       dieser Pfad gibt die sichtbare Canvas unverändert
+                       aus und ist damit die Referenz (v157.21). */
+                    const src72 = g4mExportSource();
+                    const fileName = g4mExportFileName(code, dpi, timestamp, 'jpg',
+                                                       g4mExportDebugTag(src72, 1));
 
                     link.download = fileName;
                     link.href = canvas.toDataURL('image/jpeg', 0.8);
@@ -7120,6 +8194,38 @@ function canvasSizeSupported(edge) {
    nutzt das vorhandene Chunk-Rendering (Main-Thread bleibt bedienbar,
    der Fortschrittsbalken zeigt ECHTEN Fortschritt) und exportiert
    per toBlob statt toDataURL (asynchron, halber Speicherbedarf). */
+/* ── Bezugsgrösse des Exports (v157.21) ───────────────────────────
+   Die Kurven sind in PIXELN DER SICHTBAREN CANVAS gespeichert, und
+   redrawStoredImage zeichnet sie um deren Mitte. Der Export ist genau
+   dann eine getreue Vergrösserung, wenn er von derselben Kantenlänge
+   ausgeht. Genau hier lag der Fehlerverdacht: Meldet die Canvas in
+   diesem Moment eine viel zu kleine Kante, wird der Massstab riesig
+   und die Datei zeigt nur noch einen Krümel des Bildes, formatfüllend
+   aufgeblasen — bei durchscheinenden Layern eine fast einfarbige
+   Fläche.
+
+   Darum wird der Wert nicht mehr blind gelesen, sondern geprüft:
+   Weicht der Pixelpuffer stark vom Layout-Kasten ab, ist er veraltet
+   (Rotation, ein- oder ausfahrende Browserleisten, ein Resize während
+   einer Transition) — resizeCanvas bindet ihn neu ans Layout. Bleibt
+   er danach unplausibel, bricht der Export lieber ab, statt eine
+   unbrauchbare Datei zu schreiben. */
+const G4M_EXPORT_MIN_EDGE = 50;   // darunter ist keine sinnvolle Vorlage möglich
+function g4mExportSource() {
+    const box = canvasContainer
+        ? Math.min(canvasContainer.clientWidth, canvasContainer.clientHeight)
+        : 0;
+    const before = Math.min(canvas.width, canvas.height);
+    let src = before, repaired = false;
+
+    if (!(src > 0) || (box > 0 && src < box * 0.75)) {
+        resizeCanvas();                                  // Puffer ans Layout binden
+        src = Math.min(canvas.width, canvas.height);
+        repaired = true;
+    }
+    return { src: src, before: before, box: box, repaired: repaired };
+}
+
 function downloadHighResolution(dpi, code, timestamp) {
     const inchSize = 11.8;
     const newSize  = Math.round(inchSize * dpi);
@@ -7127,6 +8233,13 @@ function downloadHighResolution(dpi, code, timestamp) {
     // Canvas-Limit-Guard: stilles Weissbild verhindern
     if (!canvasSizeSupported(newSize)) {
         alert(G4M_TEXT.resolutionLimit(newSize));
+        return;
+    }
+
+    // Bezugsgrösse zuerst — ohne brauchbare Vorlage kein Export
+    const source = g4mExportSource();
+    if (!(source.src >= G4M_EXPORT_MIN_EDGE)) {
+        alert(G4M_TEXT.exportNoSource(source.src));
         return;
     }
 
@@ -7155,34 +8268,53 @@ function downloadHighResolution(dpi, code, timestamp) {
     exportCtx.fillStyle = g4mState.canvasBackgroundColor;
     exportCtx.fillRect(0, 0, newSize, newSize);
 
-    const scaleFactor = newSize / canvas.width;
-    const centerX = newSize / 2;
-    const centerY = newSize / 2;
+    const scaleFactor = newSize / source.src;
 
-    // Skalierte Parameter-KOPIEN — die Originale bleiben unverändert
-    const scaled = storedCurveParameters.map(function (sp) {
-        const params = { ...sp };
-        params.size      *= scaleFactor;
-        params.lineWidth *= scaleFactor;
-        params.pointSize *= scaleFactor;
-        return params;
-    });
+    /* ── Der KONTEXT wird skaliert, nicht die Parameter (v157.21) ──
+       Vorher bekam jede Kurve eine Kopie mit size/lineWidth/pointSize
+       mal scaleFactor. Das ist eine Liste, die vollständig sein muss —
+       und sie war es nicht: panX/panY in applyViewTransform sind
+       ebenfalls Displaypixel und blieben unskaliert, ein verschobenes
+       Bild landete in der Datei fast zentriert. Jede künftige Grösse in
+       Pixeln hätte denselben Fehler wiederholt.
 
-    /* Der Zielkontext wird den Zeichnern als Parameter übergeben —
-       kein Umhängen einer Modul-Variablen, keine Restaurierungs-
-       Sorgfalt, die sichtbare Canvas ist beweisbar unberührt. */
+       Mit exportCtx.scale zeichnen die Renderer in DISPLAYKOORDINATEN
+       (Mitte = source.src / 2) und die Skalierung übernimmt der
+       Kontext. Alles, was in Pixeln steckt — Grössen, Strichstärken,
+       Punktgrössen, Pan, alles Künftige — wird damit zwangsläufig
+       mitskaliert. Die Datei ist per Konstruktion die exakte
+       Vergrösserung dessen, was auf dem Schirm steht.
+
+       Die Originalparameter können unverändert durchgereicht werden;
+       keiner der Zeichner schreibt in sie hinein. Das save/restore
+       umspannt alle Chunks — die Transformation muss über die
+       Animationsframes hinweg stehen bleiben. */
+    exportCtx.save();
+    exportCtx.scale(scaleFactor, scaleFactor);
+    const centerX = source.src / 2;
+    const centerY = source.src / 2;
+
+    /* Momentaufnahme der Layer-Liste (v157.21): Der Export läuft über
+       viele Frames, und Regler oder ein Live-Update dürfen die Liste
+       darunter nicht austauschen. Die Kopie ist flach — die Parameter-
+       Objekte selbst werden nur gelesen. */
+    const layers = storedCurveParameters.slice();
     let done = 0;
-    g4mRenderInChunks(scaled, function (params) {
+    const total = layers.length;
+    g4mRenderInChunks(layers, function (params) {
         g4mRendererFor(params).draw(exportCtx, centerX, centerY, params);
         done++;
         if (useProgressBar) {
-            progressFill.style.width = Math.round(done / scaled.length * 95) + '%';
+            progressFill.style.width = Math.round(done / total * 95) + '%';
         }
     }, function () {
+        exportCtx.restore();
+
         let quality = 0.9, fileType = 'image/jpeg', fileExtension = 'jpg';
         if (dpi >= 600) { quality = 0.95; fileType = 'image/png'; fileExtension = 'png'; }
 
-        const fileName = g4mExportFileName(code, dpi, timestamp, fileExtension);
+        const fileName = g4mExportFileName(code, dpi, timestamp, fileExtension,
+                                           g4mExportDebugTag(source, scaleFactor));
 
         exportCanvas.toBlob(function (blob) {
             if (blob) {
@@ -7202,7 +8334,7 @@ function downloadHighResolution(dpi, code, timestamp) {
             }
             setBusy(false);
         }, fileType, quality);
-    });
+    }, { detached: true });   // von aussen nicht abbrechbar (v157.21)
 }
 
 // Definieren der "guten Default-Werte" basierend auf GO4MOOLA
@@ -7234,11 +8366,13 @@ document.getElementById('drawing-btn').addEventListener('click', function () {
         if (toolsRect && toolsRect.height > 0) {
             const u = toolsRect.height / 12;
             const bRect = drawingBtn.getBoundingClientRect();
-            /* Höhe = 1u je Eintrag (v155.7): die Zahl der Anzeige-Modi
-               ist gewachsen, die frühere feste 4u-Rechnung hätte den
-               letzten Eintrag abgeschnitten. Die Klasse steuert nur
-               das Layout (Spalte, oben bündig), nicht die Höhe. */
-            const ddH = u * G4M_DISPLAY_MODES.length;
+            /* Höhe fest 6u (v157.34 — EINE Menügrösse für Formula/
+               Canvas/Drawing; vorher 1u je Eintrag, v155.7). Die fünf
+               Modi bleiben in ihrer Eigenhöhe oben bündig; wächst die
+               Liste je über sechs 1u-Einträge hinaus, ist der Engpass
+               wieder zu prüfen. Die Klasse steuert nur das Layout
+               (Spalte, oben bündig), nicht die Höhe. */
+            const ddH = u * 6;
             dropdown.style.top    = (bRect.top - ddH) + 'px';
             dropdown.style.bottom = 'auto';
             dropdown.style.height = ddH + 'px';
@@ -7266,15 +8400,16 @@ document.getElementById('drawing-btn').addEventListener('click', function () {
 document.getElementById('canvas-btn').addEventListener('click', function () {
     const canvasBtn = this;
     g4mToggleDropdown('canvas-color-dropdown', canvasBtn, function (dropdown, close) {
-        /* u-Raster-Geometrie (v153.1i): 4u hoch, top-basiert
-           verankert, Inhalt oben bündig — siehe Drawing-Menü. */
+        /* u-Raster-Geometrie: 6u hoch (v157.34 — EINE Menügrösse für
+           Formula/Canvas/Drawing, vorher 4u), top-basiert verankert,
+           Inhalt oben bündig — siehe Drawing-Menü. */
         const toolsRect = toolsContainer ? toolsContainer.getBoundingClientRect() : null;
         if (toolsRect && toolsRect.height > 0) {
             const u = toolsRect.height / 12;
             const bRect = canvasBtn.getBoundingClientRect();
-            dropdown.style.top    = (bRect.top - u * 4) + 'px';
+            dropdown.style.top    = (bRect.top - u * 6) + 'px';
             dropdown.style.bottom = 'auto';
-            dropdown.style.height = (u * 4) + 'px';
+            dropdown.style.height = (u * 6) + 'px';
             dropdown.classList.add('g4m-dd-4u');
         }
         // Preset-Farben (nur Schwarz und Weiss) — Labels aus G4M_TEXT (Befund 17)
@@ -8133,11 +9268,7 @@ function g4mSyncDomFromStore() {
     //   Zustand liegt bereits im Store (restoreSaved). Radios entfernt
     //   (v153d): nur Slider-Freeze und die On/Off-Quadrate nachziehen.
     if (typeof applyAllSliderFreezeStates === 'function') applyAllSliderFreezeStates();
-    if (typeof g4mShowRandomToggleFor === 'function') {
-        const activeSq = document.querySelector('.g4m-param-sq.g4m-sq-active');
-        const activeId = activeSq ? activeSq.id.replace(/^g4m-sq-/, '') : null;
-        if (activeId) g4mShowRandomToggleFor(activeId);
-    }
+    if (typeof g4mUpdateRandomCaption === 'function') g4mUpdateRandomCaption();
 
     // Canvas-Hintergrund nachziehen
     if (typeof updateCanvasBackground === 'function') updateCanvasBackground();
@@ -8912,6 +10043,13 @@ function applySliderFreezeState(sliderRow) {
        Stylesheet unter .g4m-frozen (Befund 9); hier nur noch das
        Funktionale: contentEditable des Wertefelds. */
     sliderRow.classList.toggle('g4m-frozen', isRandom);
+    g4mUpdateSqValueDisplay(sliderRow.id, isRandom);   // Bereich bzw. Wert (v157.28)
+    /* Nach dem Umschalten die Bereichs-Rails an der Tool-Linie
+       ausrichten; rAF, damit auf der FERTIGEN Geometrie gemessen wird.
+       Den ZEILENWECHSEL deckt der gleichlautende Aufruf in
+       g4mSelectParam ab — diese Funktion hier läuft dort NICHT durch
+       (v157.30). */
+    if (isRandom) requestAnimationFrame(g4mAlignRandomRangeRows);
     if (valueDisplay) valueDisplay.contentEditable = isRandom ? 'false' : 'true';
     // Quadrat eingrauen (v150k) — gleiche Zustandsquelle wie die Zeile
     const g4mSq = document.getElementById('g4m-sq-' + sliderRow.id);
@@ -9259,16 +10397,28 @@ function g4mPositionNavCovers() {
               derselbe Button in Grau: Benutzerführung ohne Worte. */
 function g4mPlaceFsHome(pos, instant) {
     const el  = document.getElementById('g4m-fs-home');
-    const ref = document.getElementById(g4mIsPortrait() ? 'g4m-fs-tools' : 'g4m-fs-nav');
+    /* Seit v157.33 gibt es nur noch die Nav-Instanz — in beiden
+       Orientierungen (die Tool-Reihen-Kopie entfiel mit My Level). */
+    const ref = document.getElementById('g4m-fs-nav');
     if (!el || !ref) return;
     el.dataset.pos = pos;
     const write = function () {
         const fr = ref.getBoundingClientRect();
         el.style.width = fr.width + 'px';
         if (pos === 'dock' || !toolsContainer) {
-            el.style.top  = fr.top  + 'px';
-            el.style.left = fr.left + 'px';
+            /* Deckungsgleichheit mit dem 2u×2u-Button (v157.37): auch
+               die HÖHE übernehmen — nur mit identischer Box zentrieren
+               beide Flex-Container ihr Symbol auf denselben Punkt. Die
+               Beschriftung blendet der [data-pos="dock"]-Zustand aus
+               (CSS), sonst schöbe sie das Symbol aus dem Zentrum. */
+            el.style.height = fr.height + 'px';
+            el.style.top    = fr.top  + 'px';
+            el.style.left   = fr.left + 'px';
         } else {
+            /* Freie Position: Eigenhöhe (Symbol + Beschriftung) — die
+               beim Dock gesetzte feste Höhe muss weg, BEVOR unten mit
+               el.offsetHeight gerechnet wird (v157.37). */
+            el.style.removeProperty('height');
             const t = toolsContainer.getBoundingClientRect();
             const m = (t.height / 12) * 0.5;                 // 0.5u Randabstand
             el.style.left = g4mIsPortrait()
@@ -9666,6 +10816,7 @@ function repositionOpenPanels() {
     requestAnimationFrame(function () {
         if (isSuperformulaPanelOpen()) g4mAlignRailsToTool('superformel-panel');
         if (isArchimedeanPanelOpen())  g4mAlignRailsToTool('archimedean-panel');
+        g4mAlignRandomRangeRows();   // Bereichs-Rails im Tool-Editor (v157.30)
     });
     const fid = openFPanelId();
     if (fid) g4mPlacePanelOverCanvas(document.getElementById(fid + '-panel'));
@@ -10487,16 +11638,8 @@ function initAccessibility() {
         svg.setAttribute('aria-hidden', 'true');
     });
 
-    // ARIA für die neuen Random-On/Off-Quadrate (Radios entfernt v153d).
-    // Jedes Paar ist eine Radiogruppe; die beiden Felder sind die Radios.
-    document.querySelectorAll('.g4m-rnd-pair').forEach(function (pair) {
-        pair.setAttribute('role', 'radiogroup');
-        const onBtn  = pair.querySelector('.g4m-rnd-on');
-        const offBtn = pair.querySelector('.g4m-rnd-off');
-        [onBtn, offBtn].forEach(function (b) { if (b) b.setAttribute('role', 'radio'); });
-        if (onBtn)  onBtn.setAttribute('aria-checked',  onBtn.classList.contains('g4m-rnd-selected')  ? 'true' : 'false');
-        if (offBtn) offBtn.setAttribute('aria-checked', offBtn.classList.contains('g4m-rnd-selected') ? 'true' : 'false');
-    });
+    /* ARIA des Random-Schalters (role=switch, aria-checked) pflegt
+       g4mUpdateRandomCaption bei jeder Zustandsänderung (v157.32). */
 
     // Native Range-Inputs der Parameter-Panels beschriften
     document.querySelectorAll('input[type=range]').forEach(function(inp) {
