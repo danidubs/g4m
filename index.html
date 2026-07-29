@@ -239,16 +239,17 @@ Kontakt: dd@danidubs.ch
         }
         .g4m-rnd-btn:hover:not(.g4m-rnd-selected) { background-color: #d0d0d0; }
         /* Nur das GEWÄHLTE Feld (g4m-rnd-selected) trägt die Gruppenfarbe
-           des Parameters — seit v153.1e in den KRÄFTIGEN Originaltönen
-           (Grün/Gelb/Blau, die pastellisierten Quadrat-Farben blieben
-           den Rasterflächen vorbehalten) mit weisser Schrift: gleiche
-           Aktiv-Logik wie On/Off/Sin/Cos/Tan auf F1/F2. */
+           des Parameters, mit weisser Schrift — dieselbe Aktiv-Logik wie
+           die Parameter-Quadrate daneben. Seit v157.19 in den GEDÄMPFTEN
+           Tönen: das Tool-Panel steht dauerhaft da, die leuchtenden
+           Originale gehören auf die F-Panels (--g4m-active-tool-*). Das
+           Orange wartet noch auf sein gedämpftes Gegenstück. */
         .g4m-rnd-btn.g4m-rnd-selected { color: #ffffff; }
         /* Kein eigener Rahmenton mehr (v156.7) — die Kerbe gehoert der
            Flaeche, nicht dem gewaehlten Knopf. */
-        .g4m-rnd-btn.g4m-rnd-selected.g4m-rnd-sel-green  { background-color: #4CAF50; }
-        .g4m-rnd-btn.g4m-rnd-selected.g4m-rnd-sel-orange { background-color: #FFB74D; }
-        .g4m-rnd-btn.g4m-rnd-selected.g4m-rnd-sel-blue   { background-color: #2196F3; }
+        .g4m-rnd-btn.g4m-rnd-selected.g4m-rnd-sel-green  { background-color: var(--g4m-active-tool-green); }
+        .g4m-rnd-btn.g4m-rnd-selected.g4m-rnd-sel-orange { background-color: var(--g4m-bright-orange); }
+        .g4m-rnd-btn.g4m-rnd-selected.g4m-rnd-sel-blue   { background-color: var(--g4m-active-tool-blue); }
 
         /* F6-F10 + Vollbild-Slot: orientierungsabhängige Platzierung
            (v150f). Standard = Quer-/Desktop-Format: F1-F10 lückenlos,
@@ -329,9 +330,9 @@ Kontakt: dd@danidubs.ch
            Gruppenton mit weisser Schrift — gleiche Aktiv-Logik wie die
            Random-On/Off-Quadrate und die F1-/F2-Parameter-Quadrate.
            Die frühere Innenkontur entfiel. */
-        .g4m-param-sq.g4m-sq-active.g4m-sq-green  { background-color: #4CAF50; }
-        .g4m-param-sq.g4m-sq-active.g4m-sq-orange { background-color: #FFB74D; }
-        .g4m-param-sq.g4m-sq-active.g4m-sq-blue   { background-color: #2196F3; }
+        .g4m-param-sq.g4m-sq-active.g4m-sq-green  { background-color: var(--g4m-active-tool-green); }
+        .g4m-param-sq.g4m-sq-active.g4m-sq-orange { background-color: var(--g4m-bright-orange); }
+        .g4m-param-sq.g4m-sq-active.g4m-sq-blue   { background-color: var(--g4m-active-tool-blue); }
         .g4m-param-sq.g4m-sq-active .g4m-sq-label,
         .g4m-param-sq.g4m-sq-active .g4m-sq-value { color: #ffffff; }
         /* Hover für die anklickbaren Parameter-Quadrate (analog tool-btn /
@@ -499,7 +500,7 @@ Kontakt: dd@danidubs.ch
             left: 0;
             top: 0;
             height: 100%;
-            background-color: #4CAF50;
+            background-color: var(--g4m-active-tool-green);
         }
 
         .slider-handle {
@@ -508,7 +509,7 @@ Kontakt: dd@danidubs.ch
             transform: translate(-50%, -50%);
             width: 12px;
             height: 12px;
-            background-color: #4CAF50;
+            background-color: var(--g4m-active-tool-green);
             cursor: pointer;
         }
 
@@ -537,7 +538,7 @@ Kontakt: dd@danidubs.ch
            einheitlich mit den F1-/F2-Wertefeldern. */
         .value-display:hover { background-color: #ffffff; }
         .value-display:focus {
-            border-color: #4CAF50;
+            border-color: var(--g4m-active-tool-green);   /* v157.20 */
             background-color: #ffffff;
         }
 
@@ -550,20 +551,26 @@ Kontakt: dd@danidubs.ch
         /* Normalization-Umschalter (ersetzt die Radios, v153d):
            klickbarer On/Off-Text mit dezentem Button-Look. */
 
-        /* Color groups */
+        /* Color groups — GEDÄMPFT wie alles Aktive im Tool-Panel
+           (v157.20). Rail-Füllung und Griff eines Parameters tragen
+           damit denselben Ton wie sein Parameter-Quadrat und sein
+           Random-Schalter; vorher standen hier die leuchtenden
+           Originale und der Regler leuchtete unter einem gedämpften
+           Quadrat. Orange wartet weiter auf sein gedämpftes
+           Gegenstück — der Name macht es zur Ein-Zeilen-Änderung. */
         .slider-green .slider-track,
         .slider-green .slider-handle {
-            background-color: #4CAF50;
+            background-color: var(--g4m-active-tool-green);
         }
 
         .slider-orange .slider-track,
         .slider-orange .slider-handle {
-            background-color: #FFB74D;
+            background-color: var(--g4m-bright-orange);
         }
 
         .slider-blue .slider-track,
         .slider-blue .slider-handle {
-            background-color: #2196F3;
+            background-color: var(--g4m-active-tool-blue);
         }
 
         /* Navigation Tool Styles */
@@ -856,6 +863,35 @@ Kontakt: dd@danidubs.ch
                F2-Blau-Ableitungen darüber. */
             --g4m-sf-line:  var(--g4m-hair);     /* Rasterlinie F1 — seit v156.9 die gemeinsame Haarlinie */
             --g4m-sf-hover: #C9F096;     /* Button-Hover: leicht abgedunkeltes Panel-Grün */
+            /* ── AKTIVFARBEN: kräftig vs. gedämpft (v157.19) ───────────
+               Die App hat zwei Farbwelten, und sie waren vertauscht:
+                 F-PANELS  tragen die leuchtenden Töne — sie sind die
+                           Bühne, auf der eine Formel bearbeitet wird.
+                 TOOL-PANEL trägt die gedämpften — es steht dauerhaft da
+                           und soll dem Bild nicht die Schau stehlen.
+               Bis v157.18 lief es umgekehrt: die aktiven Knöpfe auf F1/F2
+               waren die gedämpften Töne, die aktiven Quadrate im
+               Tool-Panel die kräftigen. Getauscht wurde nicht der Wert
+               an Ort und Stelle, sondern die ZUORDNUNG — beide Paletten
+               stehen hier als eine Quelle, jede Verwendung greift auf
+               den Namen zu.
+
+               Die gedämpften Töne sind die Originale auf HSL S 25 % /
+               L 48 % zurückgenommen, Farbton unverändert. Ein Gegenstück
+               zum Orange gibt es (noch) nicht — im Tool-Panel bleibt die
+               orange Gruppe darum vorerst kräftig; passend wäre #99815D
+               (Farbton 36°, gleiches S/L wie die beiden anderen). */
+            --g4m-bright-green:  #4CAF50;
+            --g4m-bright-orange: #FFB74D;
+            --g4m-bright-blue:   #2196F3;
+            --g4m-muted-green:   #7A9A5C;
+            --g4m-muted-blue:    #5E8199;
+            /* Aktivfarbe je Ort — HIER wird zugeordnet. Ein Tausch ist
+               von nun an ein Vertauschen dieser vier Zeilen. */
+            --g4m-active-sf:     var(--g4m-bright-green);   /* F1-Panel */
+            --g4m-active-arch:   var(--g4m-bright-blue);    /* F2-Panel */
+            --g4m-active-tool-green: var(--g4m-muted-green);
+            --g4m-active-tool-blue:  var(--g4m-muted-blue);
             /* ── HAARLINIEN-RASTER (v156.9) ────────────────────────────
                Die Buttons bleiben randlos im Sinne von v156.8 — sie
                tragen keine Umrandung, keine Kerbe, keine Fuge. Das
@@ -935,6 +971,21 @@ Kontakt: dd@danidubs.ch
             --g4m-relief:      1;
             --g4m-bevel:       max(1px, calc(var(--u) * 0.045 * var(--g4m-relief)));
             --g4m-bevel-blur:  max(2px, calc(var(--u) * 0.11  * var(--g4m-relief)));
+            /* ── Rahmen der Viz-Fenster (v157.16, Breite v157.17) ─────
+               Breite des Randes, der um die drei Viz herum stehenbleibt,
+               damit dort die Schulter sichtbar wird statt vom Bild
+               überlaufen zu werden.
+
+               Grundmass ist die Reichweite der Schulter selbst (Versatz
+               + Weichzeichnung) — der Rand ist also immer ein Vielfaches
+               dessen, was das Relief braucht, und wächst mit ihm mit.
+               Der FAKTOR ist die Stellschraube:
+                 1 = Bild endet genau am Fuss der Schulter   (v157.16)
+                 2 = Schulter plus ebenso breite Auflage, aktuell
+               Ein Faktor unter 1 schnitte ins Relief hinein — das war
+               der Ausgangsbefund, und darunter sollte es nicht gehen. */
+            --g4m-viz-frame-f: 2;
+            --g4m-viz-frame:   calc((var(--g4m-bevel) + var(--g4m-bevel-blur)) * var(--g4m-viz-frame-f));
 
             /* ── LICHT UND SCHATTEN (v157.4) ───────────────────────────
                Zwei Lagen, wie in v157.2: Licht oben links, Schatten
@@ -1096,23 +1147,27 @@ Kontakt: dd@danidubs.ch
         #superformel-panel button.g4m-arch-cell:not(.g4m-arch-babygo):not(.g4m-arch-reserve):not(.g4m-arch-botmod-active):not(.g4m-arch-sq-active):hover {
             background-color: var(--g4m-sf-hover);
         }
-        /* Aktiv-Optik der untersten F1-Zellen-Reihe (v153.1d): dunkleres
-           Grün mit weisser Schrift — GLEICHE Farbintensität wie das
-           F2-Blau #5E8199 (beide ≈ HSL S 25 % / L 48 %), nur der Farbton
-           wechselt von Blau (204°) auf das Panel-Grün (90°). Gleiche
+        /* Aktiv-Optik der untersten F1-Zellen-Reihe (v153.1d): kräftiges
+           Grün mit weisser Schrift — seit v157.19 der leuchtende Ton, im
+           Gleichschritt mit dem F2-Blau (--g4m-active-arch). Gleiche
            Spezifität wie die Zellregel darüber (1 ID + 2 Klassen) —
            die spätere Position im Stylesheet entscheidet. */
         #superformel-panel .g4m-arch-cell.g4m-arch-botmod-active {
-            background-color: #7A9A5C;   /* dunkleres, leicht «schmutziges» Panel-Grün */
+            background-color: var(--g4m-active-sf);
             color: #ffffff;
         }
         /* Aktives Parameter-Quadrat auf F1 (v153.1e): Grün-Pendant zur
            F2-Blau-Regel oben — gleiche Spezifität wie die Zellregel,
            spätere Position entscheidet. */
         #superformel-panel .g4m-arch-sq.g4m-arch-sq-active {
-            background-color: #7A9A5C;
+            background-color: var(--g4m-active-sf);
         }
-        #superformel-panel .g4m-arch-viz { border-color: var(--g4m-sf-line); }
+        /* Viz-Feld auf F1 in der Grün-Ableitung — Farbe wie die Zellen
+           daneben (v157.16), Linie wie bisher. */
+        #superformel-panel .g4m-arch-viz {
+            background-color: var(--g4m-mode-color-superformula);
+            border-color: var(--g4m-sf-line);
+        }
         /* Kerbenfarbe des F1-Panels auch dort, wo die generischen Regeln
            den F2-Blauton setzen (v156.7): Baby-Go ist von der Zellregel
            oben ausgenommen (er behält sein Rot), Fine/Coarse und die
@@ -1306,6 +1361,52 @@ Kontakt: dd@danidubs.ch
      gezeichnete Linie und hängt bewusst nicht an --g4m-notch. */
   border: 1px solid #ececec;   /* feine hellgraue Linie auf Weiss */
 }
+
+/* ── Hinweis auf der weissen Fläche (v157.12, Bedingung v157.13) ───
+   Solange die Abdeckung liegt, ist unter ihr nichts bedienbar; die
+   beiden Wege nach vorn stehen darüber (F-Reihe) bzw. daneben (Go).
+   Der Satz benennt sie. Schrift, Fettung, Farbe und Grösse sind die
+   der .tool-btn — DIESELBE Quelle wie alle Beschriftungen der App
+   (clamp(10px … 14px) an --u), damit der Text nicht als Fremdkörper
+   auf der Fläche sitzt.
+
+   ZWEI Bedingungen, beide im Selektor:
+     data-hint="on"     eine Formel MIT Funktion ist gewählt (F1/F2).
+                        Ohne Wahl gäbe es keine «selected formula», von
+                        der der Satz spricht; bei F3-F10 führte er ins
+                        Leere, dort liegt noch nichts. Setzt
+                        g4mUpdateToolsCoverHint (§6) aus dem Modus.
+     data-stage="plain" vor dem ersten Bild. Ab 'grid' ist der Hinweis
+                        eingelöst und der «Tools»-Button übernimmt die
+                        Führung; der Text weicht mit demselben Fade,
+                        mit dem das Raster aufzieht.
+
+   Grösse und Höhe kommen aus der Messung (v157.14): --g4m-tc-hint-size
+   ist derselbe Grad wie beim Canvas-Text, --g4m-tc-hint-y der Abstand
+   vom Rand der Abdeckung zum ZENTRUM DER CANVAS. Beides setzt
+   g4mAlignHintToCanvas (§6) bei jedem Resize. Die Rückfallwerte gelten,
+   bis die erste Messung gelaufen ist, und im Hochformat, wo die Canvas
+   ausserhalb der Fläche liegt.
+   pointer-events:none — der Text fängt keinen Klick ab, der dem
+   Button gilt. */
+.g4m-tc-hint {
+  position: absolute;
+  top: var(--g4m-tc-hint-y, 50%);
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;                  /* über der Rasterfläche, unter dem Button */
+  width: 78%;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: var(--g4m-tc-hint-size, clamp(10px, calc(var(--u) * 0.269), 14px));
+  font-weight: 700;
+  line-height: 1.5;
+  color: #666666;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--g4m-anim-fs-fade, 0.6s) ease;
+}
+#g4m-tools-cover[data-hint="on"][data-stage="plain"] .g4m-tc-hint { opacity: 1; }
 /* «Tools»-Button an der Stelle des Defaults-Quadrats (Raster-Zeile 3,
    Spalten 11-12) — Optik der tool-btn, damit er sofort als Knopf
    gelesen wird. Erst in der Stufe 'grid' bedienbar. */
@@ -1986,7 +2087,7 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
         .g4m-arch-color-quad i:nth-child(3) { background: #1E88E5; }
         .g4m-arch-color-quad i:nth-child(4) { background: #FDD835; }
         .g4m-arch-botmod-active {
-            background-color: #5E8199;   /* dunkleres, leicht „schmutziges" Panel-Blau */
+            background-color: var(--g4m-active-arch);
             color: #ffffff;
         }
         /* Page-2-Button (Reihe 1, Spalten 1-2) — Beschriftung wie tool-btn */
@@ -2053,18 +2154,18 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
         }
         .g4m-arch-sq .g4m-arch-sq-vals { white-space: pre-line; }
         /* Aktives Parameter-Quadrat (v153.1e): trägt dieselbe Aktiv-
-           Farbe wie On/Off/Sin/Cos/Tan (dunkles Panel-Blau, weisse
+           Farbe wie On/Off/Sin/Cos/Tan (kräftiges Panel-Blau, weisse
            Schrift) statt der früheren Innenkontur — EINE Aktiv-Optik
            für alle Parameter-Buttons. F1 überschreibt mit Grün (s. u.). */
         .g4m-arch-sq.g4m-arch-sq-active {
-            background-color: #5E8199;
+            background-color: var(--g4m-active-arch);
         }
         .g4m-arch-sq.g4m-arch-sq-active .g4m-arch-sq-letter,
         .g4m-arch-sq.g4m-arch-sq-active .g4m-arch-sq-vals { color: #ffffff; }
         /* Fine/Coarse (Parameter-Umschalter im Slider-Feld): aktive
            Seite in derselben Aktiv-Farbe statt Schwarz (v153.1e). */
         #archimedean-panel .g4m-arch-segbtn.g4m-on {
-            background: #5E8199;
+            background: var(--g4m-active-arch);
             color: #ffffff;
         }
         /* erste Rasterzeile fest auf Reihe 1 — deterministische Lage */
@@ -2095,34 +2196,71 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
             cursor: default;
         }
 
-        /* Viz-Fenster: je 4u x 4u, linksbündig, Rasterzeilen 2-3, schwarz */
+        /* Viz-Fenster: je 4u x 4u, linksbündig, Rasterzeilen 2-3.
+           ── TEST v157.16 ─────────────────────────────────────────────
+           Vorher war das ganze Feld schwarz und randlos vom Bild
+           gefüllt; die Schulter lag als ::after-Auflage DARÜBER und
+           wurde vom Bild überlaufen — dasselbe Problem wie bei der
+           grossen Canvas. Jetzt ist das Feld eine Kachel wie jede
+           andere im Panel: Panelfarbe, Relief direkt als box-shadow
+           (nicht mehr als Auflage, es liegt ja nichts mehr auf der
+           Kante). Das Bild sitzt als eingesetztes FENSTER darin, um
+           --g4m-viz-frame nach innen gerückt. Der Ring dazwischen
+           trägt die Schulter, das Bild endet davor. */
         .g4m-arch-viz {
             position: relative;
             box-sizing: border-box;
             grid-row: 3 / 5;
-            background-color: #000;
+            background-color: var(--g4m-mode-color-archimedean);
             border: var(--g4m-notch) solid var(--g4m-arch-line);
+            box-shadow: var(--g4m-raise);   /* wie Zellen und Knöpfe */
             overflow: hidden;
         }
-        /* Schwarze Haarlinie rechts/unten getilgt (v157.6): Die Panels
-           werden per Transform skaliert; bei der Subpixel-Rundung
-           zwischen dem schwarzen Fenster-Hintergrund und dem skalierten
-           Canvas blitzte am rechten und unteren Rand der Untergrund
-           hervor. Das Canvas wird um 2px übergroß gezogen — overflow:
-           hidden des Fensters schneidet den Überstand ab, der schwarze
-           Rand kann nirgends mehr durchscheinen. !important, weil die
-           Canvas-Größe inline im Markup steht. */
+        /* Der Fenstergrund folgt der CANVAS-FARBE (v157.18). Bis v157.17
+           stand hier hart #000 — das war die Farbe, die das Feld vor dem
+           Umbau hatte. Zwei Gründe für den Wechsel:
+           1. Die Viz zeigen dasselbe wie die Canvas und sollen auf
+              demselben Grund stehen; das Result-Fenster füllte sich
+              ohnehin schon mit g4mState.canvasBackgroundColor, die
+              beiden Min/Max-Fenster hinkten hinterher.
+           2. Genau hier entstanden die feinen schwarzen Linien: Beim
+              Skalieren des Panels fällt der Rand der Canvas-Bitmap um
+              Bruchteile eines Pixels neben den Elementkasten, und was
+              durchschien, war dieser Hintergrund. Trägt er dieselbe
+              Farbe wie das Bild darauf, ist der Spalt unsichtbar —
+              unabhängig davon, wie die Rundung gerade ausfällt.
+           Den Wert hält g4mApplyVizBgVar (§5) auf --g4m-canvas-bg
+           nachgeführt; der Rückfall ist die Vorgabe des Stores. */
         .g4m-arch-viz > canvas {
-            width:  calc(100% + 2px) !important;
-            height: calc(100% + 2px) !important;
+            background-color: var(--g4m-canvas-bg, #FFFFFF);
+            top:    var(--g4m-viz-frame) !important;
+            left:   var(--g4m-viz-frame) !important;
+            width:  calc(100% - 2 * var(--g4m-viz-frame)) !important;
+            height: calc(100% - 2 * var(--g4m-viz-frame)) !important;
         }
+        /* Der 2px-Überstand von v157.6 entfiel mit dem Umbau: er hielt
+           den SCHWARZEN Untergrund davon ab, bei der Subpixel-Rundung
+           des skalierten Panels am rechten und unteren Rand durchs Bild
+           zu blitzen. Der Untergrund ist dort jetzt der Rahmen in
+           Panelfarbe — eine Rundung verbreitert ihn allenfalls um ein
+           Sub-Pixel, und das fällt neben einem ohnehin sichtbaren Ring
+           nicht auf. Ein Überstand ginge jetzt umgekehrt auf Kosten des
+           Rings und wäre schädlich. */
         .g4m-arch-viz-min { grid-column: 1 / 3; }   /* Spalten 1-2 (4u) */
         .g4m-arch-viz-max { grid-column: 3 / 5; }   /* Spalten 3-4 (4u) */
         .g4m-arch-viz-result { grid-column: 5 / 7; grid-row: 3 / 5; }  /* Spalten 5-6 (4u) */
+        /* Beschriftung rückt mit ins Fenster (v157.16) — sie gehört
+           optisch aufs Bild, nicht auf den Rahmen. Ihre Farbe folgt
+           seit v157.18 dem Fenstergrund: auf einer weissen Canvas wäre
+           weisse Schrift verschwunden. */
         .g4m-arch-viz-label {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            z-index: 3;   /* über der Relief-Auflage (2) — Text bleibt klar (v157.2) */
-            color: #fff; font-size: calc(12px / var(--panel-scale, 1)); padding: 2px 5px 2px 8px;
+            position: absolute;
+            bottom: var(--g4m-viz-frame);
+            left:   var(--g4m-viz-frame);
+            right:  var(--g4m-viz-frame);
+            z-index: 3;   /* über dem Fenster — Text bleibt klar (v157.2) */
+            color: var(--g4m-canvas-ink, #000000);
+            font-size: calc(12px / var(--panel-scale, 1)); padding: 2px 5px 2px 8px;
             text-align: left; font-family: 'JetBrains Mono', monospace;
             pointer-events: none;
         }
@@ -2280,8 +2418,17 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
             -webkit-user-select: text;
         }
         .g4m-arch-block .g4m-val-box:hover { background-color: #ffffff; }
+        /* Aktivfarbe im GELTUNGSBEREICH des Panels (v157.20): Regeln, die
+           auf F1 und F2 gleichermassen greifen, können so auf «die Farbe
+           dieses Panels» zeigen statt auf einen festen Ton. Die Werte
+           kommen aus dem :root-Block (--g4m-active-sf/-arch); die
+           Options-Panels erben die Farbe ihres Mutter-Panels. */
+        #superformel-panel, #sf-options-panel   { --g4m-active: var(--g4m-active-sf); }
+        #archimedean-panel, #arch-options-panel { --g4m-active: var(--g4m-active-arch); }
+        /* Vorher fest #4CAF50 — auf dem blauen F2-Panel bekam ein
+           angeklicktes Wertefeld damit einen grünen Fokusrahmen. */
         .g4m-arch-block .g4m-val-box:focus {
-            border-color: #4CAF50;
+            border-color: var(--g4m-active, var(--g4m-active-arch));
             background-color: #ffffff;
         }
         /* Hover für Fine/Coarse und die Preset-Knöpfe (v156.8): seit
@@ -2304,11 +2451,13 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
            Zeilen sind hintergrundlos) und die noch leeren Panels
            F3-F10 (nur ein Wasserzeichen darin).
 
-           WEITER UNTEN, als ::after-Auflage: Flächen, die ein
-           deckendes Kind vollständig füllen — Canvas und die drei
-           Viz-Fenster je Panel. Ein Innenschatten des Elternteils
-           liegt UNTER dem Inhalt und wäre dort von der Zeichenfläche
-           übermalt. */
+           WEITER UNTEN, als ::after-Auflage: nur noch die beiden
+           Options-Panels, die ein deckendes Kind vollständig füllen.
+           Ein Innenschatten des Elternteils liegt dort UNTER dem Inhalt
+           und wäre von der Zeichenfläche übermalt.
+
+           GAR NICHT: die grosse Canvas (v157.11) — sie bleibt flach,
+           weil das Bild bis über die Reliefkante hinausreicht. */
         .tool-btn,
         .g4m-rnd-btn,
         .g4m-param-sq,
@@ -2341,16 +2490,22 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
         }
 
         /* ── Relief als Auflage (v157.2) ──────────────────────────────
-           Canvas und Viz-Fenster sind bis zum Rand von einer <canvas>
-           gefüllt; ein Innenschatten des Elternteils läge darunter und
-           bliebe unsichtbar. Die Auflage legt dieselbe Schulter ALS
-           EIGENE EBENE darüber. pointer-events:none, damit weder Klick
-           noch Zeiger etwas davon merken; position:absolute, damit sie
-           in den Flex-/Grid-Eltern nicht als Kind mitzählt.
+           Viz-Fenster und Options-Panels sind bis zum Rand von einer
+           <canvas> gefüllt; ein Innenschatten des Elternteils läge
+           darunter und bliebe unsichtbar. Die Auflage legt dieselbe
+           Schulter ALS EIGENE EBENE darüber. pointer-events:none, damit
+           weder Klick noch Zeiger etwas davon merken; position:absolute,
+           damit sie in den Flex-/Grid-Eltern nicht als Kind mitzählt.
            Alle Träger sind bereits positioniert (relative bzw. fixed) —
-           die Auflage braucht keinen zusätzlichen Kontext. */
-        .canvas-container::after,
-        .g4m-arch-viz::after,
+           die Auflage braucht keinen zusätzlichen Kontext.
+
+           OHNE AUFLAGE: die grosse Canvas (v157.11) und seit v157.16
+           auch die Viz-Fenster. Bei beiden lief der Inhalt ÜBER die
+           Reliefkante hinaus und schnitt die Schulter an. Die Canvas
+           steht seither flach; die Viz tragen ihr Relief direkt als
+           box-shadow und halten das Bild mit --g4m-viz-frame davon
+           weg — der Innenschatten liegt dort frei und braucht keine
+           eigene Ebene mehr. */
         #sf-options-panel::after,
         #arch-options-panel::after {
             content: '';
@@ -2431,18 +2586,18 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
            speist die Schichtbreite (setRangeFill, EINE Quelle). */
         #archimedean-panel .g4m-arch-editor input[type=range] {
             background:
-                linear-gradient(#5E8199, #5E8199) left center / var(--fill-percent, 0%) var(--g4m-slider-rail-h) no-repeat,
+                linear-gradient(var(--g4m-active-arch), var(--g4m-active-arch)) left center / var(--fill-percent, 0%) var(--g4m-slider-rail-h) no-repeat,
                 linear-gradient(#9e9e9e, #9e9e9e) left center / 100% var(--g4m-slider-rail-h) no-repeat;
         }
-        #archimedean-panel .g4m-arch-editor input[type=range]::-webkit-slider-thumb { background: #5E8199; }
-        #archimedean-panel .g4m-arch-editor input[type=range]::-moz-range-thumb    { background: #5E8199; }
+        #archimedean-panel .g4m-arch-editor input[type=range]::-webkit-slider-thumb { background: var(--g4m-active-arch); }
+        #archimedean-panel .g4m-arch-editor input[type=range]::-moz-range-thumb    { background: var(--g4m-active-arch); }
         #superformel-panel .g4m-arch-editor input[type=range] {
             background:
-                linear-gradient(#7A9A5C, #7A9A5C) left center / var(--fill-percent, 0%) var(--g4m-slider-rail-h) no-repeat,
+                linear-gradient(var(--g4m-active-sf), var(--g4m-active-sf)) left center / var(--fill-percent, 0%) var(--g4m-slider-rail-h) no-repeat,
                 linear-gradient(#9e9e9e, #9e9e9e) left center / 100% var(--g4m-slider-rail-h) no-repeat;
         }
-        #superformel-panel .g4m-arch-editor input[type=range]::-webkit-slider-thumb { background: #7A9A5C; }
-        #superformel-panel .g4m-arch-editor input[type=range]::-moz-range-thumb    { background: #7A9A5C; }
+        #superformel-panel .g4m-arch-editor input[type=range]::-webkit-slider-thumb { background: var(--g4m-active-sf); }
+        #superformel-panel .g4m-arch-editor input[type=range]::-moz-range-thumb    { background: var(--g4m-active-sf); }
         /* Der native Track (::-webkit-slider-runnable-track, Basisregel
            §Slider) malt seine eigene graue 2px-Linie ÜBER den Element-
            Hintergrund — sie übermalte die 4px-Farbschicht in der Mitte.
@@ -3317,10 +3472,16 @@ Max. 100%</span>
      ihr Rahmen clippt die Fahrt, sie verschwindet also unter dem
      Navigation-Tool. -->
 <div class="g4m-home-frame" id="g4m-tools-cover-frame">
-<div id="g4m-tools-cover" data-open="0" data-stage="plain" style="visibility: hidden;">
+<div id="g4m-tools-cover" data-open="0" data-stage="plain" data-hint="off" style="visibility: hidden;">
     <!-- Raster + «Tools»-Button erzeugt buildToolsCoverGrid (§2) aus
          DERSELBEN Rasterbeschreibung wie das Tools-Panel darunter. -->
     <div class="g4m-tc-grid" id="g4m-tc-grid"></div>
+    <!-- Hinweis der Stufe 'plain' (v157.12): nennt die zwei Wege, die
+         der User an dieser Stelle hat — Parameter im F-Panel ändern
+         oder direkt Go. Erscheint erst, wenn F1 oder F2 gewählt ist
+         (data-hint, gesetzt von g4mUpdateToolsCoverHint), und blendet
+         aus, sobald das Raster aufzieht. -->
+    <div class="g4m-tc-hint" id="g4m-tc-hint">Change parameters for selected formula or click on Go without change!</div>
 </div>
 </div>
 
@@ -3865,6 +4026,12 @@ const G4M_MODE_BUTTONS = Object.freeze({
     f3: 'f3-btn', f4: 'f4-btn', f5: 'f5-btn', f6: 'f6-btn',
     f7: 'f7-btn', f8: 'f8-btn', f9: 'f9-btn', f10: 'f10-btn'
 });
+/* Formeln, hinter denen bereits eine Funktion liegt (v157.13) — EINE
+   Quelle. F3-F10 heissen im Indikator «Coming soon» und zeichnen
+   nichts; wo die App zwischen «Formel gewählt» und «Formel gewählt UND
+   benutzbar» unterscheiden muss, entscheidet diese Liste. Zieht eine
+   neue Formel ein, kommt ihr Modus-Schlüssel hier dazu. */
+const G4M_MODES_READY = Object.freeze(['superformula', 'archimedean']);
 /* Anzeigenamen der Formeln — EINE Quelle für den Modus-Indikator
    und die Hover-Titel der F-Buttons (gesetzt in initToolbarButtons).
    Zieht eine neue Formel ein, ist ihr Name genau dieser eine Eintrag. */
@@ -3908,6 +4075,11 @@ function g4mApplyModeOptics(mode) {
             ind.textContent = 'Select formula';
         }
     }
+    /* Der Hinweis auf der Tools-Abdeckung hängt am selben Zustand
+       (v157.13) — hier statt am Klick, damit er JEDEN Weg zum Modus
+       mitbekommt: F-Button, Formel-Menü des Indikators und den
+       Wiederaufbau beim Start. */
+    g4mUpdateToolsCoverHint(mode);
 }
 function g4mSetDrawingMode(mode) {
     if (g4mState.activeDrawingMode !== mode) {
@@ -4220,7 +4392,123 @@ const sliderData = {
    verbrauchenden Element aufgelöst werden). Nebeneffekt Desktop:
    die Panel-Griffe rendern jetzt exakt 30px wie im Tool-Panel
    (vorher 28.6px durch die 0.95er-Skala). */
-const G4M_RELEASE = Object.freeze({ version: 'v157.10', date: '27.07.2026' });
+/* v157.11: Die grosse Canvas verliert ihr Relief. Sie war der einzige
+   Träger, dessen Inhalt bis über die Reliefkante hinausläuft — das
+   Bild endet erst an der Elementkante, die Schulter der ::after-Auflage
+   legte sich darüber und schnitt den Rand an. Ohne Auflage steht die
+   Kante präzise, gleich wie die weisse Fläche über den Tools. Die drei
+   Viz-Fenster je Panel und die Options-Panels behalten ihre Auflage;
+   dort füllt der Inhalt die Fläche randbündig, ohne sie zu überlaufen. */
+/* v157.12: Hinweistext auf der weissen Tools-Abdeckung — «Please change
+   the parameters of the selected formula or click directly on Go!».
+   Er steht in der Stufe 'plain', also genau solange, wie unter der
+   Fläche nichts bedienbar ist, und blendet mit demselben Fade aus, mit
+   dem in Stufe 'grid' das Raster aufzieht. Schrift, Fettung, Farbe und
+   Grösse kommen aus derselben Quelle wie alle Beschriftungen der App
+   (JetBrains Mono 700, #666666, clamp(10px, --u * 0.269, 14px)). */
+/* v157.13: Der Hinweis erscheint erst nach der Formelwahl — und nur bei
+   F1/F2. Vorher stand er ab dem ersten Anblick der Abdeckung, sprach
+   aber von «the selected formula», die es da noch gar nicht gab; bei
+   F3-F10 zeigte er auf ein Panel, hinter dem noch nichts liegt. Neu
+   entscheidet G4M_MODES_READY (eine Liste, ein Eintrag je funktions-
+   fähiger Formel), g4mUpdateToolsCoverHint setzt daraus data-hint auf
+   der Abdeckung, und der Selektor verlangt beides: data-hint="on" UND
+   data-stage="plain". Geschaltet wird in g4mApplyModeOptics statt am
+   Button-Klick — so zählt jeder Weg zum Modus mit, auch das Formel-
+   Menü des Indikators und der Wiederaufbau beim Start. */
+/* v157.14: Die beiden Sätze vor dem ersten Bild — Start-Text auf der
+   Canvas (rechts) und Hinweis auf der Tools-Abdeckung (links) — stehen
+   jetzt gleich gross und auf gleicher Höhe. GRÖSSE: g4mStartTextPx ist
+   aus showStartText herausgelöst und die einzige Quelle für beide;
+   weil die Canvas so gross gezeichnet wie dargestellt wird, ist die
+   Zahl direkt der Grad auf dem Schirm. Der frühere clamp-Wert des
+   Hinweises lief daneben und scherte in Zwischengrössen aus; er bleibt
+   nur als Rückfall bis zur ersten Messung. HÖHE: g4mAlignHintToCanvas
+   misst das ZENTRUM DER CANVAS und legt den Hinweis mit
+   translateY(-50%) darauf — vorher sass er in der Mitte der Abdeckung
+   und damit eine halbe Einheit zu tief, weil die Fläche erst unter der
+   F-Reihe beginnt. Im Hochformat liegt die Canvas ausserhalb der
+   Fläche; dort bleibt der Hinweis in deren eigener Mitte. */
+/* v157.15: Wortlaut des Hinweises auf der Tools-Abdeckung — «Change
+   parameters for selected formula or click on Go without change!».
+   Kürzer und in der Befehlsform der übrigen Beschriftungen; der
+   zweite Weg ist jetzt als solcher benannt (Go ohne Änderung) statt
+   nur als «direkt». */
+/* v157.16 (TEST): Die drei Viz-Fenster auf F1 und F2 sehen aus wie die
+   übrigen Kacheln des Panels — Panelfarbe, Relief direkt als
+   box-shadow — und tragen das Bild als eingesetztes FENSTER. Vorher
+   füllte das Bild das Feld randlos und lief über die Schulter, die als
+   ::after-Auflage darüberlag (dasselbe Problem, das v157.11 bei der
+   grossen Canvas durch Weglassen des Reliefs löste; hier soll umgekehrt
+   das Relief bleiben und das Bild zurückweichen). Der Ring dazwischen
+   ist --g4m-viz-frame breit, vorbelegt mit der Reichweite der Schulter
+   (Versatz + Weichzeichnung) — EINE Stellschraube zum Ausprobieren.
+   Mitgezogen: das Schwarz wandert vom Feld auf das Canvas (F1 zeichnet
+   auf transparenten Grund und holte sein Schwarz von dort), die
+   Beschriftung rückt mit ins Fenster (weiss liest sich nur auf dem
+   Bild), und der 2px-Überstand aus v157.6 entfiel — er hielt den
+   schwarzen Untergrund vom Bildrand fern, dort liegt jetzt der Rahmen.
+   Rückbau, falls der Ring nicht überzeugt: --g4m-viz-frame auf 0 setzen
+   und .g4m-arch-viz::after wieder in die Auflagen-Liste aufnehmen. */
+/* v157.17: Der Rahmen der Viz-Fenster wird doppelt so breit. Statt die
+   Zahl zu ändern, ist das Grundmass (die Reichweite der Schulter) vom
+   VIELFACHEN getrennt: --g4m-viz-frame-f trägt jetzt den Faktor, den
+   Rest rechnet --g4m-viz-frame. Der Rand bleibt damit ans Relief
+   gekoppelt und wächst mit ihm, ohne dass beim nächsten Nachjustieren
+   eine zusammengesetzte calc-Formel angefasst werden muss. Faktor 1
+   war v157.16, Faktor 2 ist der aktuelle Stand. */
+/* v157.18: Die drei Viz-Fenster stehen auf der CANVAS-FARBE statt auf
+   Schwarz — und damit sind zugleich die feinen schwarzen Linien weg.
+   Beides hing zusammen: v157.16 hatte das Schwarz vom Feld auf das
+   Canvas-Element verlegt und den 2px-Überstand aus v157.6 gestrichen;
+   beim Skalieren des Panels fiel der Bitmap-Rand um Bruchteile eines
+   Pixels neben den Elementkasten, und was durchschien, war eben dieses
+   Schwarz (am deutlichsten links und rechts am Result-Fenster). Trägt
+   der Hintergrund dieselbe Farbe wie das Bild darauf, ist der Spalt
+   unsichtbar, egal wie die Rundung ausfällt — der Überstand wird nicht
+   wieder gebraucht. Neu: --g4m-canvas-bg/--g4m-canvas-ink (gesetzt von
+   g4mApplyVizBgVar), die Min/Max-Viz füllen ihren Grund selbst statt
+   ihn vom Feld zu leihen, updateCanvasBackground zeichnet über
+   g4mRedrawAllViz alle sechs Fenster mit. Mitgezogen, weil der helle
+   Grund es erzwingt: die Kurvenfarbe in paintNormalizedPath und die
+   Fenster-Beschriftungen waren fest weiss («guter Kontrast auf
+   Schwarz») und wären auf einer weissen Canvas verschwunden. Beide
+   fragen jetzt g4mInkOn — eine Quelle, die auch der Start-Text nutzt
+   und die über die wahrgenommene Helligkeit entscheidet statt über
+   einen Vergleich auf '#000000'; damit sind erstmals auch die freien
+   Farben des Farbwählers richtig bedient. */
+/* v157.19: Die Aktivfarben der beiden Farbwelten waren vertauscht und
+   sind es nicht mehr. Regel: F-Panels leuchtend (sie sind die Bühne der
+   Formelarbeit), Tool-Panel gedämpft (es steht dauerhaft da). Bis hier
+   trugen die aktiven Knöpfe auf F1/F2 die gedämpften Töne (#7A9A5C,
+   #5E8199) und die aktiven Quadrate im Tool-Panel die kräftigen
+   (#4CAF50, #2196F3). Getauscht wurde nicht der Wert an Ort und Stelle,
+   sondern die ZUORDNUNG: beide Paletten stehen als benannte Quelle im
+   :root, die vier --g4m-active-*-Zeilen darunter verteilen sie, und alle
+   17 Verwendungen greifen jetzt auf den Namen zu. Ein erneuter Tausch
+   ist damit ein Vertauschen von vier Zeilen statt einer Suche nach
+   Hex-Werten. Mitgezogen: die Rails und Griffe der Panel-Slider — sie
+   tragen denselben Akzent wie die Knöpfe darüber, ein Zurückbleiben
+   hätte je Panel zwei Akzentfarben ergeben. OFFEN: die orange Gruppe im
+   Tool-Panel bleibt kräftig, ein gedämpftes Gegenstück gibt es noch
+   nicht; passend wäre #99815D (Farbton 36°, gleiches S/L wie die beiden
+   anderen gedämpften Töne). */
+/* v157.20: Nachlese zum Farbtausch — die Regler hatten ihn nicht
+   mitgemacht. Im Tool-Panel trugen Rail-Füllung und Griff weiter die
+   leuchtenden Originale, sodass ein Regler unter seinem eigenen,
+   inzwischen gedämpften Parameter-Quadrat leuchtete; sie stehen jetzt
+   auf --g4m-active-tool-*. Zweiter Fund derselben Art: der Fokusrahmen
+   der Wertefelder war fest #4CAF50 — im Tool-Panel zu hell, auf dem
+   blauen F2-Panel schlicht falschfarbig. Dafür trägt jedes Panel jetzt
+   ein eigenes --g4m-active im Geltungsbereich (Options-Panels erben von
+   ihrem Mutter-Panel), auf das panel-übergreifende Regeln zeigen können,
+   statt einen Ton festzuschreiben. UNBERÜHRT geblieben: die Navigation
+   (eigene Farbwelt, war nie Teil der Regel), die Vorgabe-Kurvenfarbe des
+   Farbwählers (Zeichenfarbe, keine Bedienoptik) und zwei Regeln ohne
+   Verwender — .tool-btn.active und .g4m-dot.g4m-on. Beide tragen noch
+   #4CAF50; sie greifen nirgends, wären beim Wiederbeleben aber die
+   nächste Fundstelle. */
+const G4M_RELEASE = Object.freeze({ version: 'v157.20', date: '29.07.2026' });
 const G4M_BUILD = G4M_RELEASE.version;   // Kurzform für Titel und Konsole
 document.title = document.title + ' · ' + G4M_BUILD;
 console.log('g4m build', G4M_BUILD, '·', G4M_RELEASE.date);
@@ -6441,10 +6729,27 @@ function updateCanvasBackground() {
        showStartText() malt Hintergrund UND Text in einem Zug — die
        Regel „leere Canvas trägt den Hinweis" gilt damit an jeder
        Stelle, die den Hintergrund neu setzt. */
+    /* Die drei Viz-Fenster stehen seit v157.18 auf demselben Grund und
+       müssen darum mitwechseln — samt der CSS-Variablen, aus denen
+       Fenster-Hintergrund und Beschriftung ihre Farbe ziehen. Steht vor
+       dem Early-Return für die leere Canvas: die Viz zeigen ihre
+       Vorschau auch dann schon. */
+    g4mApplyVizBgVar();
+    g4mRedrawAllViz();
     if (storedCurveParameters.length === 0) { showStartText(); return; }
     ctx.fillStyle = g4mState.canvasBackgroundColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     redrawStoredImage();
+}
+
+/* Alle sechs Viz-Fenster (F1 und F2, je Min/Max/Result) neu zeichnen.
+   Jede der drei Funktionen prüft selbst, ob ihre Elemente da sind —
+   der Aufruf ist auch dann harmlos, wenn nur eines der Panels je
+   geöffnet wurde. */
+function g4mRedrawAllViz() {
+    if (typeof drawSuperformulaVisualizations === 'function') drawSuperformulaVisualizations();
+    if (typeof archDrawViz === 'function') archDrawViz();
+    ['arch-viz-result', 'sf-viz-result'].forEach(g4mDrawVizResultInto);
 }
 
 /* HINWEIS ZUM SPLIT: resetToDefaults/applyGoodDefaults sind reine
@@ -7091,6 +7396,45 @@ g4mListen(window, 'resize', () => {
 });
 
 // Start-Text auf der Canvas anzeigen
+/* Strichfarbe auf einem gegebenen Untergrund (v157.18) — EINE Quelle
+   für den Start-Text, die Min/Max-Viz und die Fenster-Beschriftungen.
+
+   Entschieden wird über die wahrgenommene Helligkeit (Rec. 601), nicht
+   über einen Vergleich auf '#000000', wie ihn showStartText bis hierher
+   führte. Seit es den Farbwähler gibt, kann der Untergrund jeder Wert
+   sein — ein dunkles Blau hätte schwarze Schrift bekommen und wäre
+   unlesbar geworden. Die Schwelle liegt bei 140 statt bei der Mitte
+   128: helle Flächen blenden, dunkle Schrift darauf bleibt bis weiter
+   hinunter die ruhigere Wahl. */
+function g4mInkOn(bg) {
+    let s = String(bg == null ? '' : bg).trim().replace(/^#/, '');
+    if (s.length === 3) s = s[0] + s[0] + s[1] + s[1] + s[2] + s[2];
+    if (!/^[0-9a-f]{6}$/i.test(s)) return '#000000';
+    const n = parseInt(s, 16);
+    const y = 0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255);
+    return y < 140 ? '#FFFFFF' : '#000000';
+}
+/* Canvas-Farbe und die dazu passende Strichfarbe als CSS-Variablen —
+   für alles, was in CSS auf dem Fenstergrund steht (Fenster-Hintergrund
+   der Viz, ihre Beschriftungen). Läuft bei jedem Farbwechsel über
+   updateCanvasBackground und einmal beim Start. */
+function g4mApplyVizBgVar() {
+    const bg = g4mState.canvasBackgroundColor;
+    const root = document.documentElement;
+    root.style.setProperty('--g4m-canvas-bg',  bg);
+    root.style.setProperty('--g4m-canvas-ink', g4mInkOn(bg));
+}
+/* Schriftgrad des Start-Texts — EINE Quelle (v157.14). Gemessen an der
+   Kantenlänge der Canvas (size/45, Boden 10px), und weil die Canvas in
+   CSS-Pixeln so gross gezeichnet wie dargestellt wird (resizeCanvas
+   setzt width = clientWidth), ist der Rückgabewert zugleich der auf dem
+   Schirm sichtbare Grad. Genau darum kann der Hinweis auf der Tools-
+   Abdeckung dieselbe Zahl übernehmen (positionToolsCover, §6) — die
+   beiden Texte links und rechts stehen damit garantiert gleich gross,
+   auch in jeder Zwischengrösse des Fensters. */
+function g4mStartTextPx(size) {
+    return Math.max(10, Math.round(size / 45));
+}
 function showStartText() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
@@ -7099,8 +7443,8 @@ function showStartText() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     // Text-Stil setzen
-    ctx.fillStyle = g4mState.canvasBackgroundColor === '#000000' ? '#FFFFFF' : '#000000'; // Kontrastfarbe
-    ctx.font = Math.max(10, Math.round(canvas.width / 45)) + 'px JetBrains Mono';
+    ctx.fillStyle = g4mInkOn(g4mState.canvasBackgroundColor);   // Kontrastfarbe (v157.18)
+    ctx.font = g4mStartTextPx(canvas.width) + 'px JetBrains Mono';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     
@@ -7139,6 +7483,12 @@ function drawVizFor(kind) {
     );
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    /* Eigener Grund statt durchscheinendem Feld (v157.18): bis v157.17
+       zeichnete diese Viz auf transparent und liess das Schwarz des
+       Feldes darunter stehen. Jetzt füllt sie die Canvas-Farbe wie die
+       grosse Canvas und das Result-Fenster. */
+    ctx.fillStyle = g4mState.canvasBackgroundColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     drawSuperformulaOnCanvas(ctx, points, canvas.width, canvas.height);
 }
 
@@ -7201,7 +7551,11 @@ function paintNormalizedPath(ctx, points, width, height, opts) {
     const centerY = height / 2;
 
     ctx.beginPath();
-    ctx.strokeStyle = '#FFFFFF';   // Weiss — guter Kontrast auf Schwarz
+    /* Strich im Kontrast zum Untergrund (v157.18) — vorher fest
+       '#FFFFFF' mit der Begründung «guter Kontrast auf Schwarz». Der
+       Untergrund der Min/Max-Fenster ist seither die Canvas-Farbe; auf
+       einer weissen Canvas wäre die Kurve unsichtbar geworden. */
+    ctx.strokeStyle = g4mInkOn(g4mState.canvasBackgroundColor);
     ctx.lineWidth = 1.5;
     let started = false;
     points.forEach(function (p) {
@@ -9045,6 +9399,56 @@ function positionToolsCover() {
        ist die weisse Fläche vollständig verdeckt; öffnet der User ein
        Formel-Panel auf der Tools-Seite, erscheint es ÜBER ihr. */
     frame.style.zIndex = String(G4M_Z.TOOLS_COVER);
+    g4mAlignHintToCanvas(top, r.bottom - top);
+}
+/* ── Hinweis links auf die Canvas rechts ausrichten (v157.14) ──────
+   Vor dem ersten Bild stehen ZWEI Sätze nebeneinander: der Start-Text
+   auf der Canvas (rechts, in die Canvas gezeichnet) und der Hinweis
+   auf der Tools-Abdeckung (links, HTML). Sie sollen als ein Paar
+   gelesen werden, also gleich gross und auf gleicher Höhe stehen.
+
+   GRÖSSE: exakt die Zahl, mit der auch der Canvas-Text gesetzt wird —
+   g4mStartTextPx über die Kantenlänge der Canvas. Keine zweite Formel,
+   kein clamp daneben, das bei irgendeiner Fenstergrösse ausschert.
+
+   HÖHE: Massgabe ist das ZENTRUM DER CANVAS. Gemessen wird es am
+   Rechteck des Canvas-Containers und in den Abstand von der Oberkante
+   der Abdeckung umgerechnet; der Hinweis hängt dort mit
+   translateY(-50%), seine Mitte liegt also auf der Mitte des
+   Canvas-Textes.
+
+   Im HOCHFORMAT liegt die Canvas ÜBER dem Navigation-Tool und damit
+   ganz ausserhalb der Abdeckung — ein Ausrichten wäre dort nicht
+   möglich (der Text müsste weit über den eigenen Rand hinaus). Fällt
+   das Zentrum nicht in die Fläche, bleibt der Hinweis darum in ihrer
+   eigenen Mitte: die Variable wird gelöscht, der CSS-Rückfall 50%
+   greift. */
+function g4mAlignHintToCanvas(coverTop, coverH) {
+    const el = document.getElementById('g4m-tools-cover');
+    if (!el || !canvasContainer) return;
+    const c = canvasContainer.getBoundingClientRect();
+    const size = Math.min(c.width, c.height);   // wie resizeCanvas
+    el.style.setProperty('--g4m-tc-hint-size', g4mStartTextPx(size) + 'px');
+
+    const centerY = c.top + c.height / 2;
+    const y = centerY - coverTop;
+    if (y >= 0 && y <= coverH) {
+        el.style.setProperty('--g4m-tc-hint-y', y + 'px');
+    } else {
+        el.style.removeProperty('--g4m-tc-hint-y');   // Rückfall 50% (Hochformat)
+    }
+}
+/* Hinweis auf der Abdeckung ein-/ausschalten (v157.13). Sichtbar erst,
+   wenn eine Formel MIT Funktion gewählt ist — vorher gäbe es keine
+   «selected formula», von deren Parametern der Satz spricht, und bei
+   F3-F10 zeigte er auf ein leeres Panel. Ohne Argument liest die
+   Funktion den aktuellen Modus selbst; sie läuft auch, bevor die
+   Abdeckung im DOM sichtbar ist (der Guard fängt das ab). */
+function g4mUpdateToolsCoverHint(mode) {
+    const el = document.getElementById('g4m-tools-cover');
+    if (!el) return;
+    const m = (arguments.length ? mode : g4mState.activeDrawingMode);
+    el.setAttribute('data-hint', G4M_MODES_READY.indexOf(m) !== -1 ? 'on' : 'off');
 }
 function g4mShowToolsCover(instant) {
     const el = document.getElementById('g4m-tools-cover');
@@ -9054,6 +9458,7 @@ function g4mShowToolsCover(instant) {
        ungewollt wieder vor die Tools schieben. */
     if (g4mState.toolsCoverDone) return;
     buildToolsCoverGrid();
+    g4mUpdateToolsCoverHint();   // Stand des Modus übernehmen (v157.13)
     g4mStore.set('toolsCoverOn', true);
     positionToolsCover();
     el.style.visibility = 'visible';
@@ -9485,7 +9890,7 @@ function archDrawViz() {
         c.width  = c.parentElement.clientWidth  || 100;
         c.height = c.parentElement.clientHeight || 100;
         const vctx = c.getContext('2d');
-        vctx.fillStyle = '#000';
+        vctx.fillStyle = g4mState.canvasBackgroundColor;   // war '#000' (v157.18)
         vctx.fillRect(0, 0, c.width, c.height);
 
         const ep = g4mArchEdgeParams(t);
@@ -10161,6 +10566,7 @@ function initStateSubscriptions() {
 // Initialize
 function init() {
     initImageFallbacks();          // vor allem anderen: error-Listener der Panel-Bilder
+    g4mApplyVizBgVar();            // --g4m-canvas-bg/-ink vor dem ersten Zeichnen (v157.18)
     resizeCanvas();
     loadTokenCounter();
     g4mApplyModeOptics(g4mState.activeDrawingMode);   // Start NEUTRAL (v154.7): kein F-Button aktiv, Indikator "Select formula"
