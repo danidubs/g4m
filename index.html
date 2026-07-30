@@ -962,6 +962,8 @@ Kontakt: dd@danidubs.ch
                F2-Blau-Ableitungen darüber. */
             --g4m-sf-line:  var(--g4m-hair);     /* Rasterlinie F1 — seit v156.9 die gemeinsame Haarlinie */
             --g4m-sf-hover: #C9F096;     /* Button-Hover: leicht abgedunkeltes Panel-Grün */
+            --g4m-f3-line:  var(--g4m-hair);     /* Rasterlinie F3 (v157.51) — gemeinsame Haarlinie */
+            --g4m-f3-hover: #F5B893;     /* Button-Hover: leicht abgedunkeltes Panel-Orange */
             /* ── AKTIVFARBEN: kräftig vs. gedämpft (v157.19) ───────────
                Die App hat zwei Farbwelten, und sie waren vertauscht:
                  F-PANELS  tragen die leuchtenden Töne — sie sind die
@@ -1027,6 +1029,7 @@ Kontakt: dd@danidubs.ch
                von nun an ein Vertauschen dieser Zeilen. */
             --g4m-active-sf:     var(--g4m-bright-green);   /* F1-Panel */
             --g4m-active-arch:   var(--g4m-bright-blue);    /* F2-Panel */
+            --g4m-active-f3:     #F08A4B;                   /* F3-Panel (v157.51): kräftiges Orange zum Pastell #FFCBAF */
             --g4m-active-tool-green:  var(--g4m-muted-green);
             --g4m-active-tool-orange: var(--g4m-muted-orange);
             --g4m-active-tool-blue:   var(--g4m-muted-blue);
@@ -1356,6 +1359,65 @@ Kontakt: dd@danidubs.ch
         #superformel-panel .g4m-arch-babygo,
         #superformel-panel .g4m-arch-segbtn,
         #superformel-panel .g4m-arch-presetbtn { border-color: var(--g4m-sf-line); }
+
+        /* ── F3-PANEL «HARMONICS» (v157.51) ──────────────────────────
+           Exakt das F1-Muster (das seinerseits das F2-Raster spiegelt):
+           das Panel SELBST ist das 12x12-Raster, alle Zellen nutzen die
+           g4m-arch-*-Klassen, nur in der F3-Modusfarbe (Orange).
+             Reihe 1      (1u) = Reserve (2u) · Titel (8u) · Reserve (2u)
+             Reihen 2-9   (8u) = 3 Parameter-Quadrate K, A, k + Reserven ·
+                                 Funktions-Reihe (Color + Reserven + Go) ·
+                                 Min-/Max-/Result-Viz je 4u x 4u
+             Reihen 10-12 (3u) = Slider-Feld: EIN Min/Max-Paar für den
+                                 aktiven Parameter — wie F1/F2/Tool. */
+        #f3-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: calc(var(--u) * 12);
+            height: calc(var(--u) * 12);
+            background-color: var(--g4m-mode-color-f3);
+            transition: transform var(--g4m-anim-sub-panel, 0.55s) var(--g4m-panel-ease, ease-in-out);
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: repeat(12, 1fr);
+            padding: 0;
+            overflow: hidden;
+            font-family: 'JetBrains Mono', monospace;
+            color: black;
+            z-index: var(--g4m-z-resting, 10);
+            transform: translateX(-100%);
+            --g4m-active: var(--g4m-active-f3);   /* Fokusrahmen der Wertefelder (v157.20-Mechanik) */
+        }
+        #f3-panel .g4m-arch-cell:not(.g4m-arch-babygo) {
+            background-color: var(--g4m-mode-color-f3);
+            border-color: var(--g4m-f3-line);
+        }
+        #f3-panel button.g4m-arch-cell:not(.g4m-arch-babygo):not(.g4m-arch-reserve):not(.g4m-arch-botmod-active):not(.g4m-arch-sq-active):hover {
+            background-color: var(--g4m-f3-hover);
+        }
+        #f3-panel .g4m-arch-cell.g4m-arch-botmod-active {
+            background-color: var(--g4m-active-f3);
+            color: #ffffff;
+        }
+        #f3-panel .g4m-arch-sq.g4m-arch-sq-active {
+            background-color: var(--g4m-active-f3);
+        }
+        #f3-panel .g4m-arch-viz {
+            background-color: var(--g4m-mode-color-f3);
+            border-color: var(--g4m-f3-line);
+        }
+        #f3-panel .g4m-arch-babygo { border-color: var(--g4m-f3-line); }
+        /* Reihe-1-Buttons Page 2 / Formula (v157.52) — Format und
+           Schrift wie die Kopf-Buttons von F1/F2. */
+        #f3-panel .g4m-f3-top-left  { grid-column: 1 / 3; }
+        #f3-panel .g4m-f3-top-right { grid-column: 11 / 13; }
+        #f3-options-btn.g4m-arch-cell,
+        #f3-formula-toggle.g4m-arch-cell {
+            display: flex; align-items: center; justify-content: center;
+            font-size: calc(clamp(10px, calc(var(--u) * 0.269), 14px) / var(--panel-scale, 1));
+            font-weight: 700;
+        }
         /* Reihe 1: Page-2-Button links, Formula rechts — Format und
            Schrift wie Page-2-/Formula-Button des F2-Panels. */
         #sf-options-btn.g4m-arch-cell,
@@ -1446,6 +1508,17 @@ Kontakt: dd@danidubs.ch
             background-color: var(--g4m-mode-color-superformula) !important;
             border-color: var(--g4m-sf-line) !important;
         }
+        /* F3 (v157.53): dieselben Ableitungen in Orange — die leeren
+           Rasterfelder (Relief) und Sin/Cos/Tan-Leerzustände tragen
+           die F3-Panelfarbe statt des generischen F2-Blaus. */
+        #f3-panel .g4m-arch-mod-hidden {
+            background-color: var(--g4m-mode-color-f3) !important;
+            border-color: var(--g4m-f3-line) !important;
+        }
+        #f3-panel .g4m-botmod-typ-hidden {
+            background-color: var(--g4m-mode-color-f3) !important;
+            border-color: var(--g4m-f3-line) !important;
+        }
 
 /* body.mode-* #fN-btn { … !important } entfiel (Befund 28): Die in
    Befund 25 dokumentierte Doppel-Semantik ist aufgelöst — Button-
@@ -1462,6 +1535,7 @@ Kontakt: dd@danidubs.ch
 #archimedean-panel[data-arch-open="0"],
 #arch-options-panel[data-arch-opts-open="0"],
 #sf-options-panel[data-sf-opts-open="0"],
+#f3-options-panel[data-f3-opts-open="0"],
 [data-panel-open="0"] {
     visibility: hidden !important;
     transition: transform var(--g4m-anim-sub-panel, 0.55s) var(--g4m-panel-ease, ease-in-out), visibility 0s linear calc(var(--g4m-anim-sub-panel, 0.55s) + 0.05s) !important;
@@ -1470,6 +1544,7 @@ Kontakt: dd@danidubs.ch
 #archimedean-panel[data-arch-open="1"],
 #arch-options-panel[data-arch-opts-open="1"],
 #sf-options-panel[data-sf-opts-open="1"],
+#f3-options-panel[data-f3-opts-open="1"],
 [data-panel-open="1"] { visibility: visible !important; }
 #archimedean-panel {
     position: fixed; 
@@ -2761,6 +2836,75 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
             background: var(--g4m-rr-col, #666666);
         }
 
+        /* ── Center of Curve (v157.49) ────────────────────────────────
+           Eigene Editor-Zeile mit zwei Ansichten. Fixed: Hinweis +
+           X/Y-Anzeige (das Setzen läuft auf der Canvas). Random: je
+           Achse eine Zeile Min-Rail/Feld + Max-Rail/Feld — Rails in
+           der Schichttechnik der Bereichs-Ansicht (v157.29), Farbe =
+           Blau-Gruppe. Die Ansicht schaltet die Zeilenklasse
+           g4m-cc-random (Senke: g4mUpdateCenterUi). */
+        .g4m-param-editor .g4m-center-row .g4m-cc-fixed {
+            display: flex;
+            flex-direction: column;
+            gap: calc(var(--u) * 0.25);
+            margin-top: calc(var(--u) * 0.4);
+        }
+        .g4m-param-editor .g4m-center-row .g4m-cc-hint,
+        .g4m-param-editor .g4m-center-row .g4m-cc-vals,
+        .g4m-param-editor .g4m-cc-axlbl,
+        .g4m-param-editor .g4m-cc-axhead span {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(10px, calc(var(--u) * 0.269), 14px);
+            color: #666666;
+        }
+        .g4m-param-editor .g4m-center-row .g4m-cc-vals,
+        .g4m-param-editor .g4m-cc-axlbl { font-weight: 700; }
+        .g4m-param-editor .g4m-center-row .g4m-cc-rnd { display: none; }
+        .g4m-param-editor .g4m-center-row.g4m-cc-random .g4m-cc-rnd {
+            display: flex;
+            flex-direction: column;
+            gap: calc(var(--u) * 0.18);
+            margin-top: calc(var(--u) * 0.15);
+        }
+        .g4m-param-editor .g4m-center-row.g4m-cc-random .g4m-cc-fixed { display: none; }
+        .g4m-param-editor .g4m-cc-axis {
+            display: grid;
+            grid-template-columns: calc(var(--u) * 0.5) 1fr var(--g4m-val-w) 1fr var(--g4m-val-w);
+            column-gap: calc(var(--u) * 0.2);
+            align-items: center;
+        }
+        .g4m-param-editor .g4m-cc-axhead { line-height: 1; }
+        .g4m-param-editor .g4m-cc-axis .g4m-val-box {
+            min-width: var(--g4m-val-w);
+            height: var(--g4m-val-h, var(--g4m-arch-field-h));
+        }
+        /* Rails: Füllschicht in der gedämpften Blau-Gruppenfarbe über
+           grauer Basislinie — Track transparent, Griff blau (Technik
+           identisch zur Bereichs-Ansicht darüber). */
+        .g4m-param-editor .g4m-cc-axis input[type=range] {
+            background:
+                linear-gradient(var(--g4m-active-tool-blue, #666666), var(--g4m-active-tool-blue, #666666)) left center / var(--fill-percent, 0%) var(--g4m-slider-rail-h) no-repeat,
+                linear-gradient(#9e9e9e, #9e9e9e) left center / 100% var(--g4m-slider-rail-h) no-repeat;
+        }
+        .g4m-param-editor .g4m-cc-axis input[type=range]::-webkit-slider-runnable-track { background: transparent; }
+        .g4m-param-editor .g4m-cc-axis input[type=range]::-moz-range-track { background: transparent; }
+        .g4m-param-editor .g4m-cc-axis input[type=range]::-webkit-slider-thumb {
+            width: var(--g4m-slider-handle);
+            height: var(--g4m-slider-handle);
+            margin-top: calc((var(--g4m-slider-rail-h) - var(--g4m-slider-handle)) / 2);
+            background: var(--g4m-active-tool-blue, #666666);
+        }
+        .g4m-param-editor .g4m-cc-axis input[type=range]::-moz-range-thumb {
+            width: var(--g4m-slider-handle);
+            height: var(--g4m-slider-handle);
+            background: var(--g4m-active-tool-blue, #666666);
+        }
+        /* Crosshair NUR im Setz-Zustand (Center-Kachel aktiv + Fixed) */
+        canvas#superformulaCanvas.g4m-cc-drag { cursor: crosshair; }
+        /* Zweizeilige Bereichs-Anzeige der Center-Kachel (X- und
+           Y-Bereich untereinander, Notation «min–max» wie überall) */
+        #g4m-sqval-curve-center { white-space: pre-line; }
+
         /* ── Relief als Auflage (v157.2) ──────────────────────────────
            Viz-Fenster und Options-Panels sind bis zum Rand von einer
            <canvas> gefüllt; ein Innenschatten des Elternteils läge
@@ -2870,17 +3014,27 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
         }
         #superformel-panel .g4m-arch-editor input[type=range]::-webkit-slider-thumb { background: var(--g4m-active-sf); }
         #superformel-panel .g4m-arch-editor input[type=range]::-moz-range-thumb    { background: var(--g4m-active-sf); }
+        /* F3 (v157.51): identische Schichttechnik in der F3-Aktivfarbe */
+        #f3-panel .g4m-arch-editor input[type=range] {
+            background:
+                linear-gradient(var(--g4m-active-f3), var(--g4m-active-f3)) left center / var(--fill-percent, 0%) var(--g4m-slider-rail-h) no-repeat,
+                linear-gradient(#9e9e9e, #9e9e9e) left center / 100% var(--g4m-slider-rail-h) no-repeat;
+        }
+        #f3-panel .g4m-arch-editor input[type=range]::-webkit-slider-thumb { background: var(--g4m-active-f3); }
+        #f3-panel .g4m-arch-editor input[type=range]::-moz-range-thumb    { background: var(--g4m-active-f3); }
         /* Der native Track (::-webkit-slider-runnable-track, Basisregel
            §Slider) malt seine eigene graue 2px-Linie ÜBER den Element-
            Hintergrund — sie übermalte die 4px-Farbschicht in der Mitte.
            Auf den Panels wird der Track transparent gestellt; die graue
            Basislinie liefert bereits die zweite Hintergrund-Schicht. */
         #archimedean-panel .g4m-arch-editor input[type=range]::-webkit-slider-runnable-track,
-        #superformel-panel .g4m-arch-editor input[type=range]::-webkit-slider-runnable-track {
+        #superformel-panel .g4m-arch-editor input[type=range]::-webkit-slider-runnable-track,
+        #f3-panel .g4m-arch-editor input[type=range]::-webkit-slider-runnable-track {
             background: transparent;
         }
         #archimedean-panel .g4m-arch-editor input[type=range]::-moz-range-track,
-        #superformel-panel .g4m-arch-editor input[type=range]::-moz-range-track {
+        #superformel-panel .g4m-arch-editor input[type=range]::-moz-range-track,
+        #f3-panel .g4m-arch-editor input[type=range]::-moz-range-track {
             background: transparent;
         }
         /* Kleiner roter Go-Button (Baby-Go): unterste Reihe, ganz rechts
@@ -3620,13 +3774,201 @@ Max. 100%</span>
     </div>
 </div>
 
+<!-- F3 «HARMONICS» FORMULA PANEL (v157.52) — analog arch-formula-  -->
+<!-- panel: fährt auf der Navigation-Seite ein und ERKLÄRT die      -->
+<!-- Parameter K, A, k, φ (Anlass der Version: die Buchstaben       -->
+<!-- allein sagen dem User nichts).                                 -->
+<div id="f3-formula-panel" data-open="0" style="
+    position: fixed; top: 0; left: 0;
+    width: 300px; height: 600px;
+    background-color: var(--g4m-mode-color-f3);
+    transition: transform var(--g4m-anim-panel, 0.6s) var(--g4m-panel-ease, ease-out);
+    display: flex; flex-direction: column;
+    font-family: 'JetBrains Mono', monospace;
+    z-index: var(--g4m-z-resting, 10); transform: translateX(100%); overflow: hidden;
+    visibility: hidden;">
+    <div style="display:flex; justify-content:center; align-items:center; padding:10px 20px; background-color:var(--g4m-mode-color-f3); min-height:50px; position:relative;">
+        <h2 style="margin:0; font-size:20px; color:#666666; text-align:center;">Harmonics Formula</h2>
+    </div>
+    <div style="flex:1; padding:20px; background-color:var(--g4m-mode-color-f3); display:flex; flex-direction:column; justify-content:center; align-items:center;">
+        <div style="font-size:13px; color:#777; text-align:center; margin-bottom:14px;">
+            Harmonic circle deformation<br>(Fourier blobs)
+        </div>
+        <div style="font-size:19px; color:#333; text-align:center; margin-bottom:6px;">
+            r(θ) = 1 + Σ A<sub>j</sub> · sin(k<sub>j</sub>·θ + φ<sub>j</sub>)
+        </div>
+        <div style="font-size:12px; color:#777; text-align:center; margin-bottom:18px;">
+            sum over j = 1 … K
+        </div>
+        <div style="font-size:14px; color:#555; text-align:center; line-height:1.9;">
+            A circle, deformed by K sine waves:<br><br>
+            <b>K</b> = Number of waves per curve<br>
+            <b>A</b> = Amplitude — how deep each<br>
+            wave dents the circle<br>
+            <b>k</b> = Frequency — bumps the wave<br>
+            makes around the circle<br>
+            <b>φ</b> = Phase — where the wave starts<br>
+            (drawn randomly per curve)<br><br>
+            Each curve draws K, A, k randomly<br>
+            from your Min/Max ranges.
+        </div>
+    </div>
+</div>
+
 <!-- F3-F10: Kopfzeile mit FN-Beschriftung entfernt (v150j) — die
      Zuordnung leisten Anzeigefeld, Formel-Menü und Button-Farbe;
      das Wasserzeichen füllt die Fläche jetzt allein. -->
-<!-- F3 PANEL                                                     -->
+<!-- F3 PANEL «HARMONICS» (v157.51) — r(θ) = 1 + Σ aₖ·sin(k·θ + φₖ). -->
+<!-- Struktur = F1-Muster (12x12-Raster, g4m-arch-*-Klassen) in der  -->
+<!-- F3-Modusfarbe; Layout-Regeln unter #f3-panel im Stylesheet.     -->
 <!-- ============================================================ -->
-<div id="f3-panel" data-panel-open="0" style="position:fixed;top:0;left:0;width:calc(var(--u)*12);height:calc(var(--u)*12);background-color:var(--g4m-mode-color-f3);transition:transform var(--g4m-anim-sub-panel,0.55s) var(--g4m-panel-ease,ease-in-out);display:flex;flex-direction:column;font-family:'JetBrains Mono',monospace;color:black;z-index:10;transform:translateX(-100%);overflow:hidden;">
-    <div class="g4m-panel-watermark">F3 — coming soon</div>
+<div id="f3-panel" data-panel-open="0">
+
+    <!-- ===== Reihe 1 (1u): Page 2 · Titel (8u) · Formula (v157.52) ===== -->
+    <button type="button" id="f3-options-btn" class="g4m-arch-cell g4m-arch-top g4m-f3-top-left">Page 2</button>
+    <div class="g4m-arch-cell g4m-arch-top g4m-arch-title">Harmonics Parameters</div>
+    <button type="button" id="f3-formula-toggle" class="g4m-arch-cell g4m-arch-top g4m-f3-top-right" aria-label="Open formula panel">Formula</button>
+
+    <!-- ===== Reihen 2-9 (8u): Quadrate + Viz (Struktur = F1/F2-Grid) ===== -->
+    <div class="g4m-arch-grid">
+        <!-- Rasterzeile 1: Parameter-Quadrate K (Anzahl Oberwellen),
+             A (Amplitude), k (Frequenz) + 3 Reserven. Wertespiegel
+             (Min/Max) hält g4mF3UpdateSqVals synchron. -->
+        <button type="button" class="g4m-arch-cell g4m-arch-sq" id="f3-sq-harm">
+            <span class="g4m-arch-sq-letter">K</span>
+            <span class="g4m-arch-sq-vals" id="f3-sqval-harm">Min. 2
+Max. 5</span>
+        </button>
+        <button type="button" class="g4m-arch-cell g4m-arch-sq" id="f3-sq-amp">
+            <span class="g4m-arch-sq-letter">A</span>
+            <span class="g4m-arch-sq-vals" id="f3-sqval-amp">Min. 0.10
+Max. 0.45</span>
+        </button>
+        <button type="button" class="g4m-arch-cell g4m-arch-sq" id="f3-sq-freq">
+            <span class="g4m-arch-sq-letter">k</span>
+            <span class="g4m-arch-sq-vals" id="f3-sqval-freq">Min. 1
+Max. 8</span>
+        </button>
+        <button type="button" class="g4m-arch-cell g4m-arch-reserve" aria-label="Reserve"></button>
+        <button type="button" class="g4m-arch-cell g4m-arch-reserve" aria-label="Reserve"></button>
+        <button type="button" class="g4m-arch-cell g4m-arch-reserve" aria-label="Reserve"></button>
+
+        <!-- Funktions-Reihe (Rasterzeile 2) — Positionen EXAKT wie F1:
+             Spalte 1 Reserve, 2 = Color, 3 = Modulation (v157.53),
+             Spalten 4-6 = reserve6-Block (oben Sin/Cos/Tan, unten
+             On/Off bzw. Color-Zellen, Go). -->
+        <button type="button" class="g4m-arch-cell g4m-arch-fnsq g4m-arch-reserve" aria-label="Reserve"></button>
+        <button type="button" class="g4m-arch-cell g4m-arch-sq g4m-arch-fnsq" id="f3-sq-color">
+            <span class="g4m-arch-sq-letter">Color</span>
+            <span class="g4m-arch-sq-vals" id="f3-sqval-color">Random</span>
+        </button>
+        <button type="button" class="g4m-arch-cell g4m-arch-sq g4m-arch-fnsq" id="f3-sq-mod">
+            <span class="g4m-arch-sq-letter">Modulation</span>
+            <span class="g4m-arch-sq-vals" id="f3-sqval-mod">Off</span>
+        </button>
+        <div class="g4m-arch-fnsq g4m-arch-reserve6">
+            <!-- obere Reihe: Sin/Cos/Tan, je 2u breit (v157.53) —
+                 starten AUSGEBLENDET (Modulation default Off, wie F1
+                 v154.5): g4mSetModTypeVisible blendet sie bei On ein. -->
+            <button type="button" id="f3-mod-sin" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-restop g4m-arch-botmod g4m-arch-botmod-active g4m-botmod-typ-hidden" style="grid-column: 1 / 3;" aria-label="Modulation sine">Sin</button>
+            <button type="button" id="f3-mod-cos" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-restop g4m-arch-botmod g4m-botmod-typ-hidden" style="grid-column: 3 / 5;" aria-label="Modulation cosine">Cos</button>
+            <button type="button" id="f3-mod-tan" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-restop g4m-arch-botmod g4m-botmod-typ-hidden" style="grid-column: 5 / 7;" aria-label="Modulation tangent">Tan</button>
+            <!-- untere Reihe: Modulation On/Off (Zellen 1-2, wie F1) —
+                 ausserhalb von «Modulation» zeigen sie über
+                 g4m-arch-mod-hidden das LEERE Rasterfeld mit Relief
+                 (User-Wunsch v157.53). -->
+            <button type="button" id="f3-mod-on"  class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botmod" style="grid-column: 1 / 2;" aria-label="Modulation on">On</button>
+            <button type="button" id="f3-mod-off" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botmod g4m-arch-botmod-active" style="grid-column: 2 / 3;" aria-label="Modulation off">Off</button>
+            <!-- untere Reihe: Color Random On/Off (Zellen 1-2) +
+                 Farbwähler (Zelle 3), nur bei «Color» sichtbar — wie F1. -->
+            <button type="button" id="f3-color-random-on"  class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botcol g4m-arch-botmod-active" style="grid-column: 1 / 2; grid-row: 2; visibility: hidden;" aria-label="Random color on">On</button>
+            <button type="button" id="f3-color-random-off" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botcol" style="grid-column: 2 / 3; grid-row: 2; visibility: hidden;" aria-label="Random color off">Off</button>
+            <div class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-botcol g4m-arch-colorcell" style="grid-column: 3 / 4; grid-row: 2; visibility: hidden;">
+                <input type="color" id="f3-default-color" value="#F08A4B" aria-label="Pick fixed curve color">
+                <span class="g4m-arch-color-quad" aria-hidden="true">
+                    <i></i><i></i><i></i><i></i>
+                </span>
+            </div>
+            <button type="button" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-reserve" style="grid-column: 3 / 4;" aria-label="Reserve"></button>
+            <button type="button" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-reserve" style="grid-column: 4 / 6;" aria-label="Reserve"></button>
+            <button type="button" id="f3-baby-go" class="g4m-arch-cell g4m-arch-resbtn g4m-arch-resbot g4m-arch-babygo" style="grid-column: 6 / 7;" aria-label="Generate new image">Go</button>
+        </div>
+
+        <!-- Rasterzeilen 3-4: Min-/Max-/Result-Viz je 4u x 4u —
+             gleiche Klassen wie F1/F2, eigene Canvas-Ids. -->
+        <div class="g4m-arch-viz g4m-arch-viz-min">
+            <canvas id="f3-viz-min" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
+            <div class="g4m-arch-viz-label">Min</div>
+        </div>
+        <div class="g4m-arch-viz g4m-arch-viz-max">
+            <canvas id="f3-viz-max" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
+            <div class="g4m-arch-viz-label">Max</div>
+        </div>
+        <div class="g4m-arch-viz g4m-arch-viz-result">
+            <canvas id="f3-viz-result" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
+            <div class="g4m-arch-viz-label">Result</div>
+        </div>
+    </div>
+
+    <!-- ===== Reihen 10-12 (3u): Slider-Feld =====
+         EIN Regler-Paar (Min/Max) für den aktiven Parameter — die
+         3 Parameterzeilen generiert buildF3BoundaryRows (§2) aus
+         G4M_F3_BOUNDARY_ROWS in die F1/F2-Struktur. -->
+    <div class="g4m-arch-cell g4m-arch-editor">
+        <div id="f3-boundaries-rows"></div>
+
+        <!-- Funktions-Zeile Color: nur Kopfzeile (wie F1/F2) — die
+             Bedienung liegt in den unteren 1u-Zellen des reserve6-
+             Blocks, sichtbar bei «Color». -->
+        <div class="g4m-arch-prow" id="f3-prow-color">
+            <div class="g4m-arch-phead">
+                <span class="g4m-note-text">Random for Color On or Off</span>
+                <span class="g4m-arch-seg-spacer"></span>
+            </div>
+        </div>
+
+        <!-- Funktions-Zeile Modulation (v157.53): Strength/Freq — Typ
+             und On/Off liegen wie bei F1/F2 in der untersten
+             Zellen-Reihe des reserve6-Blocks. -->
+        <div class="g4m-arch-prow" id="f3-prow-mod">
+            <div class="g4m-arch-phead">
+                <span class="g4m-note-text">Curve modulation</span>
+                <span class="g4m-arch-seg-spacer"></span>
+            </div>
+            <div class="g4m-arch-block g4m-arch-block-mod">
+                <span class="g4m-param-label-sm g4m-arch-lbl-min">Strength</span>
+                <input type="range" id="f3-mod-strength" min="0" max="1" step="0.01" value="0.71" class="g4m-row-flex g4m-arch-rail-min">
+                <div id="f3-mod-strength-val" class="g4m-val-box g4m-arch-field-min">0.71</div>
+                <span class="g4m-param-label-sm g4m-arch-lbl-max">Freq</span>
+                <input type="range" id="f3-mod-freq" min="0.1" max="20" step="0.1" value="19.1" class="g4m-row-flex g4m-arch-rail-max">
+                <div id="f3-mod-freq-val" class="g4m-val-box g4m-arch-field-max">19.1</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- F3 OPTIONS PANEL — Page 2 des F3-Panels (v157.52),           -->
+<!-- exakt analog sf-/arch-options-panel (Seite 2 vorerst leer).  -->
+<!-- ============================================================ -->
+<div id="f3-options-panel" data-f3-opts-open="0" style="
+    position: fixed; top: 0; left: 0;
+    width: calc(var(--u) * 12); height: calc(var(--u) * 12);
+    background-color: var(--g4m-mode-color-f3);
+    transition: transform var(--g4m-anim-sub-panel, 0.55s) var(--g4m-panel-ease, ease-in-out);
+    display: flex; flex-direction: column;
+    font-family: 'JetBrains Mono', monospace; color: black;
+    z-index: var(--g4m-z-resting, 10); transform: translateX(-100%); overflow: hidden;">
+
+    <div style="position:relative; display:flex; align-items:center; justify-content:center; padding:10px 20px;
+        background-color:var(--g4m-mode-color-f3); min-height:50px;">
+        <h2 style="margin:0; font-size:20px; color:#666666; text-align:center;">Harmonics Options</h2>
+    </div>
+
+    <div style="flex:1; padding:20px; background-color:var(--g4m-mode-color-f3); overflow:hidden;">
+        <!-- Seite 2 bleibt vorerst leer für künftige Optionen —
+             gleiche Auslegung wie bei den F1-/F2-Pendants. -->
+    </div>
 </div>
 
 <!-- ============================================================ -->
@@ -3844,7 +4186,10 @@ const G4M_PERSIST = (function () {
         'currentDisplayMode', 'spiralType', 'canvasBackgroundColor', 'normalizationEnabled',
         'archConnectingLines', 'archimedeanParams', 'archUseRandomColors',
         'archDefaultColor', 'useRandomColors', 'defaultCurveColor',
-        'viewParams', 'superformulaParams', 'archModulation', 'sfModulation', 'randomModes', 'randomRanges'
+        'viewParams', 'superformulaParams', 'archModulation', 'sfModulation', 'randomModes', 'randomRanges',
+        'curveCenter',   // fester Kurven-Ursprung (v157.49); Random-Modus/-Bereiche laufen über randomModes/randomRanges
+        'fourierParams', 'fourierUseRandomColors', 'fourierDefaultColor',   // F3 «Harmonics» (v157.51)
+        'fourierModulation'   // F3-Kurven-Modulation (v157.53)
     ];
     function isPlainObject(o) {
         return o && typeof o === 'object' && !Array.isArray(o);
@@ -4001,6 +4346,14 @@ const g4mStore = (function () {
             lineWidth: 1, pointSize: 5                 // Strich-/Punktdicke
         },
 
+        /* Fester Kurven-Ursprung (v157.49): Versatz zur Canvas-Mitte in
+           Prozent des halben Canvas-Masses (x rechts+, y unten+ — wie
+           Pan-Y). Gilt für ALLE Layer, solange «Center of Curve» auf
+           Fixed steht; bei Random tragen die Kurven ihre eigenen
+           _centerX/_centerY-Felder mit Vorrang. Schreibweg:
+           g4mStore.patchCurveCenter. */
+        curveCenter: { x: 0, y: 0 },
+
         // Superformel-Parametergrenzen (Querschnitt §5 -> §3);
         // Schreibweg ausschliesslich g4mStore.patchSuperformulaParams
         superformulaParams: {
@@ -4016,6 +4369,24 @@ const g4mStore = (function () {
            moduliert den Superformel-Radius r(θ) mit Sin/Cos/Tan.
            Gleiche Defaults, aus bis zur User-Entscheidung. */
         sfModulation: { enabled: false, type: 'sin', strength: 0.71, freq: 19.1 },
+
+        /* F3 «Harmonics» (v157.51): Min/Max-Bereiche der Zufallsziehung
+           pro Kurve — K = Anzahl Oberwellen, A = Amplitude je Welle,
+           k = Frequenz (Wellenberge um den Kreis). Schreibweg:
+           g4mStore.patchFourierParams. */
+        fourierParams: {
+            harm: { min: 2,    max: 5    },
+            amp:  { min: 0.10, max: 0.45 },
+            freq: { min: 1,    max: 8    }
+        },
+        // Kurvenfarbe im F3-Panel — analog useRandomColors (F1) und
+        // archUseRandomColors (F2)
+        fourierUseRandomColors: true,
+        fourierDefaultColor: '#F08A4B',
+        /* F3-Kurven-Modulation (v157.53): analog sfModulation —
+           moduliert r(θ) mit Sin/Cos/Tan. Gleiche Defaults, aus bis
+           zur User-Entscheidung. */
+        fourierModulation: { enabled: false, type: 'sin', strength: 0.71, freq: 19.1 },
 
         // Offen-Zustand aller Overlay-Panels (Panel-Id -> bool)
         panels: {},
@@ -4075,6 +4446,9 @@ const g4mStore = (function () {
         // Verschachtelte Teilbäume — pro Teilbaum genau EIN Schreibweg
         patchArch:               patchSubtree('archimedeanParams'),
         patchViewParams:         patchSubtree('viewParams'),
+        patchCurveCenter:        patchSubtree('curveCenter'),   // Kurven-Ursprung (v157.49)
+        patchFourierParams:      patchSubtree('fourierParams'), // F3 «Harmonics» (v157.51)
+        patchFourierModulation:  patchSubtree('fourierModulation'), // F3-Modulation (v157.53)
         patchArchModulation:     patchSubtree('archModulation'),
         patchSfModulation:       patchSubtree('sfModulation'),
         patchSuperformulaParams: patchSubtree('superformulaParams'),
@@ -4169,6 +4543,8 @@ const G4M_PANELS = {
     /* Aktiv-Farben der F-Buttons liegen im Stylesheet
        (#fN-btn.g4m-btn-active) — nicht mehr hier (Befund 9) */
     'f3-panel':             { openAttr: 'data-panel-open',     side: 'canvas', zoomed: true  },
+    'f3-options-panel':     { openAttr: 'data-f3-opts-open',   side: 'canvas', zoomed: true  },   // Page 2 (v157.52)
+    'f3-formula-panel':     { openAttr: 'data-open',           side: 'tools',  zoomed: true  },   // Formel-Erklärung (v157.52)
     'f4-panel':             { openAttr: 'data-panel-open',     side: 'canvas', zoomed: true  },
     'f5-panel':             { openAttr: 'data-panel-open',     side: 'canvas', zoomed: true  },
     'f6-panel':             { openAttr: 'data-panel-open',     side: 'canvas', zoomed: true  },
@@ -4320,7 +4696,7 @@ const G4M_MODE_BUTTONS = Object.freeze({
    nichts; wo die App zwischen «Formel gewählt» und «Formel gewählt UND
    benutzbar» unterscheiden muss, entscheidet diese Liste. Zieht eine
    neue Formel ein, kommt ihr Modus-Schlüssel hier dazu. */
-const G4M_MODES_READY = Object.freeze(['superformula', 'archimedean']);
+const G4M_MODES_READY = Object.freeze(['superformula', 'archimedean', 'f3']);
 /* Anzeigenamen der Formeln — EINE Quelle für den Modus-Indikator
    und die Hover-Titel der F-Buttons (gesetzt in initToolbarButtons).
    Zieht eine neue Formel ein, ist ihr Name genau dieser eine Eintrag. */
@@ -4329,7 +4705,8 @@ const G4M_MODE_NAMES = Object.freeze({
     /* F2 ist die Spiral-FAMILIE (v156.0) — angezeigt wird die gewählte
        Bauart, siehe g4mModeName. Der Eintrag hier ist nur der Rückfall. */
     archimedean:  'Archimedean',
-    f3: 'Coming soon', f4: 'Coming soon', f5: 'Coming soon',
+    f3: 'Harmonics',   // v157.51: r(θ) = 1 + Σ aₖ·sin(k·θ + φₖ)
+    f4: 'Coming soon', f5: 'Coming soon',
     f6: 'Coming soon', f7: 'Coming soon', f8: 'Coming soon',
     f9: 'Coming soon', f10: 'Coming soon'
 });
@@ -4411,7 +4788,15 @@ const sliderData = {
     'zoom': { min: 0.1, max: 10, value: 1, step: 0.1 },
     'pan-x': { min: -500, max: 500, value: 0, step: 1 },
     'pan-y': { min: -500, max: 500, value: 0, step: 1 },
-    'rotation': { min: 0, max: 360, value: 0, step: 1 }
+    'rotation': { min: 0, max: 360, value: 0, step: 1 },
+    /* Center of Curve (v157.49): Ursprungs-Versatz je Achse in Prozent
+       des halben Canvas-Masses. ±100 = Canvas-Rand, ±133 ≈ ⅓ darüber
+       hinaus (User-Spezifikation). KEINE eigene Slider-Zeile im
+       klassischen Sinn — die Einträge speisen Grenzen/Schritt/Format
+       der Zufallsbereiche (g4mRandomRange, g4mCommitRandomBound) und
+       die Klemmung beim Canvas-Drag. */
+    'center-x': { min: -133, max: 133, value: 0, step: 1 },
+    'center-y': { min: -133, max: 133, value: 0, step: 1 }
 };
 
 /* ── Animationsdauern: EINE Quelle für CSS und JS ─────────────────
@@ -5229,7 +5614,76 @@ const sliderData = {
    «, var(--g4m-raise-crisp)» in den drei Griff-Regeln — die knappe
    Schulter aus v157.46 bleibt dafür definiert. Alle übrigen Reliefs
    (Kacheln, Buttons, D-Pad) sind unberührt. */
-const G4M_RELEASE = Object.freeze({ version: 'v157.48', date: '29.07.2026' });
+/* v157.49: DYNAMISCHER KURVEN-URSPRUNG («Center of Curve», User-Wunsch
+   30.07.). Bisher lag der Nullpunkt jeder Kurve fest in der Canvas-
+   Mitte. Neu trägt das Tool-Panel unten rechts (dem bisherigen
+   Defaults-Platz — Defaults rückte 2u nach oben auf ein Reservefeld)
+   die Kachel «Center of Curve»: Random AUS = EIN fester Ursprung für
+   alle Layer, per Klick/Drag direkt auf der Canvas versetzbar (live,
+   wie Pan); Random AN = der Ursprung wird PRO LAYER beim Go gezogen,
+   X und Y getrennt aus je einem Min/Max-Bereich. Einheit: Prozent des
+   halben Canvas-Masses (−133 … +133; 100 = Rand, 133 ≈ ⅓ darüber
+   hinaus) — prozentual, damit gespeicherte Ursprünge bei Resize, im
+   Viz-Result und im High-Res-Export korrekt mitskalieren. Per-Layer-
+   Werte liegen als _centerX/_centerY im Parametersatz der Kurve
+   (Vorrang-Philosophie wie transparency, v157.27); fehlen sie, gilt
+   der globale feste Versatz aus g4mState.curveCenter. Der Zoom-/
+   Rotations-Drehpunkt (applyViewTransform) bleibt bewusst die ECHTE
+   Canvas-Mitte — die Ansicht dreht das Gesamtbild, nicht jede Kurve
+   um sich selbst. */
+/* v157.50: BESCHRIFTUNG DER CENTER-KACHEL VEREINHEITLICHT (User-
+   Befund 30.07.). Die Editor-Zeile heisst schlicht «Center of Curve»
+   wie alle anderen Zeilen (der Klammerzusatz mit dem Wertebereich
+   entfiel — die Rails klemmen ohnehin, und die Wertefelder zeigen die
+   Grenzen). Die Kachel zeigt im Random-Modus nicht mehr das Wort
+   «Random» (stand doppelt zum Random-Button und verwirrte), sondern
+   die Bereiche in der überall gültigen «min–max»-Notation (v157.28) —
+   zweizeilig, weil hier ZWEI Achsen ihren Bereich tragen. */
+/* v157.51: F3 «HARMONICS» — die dritte Formel (User-Wunsch 30.07.).
+   r(θ) = 1 + Σₖ aₖ·sin(k·θ + φₖ): ein Kreis, dem pro Kurve K zufällige
+   Sinus-Oberwellen aufgeprägt werden — organisch-blobartige bis
+   zackige Formen, jede Layer zieht Anzahl (K), Frequenzen (k),
+   Amplituden (aₖ) und Phasen (φₖ) neu. Vollständige Integration nach
+   dem F1-Muster: eigener Renderer in G4M_RENDERERS ('f3', _type-
+   dispatcht), eigenes 12x12-Panel in der F3-Modusfarbe (3 Parameter-
+   Quadrate K/A/k mit Min/Max-Slider-Feld, Color-Quadrat mit Random/
+   Fixed + Farbwähler, Min-/Max-/Result-Viz, Baby-Go), eigener
+   Parameter-Ast fourierParams im Store (persistiert), Panel-Defaults
+   beim ersten Öffnen (G4M_DEFAULTS.f3Panel), Aufnahme in
+   G4M_MODES_READY/G4M_MODE_NAMES (Formel-Menü, Hover-Titel, Tools-
+   Abdeckungs-Hinweis laufen automatisch mit). Tool-Panel-Mechanik
+   (Normalization, Radial-Modulation, Per-Layer-Random, Transparenz,
+   Center of Curve v157.49) wirkt unverändert, weil F3 wie F1 eine
+   reine r(θ)-Formel über die gemeinsame Pipeline ist. Bewusst OHNE
+   eigene Kurven-Modulation (Sin/Cos/Tan wie F1/F2): die Oberwellen
+   SIND bereits die Radius-Modulation — eine zweite Schicht darüber
+   wäre redundant. */
+/* v157.52: F3 — FORMULA-PANEL UND PAGE 2 (User-Wunsch 30.07.). Die
+   beiden Reservefelder der F3-Kopfzeile werden zu echten Buttons wie
+   auf F1/F2: «Page 2» öffnet f3-options-panel (Auslegung wie
+   sf-/arch-options: vorerst leer für künftige Optionen), «Formula»
+   öffnet f3-formula-panel auf der Navigation-Seite — es zeigt die
+   Formel r(θ) = 1 + Σ Aⱼ·sin(kⱼθ + φⱼ) und ERKLÄRT die Parameter
+   (K, A, k, φ), denn die Buchstaben allein sagen dem User nichts
+   (Anlass dieser Version). Choreografie 1:1 vom F2-Vorbild
+   übernommen: gleiche Z-Ebenen-Tänze (OPTIONS/CARRIER_ABOVE),
+   D-Pad-Pfeile schliessen mit (links/unten = Page 2, rechts/oben =
+   Formula), Panel-Schliessen räumt beide Unterseiten ab. */
+/* v157.53: F3 — MODULATION + FORMEL-NAME + LEERE RELIEF-FELDER
+   (User-Wunsch 30.07., drei Punkte). 1) Das Formel-Panel nennt die
+   Formel jetzt beim Namen: «Harmonic circle deformation (Fourier
+   blobs)». 2) F3 erhält die volle Kurven-Modulation nach dem exakten
+   F1-Muster (der Verzicht aus v157.51 ist damit revidiert — der User
+   will den Regler): Modulation-Quadrat, Sin/Cos/Tan oben und On/Off
+   unten im reserve6-Block, Strength/Freq-Zeile im Slider-Feld,
+   Zustand fourierModulation im Store (persistiert, patchFourier-
+   Modulation), Wirkung über g4mApplyF3Modulation auf r(θ) — live auf
+   Vorschau, Canvas und Result wie bei F1. 3) Die unteren 1u-Zellen
+   des reserve6-Blocks zeigen ausserhalb von «Modulation»/«Color» das
+   LEERE Rasterfeld mit Relief (g4m-arch-mod-hidden-Mechanik von
+   F1/F2) statt nackter Reserven — dafür die F3-Farbableitungen der
+   beiden generischen !important-Regeln. */
+const G4M_RELEASE = Object.freeze({ version: 'v157.53', date: '30.07.2026' });
 const G4M_BUILD = G4M_RELEASE.version;   // Kurzform für Titel und Konsole
 document.title = document.title + ' · ' + G4M_BUILD;
 console.log('g4m build', G4M_BUILD, '·', G4M_RELEASE.date);
@@ -5355,7 +5809,9 @@ const DISPLAY_FORMATS = {
     'rotation':             { decimals: 0, unit: '°' },
     'modulation-amplitude': { decimals: 2 },
     'modulation-frequency': { decimals: 1 },
-    'modulation-phase':     { decimals: 0, unit: '°' }
+    'modulation-phase':     { decimals: 0, unit: '°' },
+    'center-x':             { decimals: 0, unit: '%' },
+    'center-y':             { decimals: 0, unit: '%' }
 };
 
 /* ── G4M_DEFAULTS — DIE eine Quelle aller Default-Werte (Befund 11).
@@ -5449,6 +5905,21 @@ const G4M_DEFAULTS = {
            Werte für den Moment, in dem der User sie aktiviert. */
         modulation: { enabled: false, type: 'sin', strength: 0.71, freq: 19.1 },
         connectingLines: false
+    },
+
+    /* F3-Panel-Öffnung (v157.51) — Tool-Slider-Vorbelegung beim ERSTEN
+       Öffnen (g4mInitPanelOnce, wie F1/F2): moderate Layer-Zahl und
+       höhere Punktdichte, damit die Oberwellen glatt gezeichnet werden;
+       Transparenz für die typische Überlagerungs-Ästhetik. */
+    f3Panel: {
+        sliders: {
+            'number-of-layers': 12, 'number-of-points': 240,
+            'number-of-pixels': 100, 'point-size': 3,
+            'line-thickness': 2.0, 'transparency': 55,
+            'zoom': 1.2, 'pan-x': 0, 'pan-y': 0, 'rotation': 0,
+            'modulation-amplitude': 0, 'modulation-frequency': 0,
+            'modulation-phase': 0
+        }
     }
 };
 
@@ -5684,6 +6155,15 @@ const G4M_RANDOM_CAPABLE_IDS = new Set(
     G4M_SLIDER_ROWS.filter(function (r) { return r.radio !== false; })
                    .map(function (r) { return r.id; })
 );
+/* «Center of Curve» (v157.49) ist Random-fähig, aber KEINE Zeile in
+   G4M_SLIDER_ROWS (eigene Zwei-Achsen-Editor-Zeile, buildCenterRow):
+   der EINE Schalt-Zustand läuft unter der Id 'curve-center'; die
+   Zufallsbereiche der Achsen liegen unter 'center-x'/'center-y'.
+   Der «Random»-Button (g4mUpdateRandomCaption) funktioniert damit
+   unverändert; handleRandomModeChange/applySliderFreezeState steigen
+   mangels sliders['curve-center'] früh aus — die Center-eigene Optik
+   pflegt g4mUpdateCenterUi über den randomMode-Bus. */
+G4M_RANDOM_CAPABLE_IDS.add('curve-center');
 
 /* Anzeigeformat eines Slider-Werts — identische Semantik wie
    formatDisplayValue() in createSlider (DISPLAY_FORMATS-basiert) */
@@ -5918,6 +6398,225 @@ function buildRandomRangeLines() {
 }
 buildRandomRangeLines();
 
+/* ══════════════════════════════════════════════════════════════════
+   CENTER OF CURVE (v157.49) — dynamischer Kurven-Ursprung
+   ══════════════════════════════════════════════════════════════════
+   EINE Kachel (unten rechts im Parameter-Raster), EIN Random-Schalter
+   (Id 'curve-center', über den bestehenden «Random»-Button), ZWEI
+   Achsen: die Zufallsbereiche liegen unter 'center-x'/'center-y' im
+   normalen randomRanges-Ast — g4mRandomRange, g4mCommitRandomBound
+   und g4mSyncRandomRow arbeiten unverändert darauf, weil die
+   Eingabe-Ids exakt dem Muster g4m-rp-<id>-<seite> folgen.
+   Fixed-Ansicht: Hinweis + X/Y-Anzeige; das Setzen läuft per Klick/
+   Drag direkt auf der Canvas (initCurveCenterDrag unten). */
+function buildCenterRow() {
+    const container = document.querySelector('.sliders-container');
+    if (!container || document.getElementById('curve-center')) return;
+
+    const rowEl = document.createElement('div');
+    rowEl.className = 'slider-row slider-blue g4m-center-row';
+    rowEl.id = 'curve-center';
+
+    // Kopfzeile — Anatomie wie die generierten Slider-Zeilen
+    const top = document.createElement('div');
+    top.className = 'slider-top-row no-radio';
+    const label = document.createElement('div');
+    label.className = 'slider-label';
+    label.textContent = 'Center of Curve';   // schlicht wie alle anderen Zeilen (v157.50)
+    top.appendChild(label);
+    rowEl.appendChild(top);
+
+    // Fixed-Ansicht: Hinweis + Live-Anzeige des festen Versatzes
+    const fixed = document.createElement('div');
+    fixed.className = 'g4m-cc-fixed';
+    const hint = document.createElement('span');
+    hint.className = 'g4m-cc-hint';
+    hint.textContent = 'Click or drag on the canvas to move the center of all curves.';
+    const vals = document.createElement('span');
+    vals.className = 'g4m-cc-vals';
+    vals.innerHTML = '';   // XSS-Hygiene: unten per createElement gefüllt
+    ['x', 'y'].forEach(function (ax) {
+        const cap = document.createElement('span');
+        cap.textContent = (ax === 'x' ? 'X ' : '\u2002\u00B7\u2002Y ');
+        const b = document.createElement('b');
+        b.id = 'g4m-cc-' + ax;
+        b.textContent = '0%';
+        vals.appendChild(cap); vals.appendChild(b);
+    });
+    fixed.appendChild(hint); fixed.appendChild(vals);
+    rowEl.appendChild(fixed);
+
+    // Random-Ansicht: je Achse eine Zeile Min-Rail/Feld + Max-Rail/Feld
+    const rnd = document.createElement('div');
+    rnd.className = 'g4m-cc-rnd';
+    const head = document.createElement('div');
+    head.className = 'g4m-cc-axis g4m-cc-axhead';
+    ['', 'Min', '', 'Max', ''].forEach(function (t) {
+        const s = document.createElement('span');
+        s.textContent = t;
+        head.appendChild(s);
+    });
+    rnd.appendChild(head);
+
+    [['center-x', 'X'], ['center-y', 'Y']].forEach(function (axis) {
+        const id = axis[0], data = sliderData[id], range = g4mRandomRange(id);
+        const line = document.createElement('div');
+        line.className = 'g4m-cc-axis';
+        const axlbl = document.createElement('span');
+        axlbl.className = 'g4m-cc-axlbl';
+        axlbl.textContent = axis[1];
+        line.appendChild(axlbl);
+
+        [['min', 'Min'], ['max', 'Max']].forEach(function (side) {
+            const input = document.createElement('input');
+            input.type = 'range';
+            input.id = 'g4m-rp-' + id + '-' + side[0];
+            input.min = data.min; input.max = data.max;
+            input.step = data.step; input.value = range[side[0]];
+            input.setAttribute('aria-label', side[1] + ' random center ' + axis[1]);
+            setRangeFill(input);
+            input.addEventListener('input', function () {
+                g4mCommitRandomBound(id, side[0], parseFloat(input.value));
+                g4mUpdateCenterUi();   // Kachel/Zustand mitführen (Bereich wirkt beim nächsten Go)
+            });
+            line.appendChild(input);
+
+            const box = document.createElement('div');
+            box.className = 'g4m-val-box';
+            box.id = 'g4m-rp-box-' + id + '-' + side[0];
+            box.textContent = g4mFmtRandomVal(id, range[side[0]]);
+            line.appendChild(box);
+        });
+        rnd.appendChild(line);
+    });
+    rowEl.appendChild(rnd);
+    container.appendChild(rowEl);
+
+    // Startzustand aus dem (ggf. wiederhergestellten) Store spiegeln
+    g4mSyncRandomRow('center-x');
+    g4mSyncRandomRow('center-y');
+    g4mUpdateCenterUi();
+}
+
+/* EINE Optik-Senke für alles rund um den Kurven-Ursprung: Kachelwert,
+   Zeilen-Ansicht (Fixed/Random), Ausgrauen der Kachel und den
+   Crosshair-Cursor der Canvas. Gerufen von Kachelwechsel
+   (g4mSelectParam), Random-Bus, Canvas-Drag und Defaults. */
+function g4mUpdateCenterUi() {
+    const isRandom = (typeof g4mIsRandomMode === 'function') && g4mIsRandomMode('curve-center');
+    const row = document.getElementById('curve-center');
+    if (row) row.classList.toggle('g4m-cc-random', isRandom);
+    const sq = document.getElementById('g4m-sq-curve-center');
+    if (sq) sq.classList.toggle('g4m-sq-random', isRandom);
+    const c = g4mState.curveCenter || { x: 0, y: 0 };
+    const val = document.getElementById('g4m-sqval-curve-center');
+    if (val) {
+        if (isRandom) {
+            /* Bereichs-Anzeige wie auf allen anderen Kacheln (v157.28,
+               «min–max») — nur zweizeilig, weil hier ZWEI Achsen ihren
+               Bereich tragen. Das Wort «Random» stand doppelt zum
+               Random-Button und verwirrte (v157.50). */
+            const rx = g4mRandomRange('center-x');
+            const ry = g4mRandomRange('center-y');
+            val.textContent =
+                'X ' + g4mFmtRandomVal('center-x', rx.min) + '\u2013' + g4mFmtRandomVal('center-x', rx.max) +
+                '\nY ' + g4mFmtRandomVal('center-y', ry.min) + '\u2013' + g4mFmtRandomVal('center-y', ry.max);
+        } else {
+            val.textContent = Math.round(c.x) + '/' + Math.round(c.y) + '%';
+        }
+    }
+    const bx = document.getElementById('g4m-cc-x');
+    const by = document.getElementById('g4m-cc-y');
+    if (bx) bx.textContent = Math.round(c.x) + '%';
+    if (by) by.textContent = Math.round(c.y) + '%';
+    // Crosshair nur, solange die Center-Kachel aktiv ist UND Fixed gilt
+    const dragReady = !!row && row.classList.contains('g4m-row-active') && !isRandom;
+    if (typeof canvas !== 'undefined' && canvas) {
+        canvas.classList.toggle('g4m-cc-drag', dragReady);
+    }
+}
+
+/* Random-Umschaltung des Ursprungs: An => beim nächsten Go pro Layer
+   ziehen (needsRegen wie bei allen Random-Schaltern); Aus => die
+   eingefrorenen Per-Layer-Ursprünge freigeben, damit der globale
+   feste Versatz wieder LIVE auf das bestehende Bild wirkt — exakt
+   die Vorrang-Philosophie von v157.27, nur mit Löschen statt
+   Überschreiben (der feste Versatz soll ja beweglich bleiben). */
+g4mBus.on('randomMode', function (ev) {
+    if (!ev || ev.sliderId !== 'curve-center') return;
+    if (ev.isRandom) {
+        needsRegen = true;
+    } else {
+        [storedCurveParameters, allGeneratedParameters].forEach(function (pool) {
+            if (!Array.isArray(pool)) return;
+            for (let i = 0; i < pool.length; i++) {
+                if (pool[i]) { delete pool[i]._centerX; delete pool[i]._centerY; }
+            }
+        });
+        if (storedCurveParameters.length && typeof redrawStoredImage === 'function') {
+            redrawStoredImage();
+        }
+    }
+    g4mUpdateCenterUi();
+});
+
+/* Eine Achsen-Ziehung für die Generierung: gleiche Rasterung auf den
+   Slider-Schritt wie g4mRandomizedValue — nur ohne dessen Modus-
+   Abfrage (der Modus hängt am gemeinsamen Schalter 'curve-center',
+   nicht an den Achsen-Ids). */
+function g4mDrawCenterPct(axisId) {
+    const r = g4mRandomRange(axisId);
+    if (r.min === r.max) return r.min;
+    const step = (sliderData[axisId] || {}).step || 1;
+    const raw = getRandomNumber(r.min, r.max);
+    return Math.min(r.max, Math.round((raw - r.min) / step) * step + r.min);
+}
+
+/* ── Canvas-Klick/-Drag setzt den festen Ursprung ─────────────────
+   Aktiv NUR, wenn die Center-Kachel gewählt ist und Fixed gilt —
+   sonst bleibt die Canvas frei von Zeiger-Nebenwirkungen. Pointer-
+   Capture erlaubt das Ziehen ÜBER den Canvas-Rand hinaus (bis zur
+   ±133-%-Klemme aus sliderData). Redraw rAF-gedrosselt, damit das
+   Ziehen auch bei vielen Layern flüssig bleibt. */
+(function initCurveCenterDrag() {
+    if (typeof canvas === 'undefined' || !canvas) return;
+    let dragging = false, raf = 0;
+    function centerDragActive() {
+        const row = document.getElementById('curve-center');
+        return !!row && row.classList.contains('g4m-row-active')
+            && !g4mIsRandomMode('curve-center');
+    }
+    function setFromEvent(e) {
+        const r = canvas.getBoundingClientRect();
+        if (!r.width || !r.height) return;
+        const lim = sliderData['center-x'];   // beide Achsen: gleiche Spanne
+        let x = ((e.clientX - r.left) / r.width  * 2 - 1) * 100;
+        let y = ((e.clientY - r.top)  / r.height * 2 - 1) * 100;
+        x = Math.max(lim.min, Math.min(lim.max, Math.round(x)));
+        y = Math.max(lim.min, Math.min(lim.max, Math.round(y)));
+        g4mStore.patchCurveCenter(function (c) { c.x = x; c.y = y; });
+        g4mUpdateCenterUi();
+        if (!raf) raf = requestAnimationFrame(function () {
+            raf = 0;
+            if (storedCurveParameters.length && typeof redrawStoredImage === 'function') {
+                redrawStoredImage();
+            }
+        });
+    }
+    canvas.addEventListener('pointerdown', function (e) {
+        if (!centerDragActive()) return;
+        dragging = true;
+        try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* ohne Capture weiter */ }
+        setFromEvent(e);
+        e.preventDefault();
+    });
+    canvas.addEventListener('pointermove', function (e) { if (dragging) setFromEvent(e); });
+    ['pointerup', 'pointercancel'].forEach(function (type) {
+        canvas.addEventListener(type, function () { dragging = false; });
+    });
+})();
+buildCenterRow();
+
 /* ── Max-Rail auf die Tool-Rail-Linie messen (v157.30) ────────────
    Dieselbe Mess-Philosophie wie g4mAlignRailsToTool, nur mit
    umgekehrter Rolle: DIE TOOL-RAIL ist der Anker, an dem schon die
@@ -6017,6 +6716,10 @@ function g4mSelectParam(id) {
     // On/Off-Schalter unter "Random Tools": passendes Paar einblenden
     // (bei Parametern ohne Random bleibt der graue Reserve-Look).
     if (typeof g4mUpdateRandomCaption === 'function') g4mUpdateRandomCaption();
+    /* Center of Curve (v157.49): Crosshair-Cursor der Canvas und die
+       Fixed/Random-Ansicht der Center-Zeile hängen an der AKTIVEN
+       Kachel — nach jedem Kachelwechsel nachführen. */
+    if (typeof g4mUpdateCenterUi === 'function') g4mUpdateCenterUi();
 }
 /* ── Raster der weissen Tools-Abdeckung (v155.1) ──────────────────
    Zeichnet als feine hellgraue Linien nach, was UNTER der Abdeckung
@@ -6077,11 +6780,13 @@ function buildParamGrid() {
     const grid = document.getElementById('g4m-param-grid');
     if (!grid) return;
 
-    /* Belegung (User-Spezifikation v150l):
-       Zeile 1 = 6 grüne · Zeile 2 = 3 orange + 3 Reservefelder ·
+    /* Belegung (User-Spezifikation v150l, Revision v157.49):
+       Zeile 1 = 6 grüne · Zeile 2 = 3 orange + 2 Reservefelder +
+       DEFAULTS (2u hochgerückt auf das frühere Reservefeld) ·
        Zeile 3 = die 5 blauen (Zoom, Pan-X, Pan-Y, Rotation,
-       Normalization) + Defaults unten rechts. Innerhalb der Gruppen
-       bleibt die bisherige Slider-Reihenfolge erhalten. */
+       Normalization) + «Center of Curve» unten rechts auf dem
+       bisherigen Defaults-Platz. Innerhalb der Gruppen bleibt die
+       bisherige Slider-Reihenfolge erhalten. */
     function sliderEntry(r) {
         return { id: r.id, color: r.color, label: g4mShortParamLabel(r.label),
                  value: g4mFormatSliderValue(r.id, sliderData[r.id].value) };
@@ -6091,10 +6796,11 @@ function buildParamGrid() {
     };
     const entries = byColor('green')
         .concat(byColor('orange'))
-        .concat([null, null, null])               // Reservefelder Zeile 2 rechts
+        .concat([null, null, 'g4m-defaults'])     // 2 Reservefelder + Defaults (v157.49: 2u hochgerückt)
         .concat(byColor('blue'))
         .concat([{ id: 'normalization-row', color: 'blue', label: 'Normalization',
-                   value: g4mState.normalizationEnabled ? 'On' : 'Off' }]);
+                   value: g4mState.normalizationEnabled ? 'On' : 'Off' },
+                 'g4m-center']);                  // «Center of Curve» auf dem alten Defaults-Platz
 
     entries.forEach(function (en) {
         if (en === null) {                        // Reservefeld
@@ -6102,6 +6808,36 @@ function buildParamGrid() {
             blank.className = 'g4m-param-sq g4m-sq-blank';
             blank.setAttribute('aria-hidden', 'true');
             grid.appendChild(blank);
+            return;
+        }
+        if (en === 'g4m-defaults') {              // Defaults (v157.49: Zeile 2, Spalte 6)
+            const def = document.createElement('button');
+            def.type = 'button';
+            def.className = 'g4m-param-sq';
+            def.id = 'g4m-sq-defaults';
+            const dlab = document.createElement('span');
+            dlab.className = 'g4m-sq-value';
+            dlab.textContent = 'Defaults';
+            def.appendChild(dlab);
+            def.addEventListener('click', function () { resetToDefaults(); });
+            grid.appendChild(def);
+            return;
+        }
+        if (en === 'g4m-center') {                // Center of Curve (v157.49)
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'g4m-param-sq g4m-sq-blue';
+            b.id = 'g4m-sq-curve-center';
+            const lab = document.createElement('span');
+            lab.className = 'g4m-sq-label';
+            lab.textContent = 'Center of Curve';
+            const val = document.createElement('span');
+            val.className = 'g4m-sq-value';
+            val.id = 'g4m-sqval-curve-center';
+            val.textContent = '0/0%';
+            b.appendChild(lab); b.appendChild(val);
+            b.addEventListener('click', function () { g4mSelectParam('curve-center'); });
+            grid.appendChild(b);
             return;
         }
         const b = document.createElement('button');
@@ -6135,16 +6871,8 @@ function buildParamGrid() {
         grid.appendChild(b);
     });
 
-    const def = document.createElement('button');        // Defaults unten rechts
-    def.type = 'button';
-    def.className = 'g4m-param-sq';
-    def.id = 'g4m-sq-defaults';
-    const dlab = document.createElement('span');
-    dlab.className = 'g4m-sq-value';
-    dlab.textContent = 'Defaults';
-    def.appendChild(dlab);
-    def.addEventListener('click', function () { resetToDefaults(); });
-    grid.appendChild(def);
+    /* Defaults entsteht seit v157.49 in der Marker-Weiche oben
+       (Zeile 2, Spalte 6) — hier gibt es nichts mehr anzuhängen. */
 
     g4mSelectParam(G4M_SLIDER_ROWS[0].id);               // nie eine leere Editor-Zone
 }
@@ -6300,6 +7028,340 @@ function buildSfBoundaryRows() {
     });
 }
 buildSfBoundaryRows();
+
+/* ══════════════════════════════════════════════════════════════════
+   F3 «HARMONICS» — PANEL-MODUL (v157.51)
+   ══════════════════════════════════════════════════════════════════
+   Exakt das F1-Muster: Quadrate sind reine Selektoren, das Slider-
+   Feld zeigt EIN Min/Max-Paar des aktiven Parameters, der Store ist
+   die einzige Wahrheitsquelle (fourierParams). Die magnetische
+   Min/Max-Kopplung (g4mInitRangeCoupling) und die editierbaren
+   Wertefelder (g4mInitValBoxEditing) greifen automatisch, weil die
+   Zeilen die gemeinsamen g4m-arch-*-Klassen tragen. */
+const G4M_F3_BOUNDARY_ROWS = [
+    { param: 'harm', note: 'Harmonics K \u00b7 sine waves per curve [1 \u2026 8]',   min: 1, max: 8,  step: 1,    defMin: 2,    defMax: 5    },
+    { param: 'amp',  note: 'Amplitude A per wave [0.00 \u2026 1.00]',               min: 0, max: 1,  step: 0.01, defMin: 0.10, defMax: 0.45 },
+    { param: 'freq', note: 'Frequency k \u00b7 bumps around the circle [1 \u2026 12]', min: 1, max: 12, step: 1,    defMin: 1,    defMax: 8    }
+];
+const G4M_F3_SQ_PARAMS = ['harm', 'amp', 'freq'];
+
+function g4mF3Fmt(param, v) {
+    return param === 'amp' ? Number(v).toFixed(2) : String(Math.round(v));
+}
+
+function buildF3BoundaryRows() {
+    const host = document.getElementById('f3-boundaries-rows');
+    if (!host) return;
+    G4M_F3_BOUNDARY_ROWS.forEach(function (row) {
+        // Startwerte aus dem (ggf. sitzungs-wiederhergestellten) Store —
+        // nicht aus den Markup-Defaults, damit Restore überlebt.
+        const fp = (g4mState.fourierParams || {})[row.param] || { min: row.defMin, max: row.defMax };
+
+        const prow = document.createElement('div');
+        prow.className = 'g4m-arch-prow';
+        prow.id = 'f3-prow-' + row.param;
+
+        const head = document.createElement('div');
+        head.className = 'g4m-arch-phead';
+        const note = document.createElement('span');
+        note.className = 'g4m-note-text';
+        note.textContent = row.note;
+        const spacer = document.createElement('span');
+        spacer.className = 'g4m-arch-seg-spacer';
+        head.appendChild(note);
+        head.appendChild(spacer);
+        prow.appendChild(head);
+
+        const block = document.createElement('div');
+        block.className = 'g4m-arch-block';
+        [['min', 'Min', 'g4m-arch-lbl-min', 'g4m-arch-rail-min', 'g4m-arch-field-min', fp.min],
+         ['max', 'Max', 'g4m-arch-lbl-max', 'g4m-arch-rail-max', 'g4m-arch-field-max', fp.max]].forEach(function (side) {
+            const cap = document.createElement('span');
+            cap.className = 'g4m-param-label-sm ' + side[2];
+            cap.textContent = side[1];
+            block.appendChild(cap);
+
+            const input = document.createElement('input');
+            input.type = 'range';
+            input.id = 'f3-param-' + row.param + '-' + side[0];
+            input.min = row.min; input.max = row.max;
+            input.step = row.step; input.value = side[5];
+            input.className = 'g4m-row-flex ' + side[3];
+            block.appendChild(input);
+
+            const box = document.createElement('div');
+            box.id = 'f3-val-' + row.param + '-' + side[0];
+            box.className = 'g4m-val-box ' + side[4];
+            box.textContent = g4mF3Fmt(row.param, side[5]);
+            block.appendChild(box);
+        });
+        prow.appendChild(block);
+        host.appendChild(prow);
+    });
+}
+buildF3BoundaryRows();
+
+/* Wertespiegel der F3-Quadrate (Min/Max je Parameter, Color-Status) */
+function g4mF3UpdateSqVals() {
+    const fp = g4mState.fourierParams || {};
+    G4M_F3_SQ_PARAMS.forEach(function (param) {
+        const el = document.getElementById('f3-sqval-' + param);
+        if (el && fp[param]) {
+            el.textContent = 'Min. ' + g4mF3Fmt(param, fp[param].min)
+                   + '\n' + 'Max. ' + g4mF3Fmt(param, fp[param].max);
+        }
+    });
+    const colEl = document.getElementById('f3-sqval-color');
+    if (colEl) colEl.textContent = (g4mState.fourierUseRandomColors !== false) ? 'Random' : 'Fixed';
+    // Modulation-Quadrat: Statustext wie F1 (v157.53)
+    const mEl = document.getElementById('f3-sqval-mod');
+    if (mEl) {
+        const mod = g4mState.fourierModulation || {};
+        mEl.textContent = mod.enabled ? String(mod.type || 'sin') : 'Off';
+    }
+}
+
+/* Zeigt genau eine Parameterzeile im F3-Slider-Feld; markiert das
+   aktive Quadrat. Die Color-Zellen (On/Off + Farbwähler) sind NUR
+   bei «Color» sichtbar — wie F1. */
+function g4mF3SelectParam(param) {
+    document.querySelectorAll('#f3-panel .g4m-arch-sq')
+        .forEach(function (sq) { sq.classList.remove('g4m-arch-sq-active'); });
+    document.querySelectorAll('#f3-panel .g4m-arch-prow')
+        .forEach(function (row) { row.classList.remove('g4m-arch-prow-active'); });
+    const sq  = document.getElementById('f3-sq-' + param);
+    const row = document.getElementById('f3-prow-' + param);
+    if (sq)  sq.classList.add('g4m-arch-sq-active');
+    if (row) row.classList.add('g4m-arch-prow-active');
+    /* Sin/Cos/Tan/On/Off bilden das Grundraster (v157.53, wie F1/F2):
+       bei «mod» mit Inhalt, sonst LEERES Rasterfeld mit Relief
+       (g4m-arch-mod-hidden — User-Wunsch). Die Color-Zellen sind NUR
+       bei «color» sichtbar. */
+    const showMod = (param === 'mod');
+    const showCol = (param === 'color');
+    document.querySelectorAll('#f3-panel .g4m-arch-reserve6 .g4m-arch-botmod')
+        .forEach(function (b) { b.classList.toggle('g4m-arch-mod-hidden', !showMod); });
+    document.querySelectorAll('#f3-panel .g4m-arch-reserve6 .g4m-arch-botcol')
+        .forEach(function (b) { b.style.visibility = showCol ? 'visible' : 'hidden'; });
+    g4mF3UpdateSqVals();
+}
+
+/* ── Viz-Vorschau (Min/Max) ───────────────────────────────────────
+   DETERMINISTISCHE Repräsentanten statt Zufall (die Vorschau soll
+   beim Ziehen stehen, nicht flackern): K und A der jeweiligen Seite,
+   Frequenzen gleichmässig über den k-Bereich verteilt, Phasen im
+   Goldenen Winkel gestaffelt. */
+function g4mF3PreviewPoints(kind) {
+    const fp = g4mState.fourierParams;
+    if (!fp) return [];
+    const K = Math.max(1, Math.round(fp.harm[kind]));
+    const a = fp.amp[kind];
+    const harmonics = [];
+    for (let j = 0; j < K; j++) {
+        const t = (K === 1) ? 0.5 : j / (K - 1);
+        harmonics.push({
+            k: Math.round(fp.freq.min + t * (fp.freq.max - fp.freq.min)),
+            a: a,
+            p: j * 2.399963   // Goldener Winkel in rad
+        });
+    }
+    const points = [];
+    for (let i = 0; i < 160; i++) {
+        const th = i * 2 * Math.PI / 160;
+        // Modulation wie im Renderer (v157.53) — Vorschau = echtes Bild
+        const r = g4mApplyF3Modulation(g4mFourierRadius(harmonics, th), th);
+        points.push({ x: r * Math.cos(th), y: r * Math.sin(th) });
+    }
+    return points;
+}
+
+function drawF3VizFor(kind) {
+    const vc = document.getElementById('f3-viz-' + kind);
+    if (!vc) return;
+    vc.width  = vc.parentElement.clientWidth;
+    vc.height = vc.parentElement.clientHeight;
+    const vctx = vc.getContext('2d');
+    if (!vctx) return;
+    vctx.clearRect(0, 0, vc.width, vc.height);
+    vctx.fillStyle = g4mState.canvasBackgroundColor;   // wie F1/F2 (v157.18)
+    vctx.fillRect(0, 0, vc.width, vc.height);
+    paintNormalizedPath(vctx, g4mF3PreviewPoints(kind), vc.width, vc.height, {
+        close: true,
+        padding: 10,
+        fillStyle: 'rgba(255, 203, 175, 0.45)'   // Pastell-Panelorange
+    });
+}
+function drawF3Visualizations() { ['min', 'max'].forEach(drawF3VizFor); }
+
+/* ── Farbsteuerung des F3-Panels — exakt das F1/F2-Muster ─────────*/
+function g4mSyncF3ColorButtons() {
+    const random = (g4mState.fourierUseRandomColors !== false);
+    g4mSetBotModActive('f3-color-random-on',  random);
+    g4mSetBotModActive('f3-color-random-off', !random);
+    const cell = document.querySelector('#f3-panel .g4m-arch-colorcell');
+    if (cell) cell.classList.toggle('g4m-arch-color-random', random);
+    const cp = document.getElementById('f3-default-color');
+    if (cp && g4mState.fourierDefaultColor) cp.value = g4mState.fourierDefaultColor;
+}
+
+function initF3ColorControls() {
+    const onButton  = document.getElementById('f3-color-random-on');
+    const offButton = document.getElementById('f3-color-random-off');
+    const picker    = document.getElementById('f3-default-color');
+    if (onButton && offButton) {
+        onButton.addEventListener('click', function () {
+            g4mStore.set('fourierUseRandomColors', true);
+            g4mSyncF3ColorButtons();
+            g4mF3UpdateSqVals();
+        });
+        offButton.addEventListener('click', function () {
+            g4mStore.set('fourierUseRandomColors', false);
+            g4mSyncF3ColorButtons();
+            g4mF3UpdateSqVals();
+        });
+    }
+    if (picker) picker.addEventListener('input', function () {
+        g4mStore.set('fourierDefaultColor', this.value);
+        // Fixfarbe live anwenden, wenn Random aus ist — NUR auf F3-Kurven
+        if (g4mState.fourierUseRandomColors === false) {
+            let touched = false;
+            for (let i = 0; i < storedCurveParameters.length; i++) {
+                const c = storedCurveParameters[i];
+                if (c && c._type === 'f3') { c.color = this.value; touched = true; }
+            }
+            if (touched) redrawStoredImage();
+        }
+    });
+    g4mSyncF3ColorButtons();
+}
+
+/* ── Modulations-Steuerung des F3-Panels (v157.53) ────────────────
+   Buttons und Slider EXAKT an den F1-Positionen (Sin/Cos/Tan oben,
+   On/Off unten, Strength/Freq im Slider-Feld). Zustand:
+   fourierModulation im Store; Wirkung: g4mApplyF3Modulation im
+   Renderer. Jede Änderung wirkt live auf Vorschau, Canvas und
+   Result-Fenster. */
+function g4mSyncF3ModOptics() {
+    const mod = g4mState.fourierModulation || {};
+    g4mSetBotModActive('f3-mod-on',  !!mod.enabled);
+    g4mSetBotModActive('f3-mod-off', !mod.enabled);
+    g4mSetBotModActive('f3-mod-sin', mod.type === 'sin');
+    g4mSetBotModActive('f3-mod-cos', mod.type === 'cos');
+    g4mSetBotModActive('f3-mod-tan', mod.type === 'tan');
+    g4mSetModTypeVisible('f3-mod-', !!mod.enabled);   // Sin/Cos/Tan nur bei On (v154.5)
+}
+
+function initF3ModulationControls() {
+    function applyLive() {
+        g4mSyncF3ModOptics();
+        g4mF3UpdateSqVals();
+        drawF3Visualizations();   // Min/Max-Vorschau
+        redrawStoredImage();      // Canvas + Result live
+    }
+
+    const onBtn  = document.getElementById('f3-mod-on');
+    const offBtn = document.getElementById('f3-mod-off');
+    if (onBtn) onBtn.addEventListener('click', function () {
+        g4mStore.patchFourierModulation(function (mod) { mod.enabled = true; });
+        applyLive();
+    });
+    if (offBtn) offBtn.addEventListener('click', function () {
+        g4mStore.patchFourierModulation(function (mod) { mod.enabled = false; });
+        applyLive();
+    });
+    [['f3-mod-sin', 'sin'], ['f3-mod-cos', 'cos'], ['f3-mod-tan', 'tan']].forEach(function (pair) {
+        const btn = document.getElementById(pair[0]);
+        if (!btn) return;
+        btn.addEventListener('click', function () {
+            g4mStore.patchFourierModulation(function (mod) { mod.type = pair[1]; });
+            applyLive();
+        });
+    });
+
+    const strSlider = document.getElementById('f3-mod-strength');
+    const strVal    = document.getElementById('f3-mod-strength-val');
+    const freqSlider = document.getElementById('f3-mod-freq');
+    const freqVal    = document.getElementById('f3-mod-freq-val');
+    /* Rails/Felder aus dem (ggf. wiederhergestellten) Store spiegeln —
+       fourierModulation ist persistiert, die Markup-Defaults wären
+       nach einem Restore veraltet. */
+    const mod0 = g4mState.fourierModulation || {};
+    if (strSlider && isFinite(mod0.strength)) {
+        strSlider.value = mod0.strength;
+        setRangeFill(strSlider);
+        if (strVal) strVal.textContent = (+mod0.strength).toFixed(2);
+    }
+    if (freqSlider && isFinite(mod0.freq)) {
+        freqSlider.value = mod0.freq;
+        setRangeFill(freqSlider);
+        if (freqVal) freqVal.textContent = (+mod0.freq).toFixed(1);
+    }
+    if (strSlider) strSlider.addEventListener('input', function () {
+        const v = parseFloat(this.value);
+        g4mStore.patchFourierModulation(function (mod) { mod.strength = v; });
+        if (strVal) strVal.textContent = v.toFixed(2);
+        drawF3Visualizations();
+        redrawStoredImage();
+    });
+    if (freqSlider) freqSlider.addEventListener('input', function () {
+        const v = parseFloat(this.value);
+        g4mStore.patchFourierModulation(function (mod) { mod.freq = v; });
+        if (freqVal) freqVal.textContent = v.toFixed(1);
+        drawF3Visualizations();
+        redrawStoredImage();
+    });
+
+    g4mSyncF3ModOptics();
+}
+
+/* Bereichs-Regler an den Store binden. Die Partner-Kopplung liefert
+   g4mInitRangeCoupling (delegiert, dokumentweit) — löst sie einen
+   Partner aus, läuft dessen eigener Listener hier ebenfalls durch. */
+function initF3RangeInputs() {
+    G4M_F3_BOUNDARY_ROWS.forEach(function (row) {
+        ['min', 'max'].forEach(function (side) {
+            const input = document.getElementById('f3-param-' + row.param + '-' + side);
+            const box   = document.getElementById('f3-val-' + row.param + '-' + side);
+            if (!input || !box) return;
+            input.addEventListener('input', function () {
+                const v = parseFloat(input.value);
+                if (isNaN(v)) return;
+                g4mStore.patchFourierParams(function (fp) { fp[row.param][side] = v; });
+                box.textContent = g4mF3Fmt(row.param, v);
+                g4mF3UpdateSqVals();
+                drawF3VizFor(side);   // Bereiche wirken beim nächsten Go; die Vorschau sofort
+            });
+        });
+    });
+}
+
+/* Tool-Slider-Vorbelegung beim ERSTEN Öffnen (g4mInitPanelOnce) */
+function setF3Defaults() {
+    const d = G4M_DEFAULTS.f3Panel;
+    Object.keys(d.sliders).forEach(function (id) {
+        if (sliders[id]) sliders[id].setValue(d.sliders[id]);
+    });
+}
+
+/* Einmalige Verdrahtung des F3-Panels (gerufen im Boot neben
+   initializeSuperformPanel) — Quadrate, Farben, Regler, Baby-Go. */
+function initF3Panel() {
+    if (!document.getElementById('f3-panel')) return;
+    initF3RangeInputs();
+    initF3ColorControls();
+    initF3ModulationControls();   // Sin/Cos/Tan, On/Off, Strength/Freq (v157.53)
+    g4mF3SelectParam('harm');   // Startauswahl — nie leeres Slider-Feld
+    G4M_F3_SQ_PARAMS.concat(['color', 'mod']).forEach(function (param) {
+        const sq = document.getElementById('f3-sq-' + param);
+        if (sq) sq.addEventListener('click', function () { g4mF3SelectParam(param); });
+    });
+    const go = document.getElementById('f3-baby-go');
+    if (go) go.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (g4mState.homeCoversOn) g4mHideHomeCovers();
+        generateSuperformulas({ skipPrepare: true });
+    });
+}
 
 // Setup drag functionality for sliders
 document.querySelectorAll('.slider-row').forEach(sliderRow => {
@@ -6844,6 +7906,26 @@ function generateSuperformulaParameters(maxSize) {
 
 /* Ansichts-Transformation (Zoom/Pan/Rotation aus den Tool-Slidern)
    um das Canvas-Zentrum; der Aufrufer rahmt mit ctx.save()/restore() */
+/* ── Kurven-Ursprung einer Layer (v157.49) ────────────────────────
+   Liefert den WIRKSAMEN Ursprung: trägt die Kurve eigene Felder
+   (_centerX/_centerY — Random stand beim Generieren an), gelten sie;
+   sonst der globale feste Versatz (g4mState.curveCenter, live).
+   Die Prozentwerte beziehen sich IMMER auf das halbe Mass der
+   HAUPT-Canvas — nicht auf das übergebene centerX. So stimmt der
+   Versatz in allen drei Zeichenwegen: Haupt-Canvas (half == centerX),
+   High-Res-Export (zeichnet in Display-Koordinaten, half == src/2 ==
+   centerX) und Viz-Result (zeichnet in Haupt-Canvas-Pixeln und
+   skaliert per Kontext-Transform — der Versatz muss darum ebenfalls
+   in Haupt-Canvas-Pixeln vorliegen). */
+function g4mLayerCenter(params, centerX, centerY) {
+    const px = (params && typeof params._centerX === 'number')
+        ? params._centerX : (g4mState.curveCenter ? g4mState.curveCenter.x : 0);
+    const py = (params && typeof params._centerY === 'number')
+        ? params._centerY : (g4mState.curveCenter ? g4mState.curveCenter.y : 0);
+    const half = (Math.min(canvas.width, canvas.height) / 2) || 1;
+    return { x: centerX + px / 100 * half, y: centerY + py / 100 * half };
+}
+
 function applyViewTransform(ctx, centerX, centerY) {
     const vp = g4mState.viewParams;   // von §2 bei jeder Slider-Änderung gespiegelt
     const zoom     = vp.zoom;
@@ -6927,7 +8009,11 @@ function g4mApplySfModulation(r, theta) {
 
 function drawSuperformula(ctx, centerX, centerY, params) {
     ctx.save();
+    /* Ansichts-Drehpunkt bleibt die ECHTE Canvas-Mitte (v157.49) —
+       Zoom/Rotation drehen das Gesamtbild; nur die KURVE selbst
+       entsteht um ihren eigenen Ursprung cc. */
     applyViewTransform(ctx, centerX, centerY);
+    const cc = g4mLayerCenter(params, centerX, centerY);
     
     // Punkte berechnen
     const points = [];
@@ -6971,12 +8057,12 @@ function drawSuperformula(ctx, centerX, centerY, params) {
     // Konvertiere zu kartesischen Koordinaten
     const cartesianPoints = [];
     for (let i = 0; i < points.length; i++) {
-        const x = centerX + points[i].finalRadius * Math.cos(points[i].angle);
-        const y = centerY + points[i].finalRadius * Math.sin(points[i].angle);
+        const x = cc.x + points[i].finalRadius * Math.cos(points[i].angle);
+        const y = cc.y + points[i].finalRadius * Math.sin(points[i].angle);
         cartesianPoints.push({ x, y });
     }
     
-    applyRadialModulation(cartesianPoints, centerX, centerY, params);
+    applyRadialModulation(cartesianPoints, cc.x, cc.y, params);
     
     /* Per-Layer-Vorrang (v157.27): trägt die Kurve einen eigenen Wert
        (Random stand beim Generieren an), gilt er; sonst wie bisher der
@@ -7182,6 +8268,130 @@ function prepareSuperformulaGeneration() {
    redrawStoredImage, runGeneration und der High-Res-Export
    dispatchen ausschliesslich hierüber — keine _type-Verzweigungen
    mehr im Ablaufcode. */
+/* ══════════════════════════════════════════════════════════════════
+   F3 «HARMONICS» — RENDERER (v157.51)
+   ══════════════════════════════════════════════════════════════════
+   r(θ) = 1 + Σₖ aₖ·sin(k·θ + φₖ) — der Einheitskreis plus K zufällige
+   Sinus-Oberwellen. Struktureller Zwilling von drawSuperformula:
+   gleiche Pipeline (Normalization, Center of Curve, Radial-Modulation,
+   Per-Layer-Transparenz, renderByDisplayMode), nur die Radius-Formel
+   ist eine andere. */
+/* F3-Kurven-Modulation (v157.53) — exakt die sfModulation-Mechanik:
+   liest den Zustand LIVE aus dem Store, damit Reglerbewegungen ohne
+   Neugenerierung auf bestehende Layer wirken (redrawStoredImage). */
+function g4mApplyF3Modulation(r, theta) {
+    const mod = g4mState.fourierModulation;
+    if (!mod || !mod.enabled) return r;
+    const tt = theta * mod.freq;
+    let mv = 0;
+    if      (mod.type === 'sin') mv = mod.strength * Math.sin(tt);
+    else if (mod.type === 'cos') mv = mod.strength * Math.cos(tt);
+    else if (mod.type === 'tan') mv = mod.strength * Math.max(Math.min(Math.tan(tt), 1), -1);
+    return r * (1 + mv);
+}
+
+function g4mFourierRadius(harmonics, angle) {
+    let r = 1;
+    for (let j = 0; j < harmonics.length; j++) {
+        const h = harmonics[j];
+        r += h.a * Math.sin(h.k * angle + h.p);
+    }
+    return r;
+}
+
+function generateFourierParameters(maxSize) {
+    const fp = g4mState.fourierParams
+        || { harm: { min: 2, max: 5 }, amp: { min: 0.1, max: 0.45 }, freq: { min: 1, max: 8 } };
+    // Grössen-Zufall wie F1 (10 %–100 % von maxSize)
+    const size = getRandomNumber(maxSize * 0.1, maxSize);
+
+    const K = Math.max(1, Math.round(getRandomNumber(fp.harm.min, fp.harm.max)));
+    const harmonics = [];
+    for (let j = 0; j < K; j++) {
+        harmonics.push({
+            k: Math.round(getRandomNumber(fp.freq.min, fp.freq.max)),
+            a: getRandomNumber(fp.amp.min, fp.amp.max),
+            p: getRandomNumber(0, 2 * Math.PI)
+        });
+    }
+
+    // Zufallswerte aus den USER-BEREICHEN (v157.27) — wie F1/F2
+    const pointDensity = g4mRandomizedValue('number-of-points', g4mState.viewParams.toolPoints);
+    const lineWidth    = g4mRandomizedValue('line-thickness',   g4mState.viewParams.lineWidth);
+    const pointSize    = g4mRandomizedValue('point-size',       g4mState.viewParams.pointSize);
+
+    const color = (g4mState.fourierUseRandomColors !== false)
+        ? getRandomColor() : (g4mState.fourierDefaultColor || '#F08A4B');
+
+    return Object.assign({
+        _type: 'f3',
+        harmonics,
+        size,
+        color,
+        pointDensity,
+        lineWidth,
+        pointSize
+    }, g4mPerLayerRandomFields());
+}
+
+function drawFourierBlob(ctx, centerX, centerY, params) {
+    ctx.save();
+    /* Ansichts-Drehpunkt = Canvas-Mitte, Kurven-Ursprung = cc —
+       gleiche Aufteilung wie drawSuperformula (v157.49). */
+    applyViewTransform(ctx, centerX, centerY);
+    const cc = g4mLayerCenter(params, centerX, centerY);
+
+    const points = [];
+    let minRadius = Infinity;
+    let maxRadius = -Infinity;
+    for (let i = 0; i < params.pointDensity; i++) {
+        const angle = i * (2 * Math.PI / params.pointDensity);
+        // Modulation (v157.53) direkt auf den Radius — wie F1
+        const radius = g4mApplyF3Modulation(
+            g4mFourierRadius(params.harmonics || [], angle),
+            angle
+        );
+        if (isFinite(radius)) {
+            minRadius = Math.min(minRadius, radius);
+            maxRadius = Math.max(maxRadius, radius);
+        }
+        points.push({ angle, radius });
+    }
+
+    // Normalisieren wenn aktiviert — identische Mechanik wie F1
+    if (g4mState.normalizationEnabled && maxRadius > minRadius && isFinite(minRadius)) {
+        const range = maxRadius - minRadius;
+        for (let i = 0; i < points.length; i++) {
+            points[i].finalRadius = ((points[i].radius - minRadius) / range) * params.size;
+        }
+    } else {
+        /* Ohne Normalisierung: r schwankt um 1 — radius·size hält die
+           Kurve damit von selbst in der Grössenordnung von size. */
+        for (let i = 0; i < points.length; i++) {
+            points[i].finalRadius = points[i].radius * params.size;
+        }
+    }
+
+    const cartesianPoints = [];
+    for (let i = 0; i < points.length; i++) {
+        cartesianPoints.push({
+            x: cc.x + points[i].finalRadius * Math.cos(points[i].angle),
+            y: cc.y + points[i].finalRadius * Math.sin(points[i].angle)
+        });
+    }
+
+    applyRadialModulation(cartesianPoints, cc.x, cc.y, params);
+
+    // Per-Layer-Vorrang (v157.27) — wie F1/F2
+    const transparency = (params.transparency !== undefined
+        ? params.transparency : g4mState.viewParams.transparency) / 100;
+    const colorWithTransparency = hexToRgba(params.color, 1 - transparency);
+
+    renderByDisplayMode(ctx, cartesianPoints, colorWithTransparency, params, true);
+
+    ctx.restore();
+}
+
 const G4M_RENDERERS = {
     superformula: {
         label: 'superformulas',   // Busy-Text-Baustein (Befund 27)
@@ -7198,6 +8408,12 @@ const G4M_RENDERERS = {
         makeParams: generateArchimedeanParameters,
         draw: drawArchimedeanSpiral,
         prepare: prepareArchimedeanGeneration
+    },
+    f3: {
+        label: 'harmonic curves',   // Busy-Text-Baustein (Befund 27)
+        makeParams: generateFourierParameters,
+        draw: drawFourierBlob
+        // kein prepare: F3 hat keine Page 2, die zu schliessen wäre
     }
 };
 
@@ -7246,8 +8462,20 @@ function runGeneration(rendererId, opts) {
         // (makeParams): F1 behält den bisherigen Zufalls-Größentrick,
         // F2 nutzt den Optimizer. Übergeben wird nur die Bezugsgröße
         // maxSize (= „volle" Größe, 100 %). (v153d)
+        /* Center of Curve (v157.49): steht der Ursprung auf Random,
+           zieht JEDER Pool-Eintrag (nicht nur die sichtbaren Layer)
+           seinen eigenen Versatz — nachträgliches Hochregeln der
+           Layer-Zahl holt Kurven mit bereits gezogenem Ursprung aus
+           dem Pool. Fixed => Felder bewusst NICHT setzen, damit der
+           globale Versatz live beweglich bleibt (Vorrang-Philosophie
+           v157.27). */
+        const centerRandom = g4mIsRandomMode('curve-center');
         for (let i = 0; i < G4M_PARAM_POOL_SIZE; i++) {
             const params = renderer.makeParams(maxSize);
+            if (centerRandom) {
+                params._centerX = g4mDrawCenterPct('center-x');
+                params._centerY = g4mDrawCenterPct('center-y');
+            }
             allGeneratedParameters.push(params);
             if (i < numCurves) storedCurveParameters.push(params);
         }
@@ -7434,7 +8662,10 @@ function g4mArchValsFromSeeds(seeds, p) {
 // Archimedische Spirale zeichnen — identische Struktur wie drawSuperformula()
 function drawArchimedeanSpiral(ctx, centerX, centerY, params) {
     ctx.save();
+    /* Ansichts-Drehpunkt = Canvas-Mitte, Kurven-Ursprung = cc —
+       gleiche Aufteilung wie drawSuperformula (v157.49). */
     applyViewTransform(ctx, centerX, centerY);
+    const cc = g4mLayerCenter(params, centerX, centerY);
 
     // Spiralpunkte: r(θ) = a + b·θ
     // params.nSteps = Anzahl Wachstumsschritte (aus Archimedean Panel) → bestimmt Länge
@@ -7490,12 +8721,12 @@ function drawArchimedeanSpiral(ctx, centerX, centerY, params) {
             finalR = p.r * params.size * 0.15;
         }
         return {
-            x: centerX + finalR * Math.cos(p.theta),
-            y: centerY + finalR * Math.sin(p.theta)
+            x: cc.x + finalR * Math.cos(p.theta),
+            y: cc.y + finalR * Math.sin(p.theta)
         };
     });
 
-    applyRadialModulation(cartesianPoints, centerX, centerY, params);
+    applyRadialModulation(cartesianPoints, cc.x, cc.y, params);
 
     /* Per-Layer-Vorrang (v157.27): trägt die Kurve einen eigenen Wert
        (Random stand beim Generieren an), gilt er; sonst wie bisher der
@@ -7593,7 +8824,8 @@ function g4mRenderInChunks(items, drawOne, onDone, opts) {
    große Canvas aussieht. Wird beim Generieren und bei Optimizer-
    Echtzeitänderungen aufgerufen. EIN Maler für beide Fenster. */
 function g4mDrawVizResult() {
-    ['arch-viz-result', 'sf-viz-result'].forEach(g4mDrawVizResultInto);
+    // seit v157.51 auch das F3-Result-Fenster — EIN Maler für alle drei
+    ['arch-viz-result', 'sf-viz-result', 'f3-viz-result'].forEach(g4mDrawVizResultInto);
 }
 function g4mDrawVizResultInto(canvasId) {
     const vc = document.getElementById(canvasId);
@@ -7723,14 +8955,15 @@ function updateCanvasBackground() {
     redrawStoredImage();
 }
 
-/* Alle sechs Viz-Fenster (F1 und F2, je Min/Max/Result) neu zeichnen.
-   Jede der drei Funktionen prüft selbst, ob ihre Elemente da sind —
+/* Alle Viz-Fenster (F1, F2 und seit v157.51 F3, je Min/Max/Result)
+   neu zeichnen. Jede Funktion prüft selbst, ob ihre Elemente da sind —
    der Aufruf ist auch dann harmlos, wenn nur eines der Panels je
    geöffnet wurde. */
 function g4mRedrawAllViz() {
     if (typeof drawSuperformulaVisualizations === 'function') drawSuperformulaVisualizations();
     if (typeof archDrawViz === 'function') archDrawViz();
-    ['arch-viz-result', 'sf-viz-result'].forEach(g4mDrawVizResultInto);
+    if (typeof drawF3Visualizations === 'function') drawF3Visualizations();
+    ['arch-viz-result', 'sf-viz-result', 'f3-viz-result'].forEach(g4mDrawVizResultInto);
 }
 
 /* HINWEIS ZUM SPLIT: resetToDefaults/applyGoodDefaults sind reine
@@ -7768,6 +9001,16 @@ function resetToDefaults(generateImage = true) {
             (r.id === 'line-thickness'  && defaults.lineSizeMode === 'random');
         g4mSetRandomMode(r.id, isRandom);
     });
+    /* Center of Curve (v157.49): zurück auf Fixed, Ursprung in die
+       Canvas-Mitte, Zufallsbereiche auf die volle Spanne. Der
+       randomMode-Bus räumt dabei die Per-Layer-Ursprünge ab. */
+    g4mSetRandomMode('curve-center', false);
+    ['center-x', 'center-y'].forEach(function (id) {
+        g4mSetRandomRange(id, sliderData[id].min, sliderData[id].max);
+        if (typeof g4mSyncRandomRow === 'function') g4mSyncRandomRow(id);
+    });
+    g4mStore.patchCurveCenter(function (c) { c.x = 0; c.y = 0; });
+    if (typeof g4mUpdateCenterUi === 'function') g4mUpdateCenterUi();
     if (typeof applyAllSliderFreezeStates === 'function') applyAllSliderFreezeStates();
     
     if (generateImage) {
@@ -9350,12 +10593,32 @@ function showFPanel(id) {
     g4mSetPanelOpen(id + '-panel', true);
 
     g4mSetDrawingMode(id);   // Modus + Button-Optik zentral (Befund 28)
+    /* F3 trägt seit v157.51 echte Inhalte: Tool-Slider-Vorbelegung
+       EINMALIG (wie F1/F2 über g4mInitPanelOnce), Min/Max-Vorschau und
+       Rail-Ausrichtung bei jedem Öffnen — exakt die F1-Öffnungsfolge
+       (showSuperformulaPanel), nur ohne eigenes show, weil F3 den
+       generischen Weg nutzt. */
+    if (id === 'f3') {
+        g4mInitPanelOnce('f3', setF3Defaults);
+        setTimeout(function () {
+            drawF3Visualizations();
+            g4mDrawVizResultInto('f3-viz-result');
+        }, G4M_ANIM.VIZ_DELAY_MS);
+        requestAnimationFrame(function () { g4mAlignRailsToTool('f3-panel'); });
+    }
     updateArrowVisibility();
 }
 
 function hideFPanel(id) {
     const panel = document.getElementById(id + '-panel');
     if (!panel) return;
+    /* F3 (v157.52): das schliessende Träger-Panel nimmt seine
+       Unterseiten mit — exakt wie hideArchimedeanPanel das
+       Formel-Panel mitschliesst. */
+    if (id === 'f3') {
+        if (typeof hideF3FormulaPanel === 'function' && isF3FormulaPanelOpen()) hideF3FormulaPanel();
+        if (typeof hideF3OptionsPanel === 'function' && isF3OptionsPanelOpen()) hideF3OptionsPanel();
+    }
     panel.style.zIndex    = String(G4M_Z.SLIDING);
     g4mSetPanelSlide(panel, g4mHiddenTransform('canvas'));
     g4mSetPanelOpen(id + '-panel', false);
@@ -9432,6 +10695,114 @@ function g4mToggleArchFormula(e) {
         hideArchFormulaPanel();
     } else {
         showArchFormulaPanel();
+    }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   F3 «HARMONICS» — FORMULA-PANEL UND PAGE 2 (v157.52)
+   ══════════════════════════════════════════════════════════════════
+   Choreografie 1:1 vom F2-Vorbild (show/hideArchFormulaPanel bzw.
+   show/hideSfOptionsPanel): gleiche Z-Ebenen-Tänze, gleiche
+   Zeitkonstanten — nur die Ids zeigen auf die F3-Familie
+   (Träger f3-panel, Formel f3-formula-panel, Page 2 f3-options-panel). */
+function isF3FormulaPanelOpen() { return g4mIsPanelOpen('f3-formula-panel'); }
+function isF3OptionsPanelOpen() { return g4mIsPanelOpen('f3-options-panel'); }
+
+function showF3FormulaPanel() {
+    const panel = document.getElementById('f3-formula-panel');
+    const carrier = document.getElementById('f3-panel');
+    if (!panel) return;
+    g4mPlacePanelOverTools(panel);
+    panel.style.visibility = 'visible';
+    g4mSetPanelOpen('f3-formula-panel', true);
+    panel.style.zIndex = String(G4M_Z.FORMULA_SHOWN);
+    if (isF3OptionsPanelOpen()) {
+        /* Page 2 offen: Formel-Fahrt gleitet UNTER der offenen Page 2
+           durch — siehe showArchFormulaPanel (v153.1g). */
+        const opts = document.getElementById('f3-options-panel');
+        if (opts) opts.style.zIndex = String(G4M_Z.CARRIER_ABOVE + 1);
+        if (carrier) carrier.style.zIndex = String(G4M_Z.SLIDING);
+    } else {
+        if (carrier) carrier.style.zIndex = String(G4M_Z.CARRIER_ABOVE);
+    }
+    requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+            g4mSetPanelSlide(panel, 'translateX(0)');
+            setTimeout(function () {
+                updateArrowVisibility();
+            }, G4M_ANIM.ARROW_SYNC_MS);
+        });
+    });
+}
+
+function hideF3FormulaPanel() {
+    const panel = document.getElementById('f3-formula-panel');
+    const carrier = document.getElementById('f3-panel');
+    if (!panel) return;
+    panel.style.transition = 'transform ' + (G4M_ANIM.PANEL_MS / 1000) + 's var(--g4m-panel-ease, ease-out)';
+    g4mSetPanelOpen('f3-formula-panel', false);
+    g4mSetPanelSlide(panel, g4mHiddenTransform('tools'));
+    setTimeout(function () {
+        panel.style.visibility = 'hidden';
+        panel.style.zIndex = String(G4M_Z.RESTING);
+        if (carrier) carrier.style.zIndex = String(G4M_Z.SLIDING);
+        updateArrowVisibility();
+    }, G4M_ANIM.AFTER_PANEL_MS);
+}
+
+function g4mToggleF3Formula(e) {
+    if (e) e.stopPropagation();
+    if (isF3FormulaPanelOpen()) {
+        hideF3FormulaPanel();
+    } else {
+        showF3FormulaPanel();
+    }
+}
+
+function showF3OptionsPanel() {
+    const panel = document.getElementById('f3-options-panel');
+    if (!panel) return;
+    // Z-Choreografie wie showSfOptionsPanel (v153.1g)
+    if (isF3FormulaPanelOpen()) {
+        const carrier = document.getElementById('f3-panel');
+        if (carrier) carrier.style.zIndex = String(G4M_Z.SLIDING);
+    }
+    g4mSetPanelOpen('f3-options-panel', true);
+    g4mPlacePanelOverCanvas(panel);
+    panel.style.zIndex = String(G4M_Z.OPTIONS);
+    g4mSetPanelSlide(panel, 'translateX(0)');
+    setTimeout(function () {
+        if (g4mIsPanelOpen('f3-options-panel') && isF3FormulaPanelOpen()) {
+            panel.style.zIndex = String(G4M_Z.CARRIER_ABOVE + 1);
+        }
+    }, G4M_ANIM.AFTER_SUB_PANEL_MS);
+    updateArrowVisibility();
+}
+
+function hideF3OptionsPanel() {
+    const panel = document.getElementById('f3-options-panel');
+    if (!panel) return;
+    panel.style.zIndex = String(G4M_Z.OPTIONS);
+    g4mSetPanelSlide(panel, g4mHiddenTransform('canvas'));
+    setTimeout(function () {
+        g4mSetPanelOpen('f3-options-panel', false);
+        panel.style.zIndex = String(G4M_Z.RESTING);
+        if (isF3FormulaPanelOpen()) {
+            const carrier = document.getElementById('f3-panel');
+            if (carrier) carrier.style.zIndex = String(G4M_Z.CARRIER_ABOVE);
+        }
+        updateArrowVisibility();
+    }, G4M_ANIM.AFTER_SUB_PANEL_MS);
+}
+
+function g4mToggleF3Options(e) {
+    if (e) e.stopPropagation();
+    const panel = document.getElementById('f3-options-panel');
+    if (!panel) return;
+    if (g4mIsPanelOpen('f3-options-panel')) {
+        hideF3OptionsPanel();
+    } else {
+        showF3OptionsPanel();
     }
 }
 
@@ -9972,7 +11343,10 @@ function g4mInitRangeCoupling() {
    Paarung Input↔Feld folgt der DOM-Nachbarschaft: in jedem
    g4m-arch-block folgt das g4m-val-box direkt auf sein input. */
 function g4mInitValBoxEditing() {
-    document.querySelectorAll('.g4m-arch-block input[type=range]').forEach(function (inp) {
+    /* Center-Achsen (v157.49) laufen über DIESELBE Mechanik — ihre
+       Wertefelder folgen dem gleichen input→val-box-Nachbarschafts-
+       muster wie die F-Editoren. */
+    document.querySelectorAll('.g4m-arch-block input[type=range], .g4m-cc-axis input[type=range]').forEach(function (inp) {
         const box = inp.nextElementSibling;
         if (!box || !box.classList.contains('g4m-val-box')) return;
         if (box._g4mEditable) return;   // idempotent
@@ -10816,6 +12190,7 @@ function repositionOpenPanels() {
     requestAnimationFrame(function () {
         if (isSuperformulaPanelOpen()) g4mAlignRailsToTool('superformel-panel');
         if (isArchimedeanPanelOpen())  g4mAlignRailsToTool('archimedean-panel');
+        if (isFPanelOpen('f3'))        g4mAlignRailsToTool('f3-panel');   // F3 (v157.51)
         g4mAlignRandomRangeRows();   // Bereichs-Rails im Tool-Editor (v157.30)
     });
     const fid = openFPanelId();
@@ -10868,16 +12243,23 @@ function updateArrowVisibility() {
 
     let showCanvasClose = false, showToolsClose = false, controlling = null;
 
-    // Formel-Panels (Gielis / Archimedean Formula) offen → Schließ-Pfeil Richtung Nav
-    if (isGielisPanelOpen() || isArchFormulaPanelOpen()) {
+    // Formel-Panels (Gielis / Archimedean / Harmonics Formula) offen →
+    // Schließ-Pfeil Richtung Nav
+    if (isGielisPanelOpen() || isArchFormulaPanelOpen() || isF3FormulaPanelOpen()) {
         showToolsClose = true;
     }
 
     // Oberstes Canvas-Panel bestimmt den anderen Pfeil
     if (isArchOptionsPanelOpen())       { showCanvasClose = true; controlling = 'arch-options'; }
     else if (isSfOptionsPanelOpen())    { showCanvasClose = true; controlling = 'sf-options'; }
+    else if (isF3OptionsPanelOpen())    { showCanvasClose = true; controlling = 'f3-options'; }
     else if (isArchimedeanPanelOpen())  { showCanvasClose = !isArchFormulaPanelOpen(); controlling = 'archimedean-panel'; }
-    else if (openFPanelId())            { showCanvasClose = true; controlling = openFPanelId() + '-panel'; }
+    else if (openFPanelId())            {
+        const fid = openFPanelId();
+        // F3 mit offenem Formel-Panel: wie F2 nur der Nav-Pfeil (v157.52)
+        showCanvasClose = !(fid === 'f3' && isF3FormulaPanelOpen());
+        controlling = fid + '-panel';
+    }
     else if (isSuperformulaPanelOpen()) { showCanvasClose = !isGielisPanelOpen(); controlling = 'formula-panel'; }
     else if (isHomePanelVisible()) {
         // Der frühere Intro-Sonderfall (grosses Vollbild-Symbol auf dem
@@ -10936,7 +12318,9 @@ function handleLeftArrowClick(e) {
     // Priorität: Options (Page 2) > Archimedean > F3-F6 > Superformula > Home
     if (isArchOptionsPanelOpen())  { hideArchOptionsPanel(); return; }
     if (isSfOptionsPanelOpen())    { hideSfOptionsPanel(); return; }
+    if (isF3OptionsPanelOpen())    { hideF3OptionsPanel(); return; }   // Page 2 F3 (v157.52)
     if (isArchFormulaPanelOpen())  { return; } // rechtes Formel-Panel: rechter Pfeil schließt
+    if (isF3FormulaPanelOpen())    { return; } // dito F3-Formel (v157.52)
     if (isArchimedeanPanelOpen())  { hideArchimedeanPanel(); return; }
     const fid = openFPanelId();
     if (fid)                       { hideFPanel(fid); return; }
@@ -10951,6 +12335,7 @@ function handleRightArrowClick(e) {
     e.stopPropagation();
 
     if (isArchFormulaPanelOpen()) { hideArchFormulaPanel(); return; }
+    if (isF3FormulaPanelOpen())   { hideF3FormulaPanel(); return; }   // F3-Formel (v157.52)
     if (isGielisPanelOpen())      { hideGielisPanel(); return; }
 }
 
@@ -11374,6 +12759,8 @@ function initToolbarButtons() {
     bind('arch-options-btn', g4mToggleArchOptions);
     bind('sf-options-btn', g4mToggleSfOptions);
     bind('arch-formula-toggle', g4mToggleArchFormula);
+    bind('f3-options-btn', g4mToggleF3Options);      // Page 2 F3 (v157.52)
+    bind('f3-formula-toggle', g4mToggleF3Formula);   // Formel F3 (v157.52)
     // arch-formula-close-btn entfiel (v153.1d) — Schliessen über Pfeil/Formula-Button
 
     // Der klickbare Formel-Hinweis ist auch per Tastatur bedienbar
@@ -11724,6 +13111,9 @@ function init() {
     
     // Superformula Panel-Steuerung initialisieren
     initializeSuperformPanel();
+
+    // F3 «Harmonics» Panel-Steuerung initialisieren (v157.51)
+    initF3Panel();
     
     // Reset to defaults ohne Bild zu generieren
     resetToDefaults(false);
