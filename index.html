@@ -7328,7 +7328,32 @@ const sliderData = {
    konsistentere Wahl — keine andere Zeile des Kontaktblocks trägt
    ein Satzzeichen. Geändert an BEIDEN Stellen, wortgleich: Home-
    Kontaktblock und G4M_CONNECT.RIGHTS (Connect-Karten-Band). */
-const G4M_RELEASE = Object.freeze({ version: 'v157.117', date: '31.07.2026' });
+/* v157.118: CONNECT-KARTE HANDY-TAUGLICH (User-Befund 31.07.: «der
+   Text ist nicht verkleinert fürs Handy»). Ursache war der
+   72px-Mindestboden des Branding-Bands: die Canvas läuft in
+   CSS-Pixeln (~300-400px auf dem Handy), der Boden blähte Band und
+   Schriften dort relativ aufs Doppelte — die Textblöcke
+   kollidierten. Kur: Band rein proportional (10 % der Bildhöhe,
+   Mini-Boden 28px) UND ein Breiten-Wächter, der die breiteste
+   Zeilenpaarung mit measureText real misst und bei Platznot alle
+   drei Schriftgrade gemeinsam herunterskaliert. Auf dem Desktop
+   ändert sich nichts (dort griff der Boden nie); auf jeder kleinen
+   Canvas trägt die Karte jetzt dasselbe Layout, nur verkleinert. */
+/* v157.119: CONNECT-KARTE IN FESTER HOCHAUFLÖSUNG (User-Befund
+   31.07.: «Text wirkt verpixelt» auf dem Handy). Die Karte kopierte
+   die Bildschirm-Canvas 1:1 — auf dem Handy nur ~300-400 CSS-Pixel,
+   beim Betrachten/Teilen hochgezerrt. Neu wird das KUNSTWERK vor
+   der Band-Komposition IMMER in CARD_PX (1080px) NEU gerendert —
+   mit exakt der Kontext-Skalierungs-Mechanik des High-Res-Exports
+   (v157.21: Kontext skaliert, Renderer zeichnen in Display-
+   koordinaten, gestückelt via g4mRenderInChunks; Busy-Anzeige wie
+   beim Export). Kurven UND Bandtext (~35px statt ~11px) sind damit
+   auf jedem Gerät scharf, Desktop und Handy erzeugen die IDENTISCHE
+   Karte. Zusatz: schlägt navigator.share nach dem längeren Rendern
+   fehl (z. B. erloschene User-Geste), fällt Share auf den Karten-
+   Download zurück statt still zu enden; nur der bewusste Abbruch
+   (AbortError) bleibt folgenlos. */
+const G4M_RELEASE = Object.freeze({ version: 'v157.119', date: '31.07.2026' });
 const G4M_BUILD = G4M_RELEASE.version;   // Kurzform für Titel und Konsole
 document.title = document.title + ' · ' + G4M_BUILD;
 console.log('g4m build', G4M_BUILD, '·', G4M_RELEASE.date);
@@ -13485,6 +13510,10 @@ function initGielisPanel() {
 const G4M_CONNECT = Object.freeze({
     URL:   'https://g4m.ch',
     MAIL:  'info@g4m.ch',
+    CARD_PX: 1080,                  /* feste Render-Kantenlänge der Karte (v157.119) —
+                                       Kunstwerk und Bandtext werden IMMER in dieser
+                                       Auflösung NEU gerendert, nie von der kleinen
+                                       Bildschirm-Canvas kopiert */
     OWNER: 'Daniel Dubs',           // Copyright-Zeile der Karte (v157.107)
     RIGHTS:'All rights reserved',   /* ohne Schlusspunkt (v157.117) — konsistent mit dem punktlosen Home-Block */
     /* Der frühere CLAIM-Schlüssel entfiel (v157.102): der Claim
@@ -13502,44 +13531,120 @@ function g4mConnectGuard() {
     return false;
 }
 
-/* Karte zeichnen: Canvas-Bild + Branding-Band unten */
-function g4mConnectCardCanvas() {
-    const W = canvas.width, H = canvas.height;
-    const band = Math.max(72, Math.round(H * 0.10));
+/* Kunstwerk in Ziel-Auflösung NEU rendern (v157.119, User-Befund
+   Handy: «Text wirkt verpixelt») — die Bildschirm-Canvas läuft in
+   CSS-Pixeln (~300-400px auf dem Handy); eine 1:1-Kopie davon wird
+   beim Teilen hochgezerrt und pixelt. Exakt die Mechanik des
+   High-Res-Exports (v157.21): der KONTEXT wird skaliert, die
+   Renderer zeichnen unverändert in Displaykoordinaten — die Karte
+   ist per Konstruktion die exakte, scharfe Vergrösserung des
+   Bildschirmbilds; gestückelt über g4mRenderInChunks, damit die UI
+   reaktionsfähig bleibt. */
+function g4mConnectArtwork(targetPx) {
+    return new Promise(function (resolve, reject) {
+        const source = g4mExportSource();
+        if (!(source.src >= G4M_EXPORT_MIN_EDGE)) {
+            reject(new Error('no export source'));
+            return;
+        }
+        const art = document.createElement('canvas');
+        art.width = art.height = targetPx;
+        const c = art.getContext('2d');
+        c.fillStyle = g4mState.canvasBackgroundColor;
+        c.fillRect(0, 0, targetPx, targetPx);
+        c.save();
+        c.scale(targetPx / source.src, targetPx / source.src);
+        const cx = source.src / 2, cy = source.src / 2;
+        const layers = storedCurveParameters.slice();   // Momentaufnahme (wie Export)
+        g4mRenderInChunks(layers, function (params) {
+            g4mRendererFor(params).draw(c, cx, cy, params);
+        }, function () {
+            c.restore();
+            resolve(art);
+        });
+    });
+}
+
+/* Karte zeichnen: Kunstwerk-Canvas + Branding-Band unten.
+   v157.118 (User-Befund Handy: «Text nicht verkleinert»): der
+   frühere 72px-MINDESTBODEN des Bands war der Fehler — die Canvas
+   läuft in CSS-Pixeln (resizeCanvas), auf dem Handy misst sie nur
+   ~300-400px; der Boden liess Band und Schriften dort relativ auf
+   das Doppelte wachsen, linker Marken- und rechter Copyright-Block
+   kollidierten. Neu: 1) Band REIN PROPORTIONAL zur Bildhöhe (10 %,
+   Mini-Boden 28px nur gegen Unlesbarkeit); 2) BREITEN-WÄCHTER mit
+   echten measureText-Massen: passt die breiteste Zeilenpaarung
+   (links + Luft + rechts) nicht zwischen die Ränder, skalieren
+   ALLE Schriftgrade gemeinsam herunter — die Karte trägt damit auf
+   jeder Grösse dasselbe Layout, nur eben verkleinert. */
+function g4mConnectCardCanvas(srcCanvas) {
+    const src = srcCanvas || canvas;   // Rückfall: Bildschirm-Canvas
+    const W = src.width, H = src.height;
+    const band = Math.max(28, Math.round(H * 0.10));
     const off = document.createElement('canvas');
     off.width = W; off.height = H + band;
     const c = off.getContext('2d');
-    c.drawImage(canvas, 0, 0);
+    c.drawImage(src, 0, 0);
     c.fillStyle = '#333333';
     c.fillRect(0, H, W, band);
     const pad = Math.round(band * 0.35);
+    const L1 = 'g4m · generative formulas';   /* Wortlaut v157.108 (User) — identisch mit dem Share-Text */
+    const L2 = 'g4m.ch · ' + G4M_CONNECT.MAIL;
+    const R1 = '© ' + new Date().getFullYear() + ' ' + G4M_CONNECT.OWNER;
+    const R2 = G4M_CONNECT.RIGHTS;
+    let s1 = band * 0.32, s2 = band * 0.24, s3 = band * 0.22;
+    // Breiten-Wächter: reale Masse der gesetzten Schrift, kein Schätzen
+    const wOf = function (px, bold, t) {
+        c.font = (bold ? '700 ' : '') + Math.round(px) + 'px "JetBrains Mono", monospace';
+        return c.measureText(t).width;
+    };
+    const gapMin = pad;   // Mindestluft zwischen linkem und rechtem Block
+    const widest = Math.max(
+        wOf(s1, true,  L1) + wOf(s3, false, R1),
+        wOf(s2, false, L2) + wOf(s3, false, R2)
+    );
+    const avail = W - 2 * pad - gapMin;
+    if (widest > avail) {
+        const k = avail / widest;
+        s1 *= k; s2 *= k; s3 *= k;
+    }
     c.textBaseline = 'middle';
-    // Links: Marke + Kontakt (wie gehabt)
+    // Links: Marke + Kontakt
     c.textAlign = 'left';
     c.fillStyle = '#ffffff';
-    c.font = '700 ' + Math.round(band * 0.32) + 'px "JetBrains Mono", monospace';
-    c.fillText('g4m · generative formulas', pad, H + band * 0.36);   /* Wortlaut v157.108 (User) — identisch mit dem Share-Text */
+    c.font = '700 ' + Math.round(s1) + 'px "JetBrains Mono", monospace';
+    c.fillText(L1, pad, H + band * 0.36);
     c.fillStyle = '#cccccc';
-    c.font = Math.round(band * 0.24) + 'px "JetBrains Mono", monospace';
-    c.fillText('g4m.ch · ' + G4M_CONNECT.MAIL, pad, H + band * 0.72);
+    c.font = Math.round(s2) + 'px "JetBrains Mono", monospace';
+    c.fillText(L2, pad, H + band * 0.72);
     /* Rechts (v157.107, User-Vorlage): Copyright + Name, rechtsbündig
        als eigener Block — Jahr dynamisch, damit die Karte nie
        veraltet. Gleiche Zeilenhöhen wie der linke Block. */
     c.textAlign = 'right';
-    c.font = Math.round(band * 0.22) + 'px "JetBrains Mono", monospace';
-    c.fillText('© ' + new Date().getFullYear() + ' ' + G4M_CONNECT.OWNER, W - pad, H + band * 0.36);
-    c.fillText(G4M_CONNECT.RIGHTS, W - pad, H + band * 0.72);
+    c.font = Math.round(s3) + 'px "JetBrains Mono", monospace';
+    c.fillText(R1, W - pad, H + band * 0.36);
+    c.fillText(R2, W - pad, H + band * 0.72);
     c.textAlign = 'left';   // Zustand zurückgeben — Kontext ist frisch, aber sauber bleiben
     return off;
 }
 function g4mConnectCardBlob() {
-    return new Promise(function (resolve, reject) {
-        try {
-            g4mConnectCardCanvas().toBlob(function (b) {
-                if (b) resolve(b); else reject(new Error('card render failed'));
-            }, 'image/png');
-        } catch (err) { reject(err); }
-    });
+    /* v157.119: Kunstwerk IMMER in CARD_PX neu rendern (scharf auf
+       jedem Gerät — Desktop und Handy erzeugen jetzt die identische
+       Karte), dann Band komponieren, dann PNG. Busy-Anzeige wie der
+       Export; setBusy(false) läuft in JEDEM Ausgang. */
+    setBusy(true, 'Rendering connect card …');
+    return g4mConnectArtwork(G4M_CONNECT.CARD_PX)
+        .then(function (art) {
+            return new Promise(function (resolve, reject) {
+                try {
+                    g4mConnectCardCanvas(art).toBlob(function (b) {
+                        if (b) resolve(b); else reject(new Error('card render failed'));
+                    }, 'image/png');
+                } catch (err) { reject(err); }
+            });
+        })
+        .then(function (b) { setBusy(false); return b; },
+              function (err) { setBusy(false); throw err; });
 }
 function g4mConnectSaveBlob(blob) {
     const url = URL.createObjectURL(blob);
@@ -13557,9 +13662,16 @@ function g4mConnectShare() {
     g4mConnectCardBlob().then(function (blob) {
         const file = new File([blob], 'g4m-connect-card.png', { type: 'image/png' });
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            /* Abbruch des Teilen-Dialogs ist KEIN Fehler — still schlucken */
+            /* Abbruch des Teilen-Dialogs (AbortError) ist KEIN Fehler.
+               Jede ANDERE Ablehnung (v157.119) — z. B. erloschene
+               User-Geste nach dem längeren High-Res-Rendern — fällt
+               auf den Karten-Download zurück, statt still zu enden. */
             navigator.share({ files: [file], title: 'g4m', text: G4M_CONNECT.TEXT })
-                .catch(function () {});
+                .catch(function (err) {
+                    if (err && err.name === 'AbortError') return;
+                    g4mConnectSaveBlob(blob);
+                    g4mGalleryHint('Sharing failed — card downloaded instead');
+                });
         } else {
             g4mConnectSaveBlob(blob);
             g4mGalleryHint('Sharing not supported here — card downloaded instead');
