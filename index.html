@@ -29,7 +29,7 @@ Kontakt: dd@danidubs.ch
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Conceptual Partial Model for g4m</title>
+<title>g4m · grid for magic</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -596,6 +596,44 @@ Kontakt: dd@danidubs.ch
             display: block;
             border: none;
         }
+        #gallery-view { cursor: pointer; }   /* Mitte: Klick schliesst (v157.69) */
+        /* Blätter-Zonen (v157.123): unsichtbare Flächen links/rechts
+           mit dezentem Chevron — weiss mit dunklem Schein, damit sie
+           auf JEDEM Bildinhalt lesbar sind; Hover hebt sie an. */
+        #gallery-view .g4m-gal-nav { display: none; }   /* v157.125: nur im Album-Modus */
+        #gallery-view.g4m-gal-browsing .g4m-gal-nav {
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 30%;
+            background: transparent;
+            border: none;
+            margin: 0; padding: 0;
+            display: flex;
+            align-items: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(28px, calc(var(--u) * 0.9), 64px);
+            line-height: 1;
+            color: rgba(255, 255, 255, 0.85);
+            text-shadow: 0 0 6px rgba(0, 0, 0, 0.65);
+            opacity: 0.6;
+            cursor: pointer;
+        }
+        #gallery-view.g4m-gal-browsing .g4m-gal-nav:hover { opacity: 1; }
+        /* ✕-Rückweg (v157.126): Eck-Chip oben rechts, ÜBER der
+           Weiter-Zone (DOM-Reihenfolge), gleiche Lesbarkeit wie die
+           Chevrons (weiss mit dunklem Schein). */
+        #gallery-view.g4m-gal-browsing .g4m-gal-nav-back {
+            position: absolute;
+            top: 0; right: 0;
+            bottom: auto;
+            width:  calc(var(--u) * 1.2);
+            height: calc(var(--u) * 1.2);
+            justify-content: center;
+            font-size: clamp(18px, calc(var(--u) * 0.5), 34px);
+            padding: 0;
+        }
+        #gallery-view.g4m-gal-browsing .g4m-gal-nav-prev { left: 0;  justify-content: flex-start; padding-left:  calc(var(--u) * 0.25); }
+        #gallery-view.g4m-gal-browsing .g4m-gal-nav-next { right: 0; justify-content: flex-end;   padding-right: calc(var(--u) * 0.25); }
         /* Nav-Sperre bei offener Galerie (v157.65): Guestbook, Home
            und Projects eingegraut und nicht bedienbar. */
         /* v157.83 (User-Idee): Farben UNVERÄNDERT — die Sperre zeigt
@@ -1029,6 +1067,43 @@ Kontakt: dd@danidubs.ch
         /* Die Pfeilzellen bleiben durchsichtig — sie sind Teile EINER
            Kachel, keine vier Knöpfe. Sichtbar reagiert immer nur das
            D-Pad als Ganzes (Regel darunter). */
+        /* «menu»-Hinweis (v157.128, präzisiert v157.129): erscheint
+           NUR im Album-Modus (Menü ausgeblendet) und schmiegt sich
+           RECHTSBÜNDIG an den Pfeil-nach-rechts — Wort und Pfeil
+           lesen sich als EIN Griff: «▸ menu = dorthin zurück». */
+        /* v157.130 (User-Befund: «menu» stand von Beginn weg da) —
+           EXAKT die v157.68-Falle der Galerie-Kacheln, nochmals
+           getappt: g4m-flex-center setzt display:flex, und ein
+           Autoren-display ÜBERSTIMMT das hidden-Attribut (das nur
+           über das UA-Stylesheet display:none wirkt). Die explizite
+           [hidden]-Regel stellt die Rangordnung wieder her. */
+        /* v157.132/133 — RECHTSBÜNDIG ZUM DREIECK (User: «viel näher
+           an den Pfeil»): v157.132 richtete auf die 24px-SVG-BOX aus
+           — aber das DREIECK füllt die Box nicht: der rotierte Pfad
+           (M12 5 l8 10 H4 z, rotate 90) spannt nur x 9..19, die Box
+           hat also 9px TOTZONE vor der Dreiecksbasis — genau die
+           Restlücke im User-Screenshot. Korrigierte Herleitung:
+           Dreiecksbasis ab Zellgrenze = Box-Einzug (u/3 − 12px)
+           + 9px = u/3 − 3px; Wortende = |Zug| − 2px Polsterung;
+           Fuge 4px  =>  Zug = u/3 − 5px, als margin-right:
+           calc(5px − u/3), geklammert auf [−32px, 0]. Die Fuge ist
+           damit KONSTRUKTIV konstant 4px auf jeder Grösse; auf
+           Kleinstschirmen (Zug 0) bleibt die 2px-Mindestpolsterung.
+           Trefferflächen-Überlappung folgenlos: Wort und Pfeil
+           führen denselben Rückweg aus. */
+        #dpad-menu.dpad-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(9px, calc(var(--u) * 0.22), 13px);
+            font-weight: 700;
+            color: #666666;
+            letter-spacing: 0.03em;
+            display: flex;
+            justify-content: flex-end;               /* an die Kante zur Pfeilzelle … */
+            text-align: right;
+            padding-right: 2px;                      /* Mindest-Fuge */
+            margin-right: clamp(-32px, calc(5px - var(--u) / 3), 0px);   /* … und an die DREIECKSBASIS heran (v157.133) */
+        }
+        #dpad-menu[hidden] { display: none; }        /* Rangordnung gegen die eigene Flex-Regel (v157.130) */
         .dpad-btn {
             background-color: transparent;
             border: none;
@@ -1167,6 +1242,54 @@ Kontakt: dd@danidubs.ch
         #resolution-dropdown, #arch-spiral-dropdown, #connect-dropdown {
             box-shadow: calc(var(--u) * 0.14) calc(var(--u) * 0.14) calc(var(--u) * 0.34) rgba(0, 0, 0, 0.42);
         }
+
+        /* ── INFO-TAFEL AM i-BUTTON (v160.2, User) ─────────────────
+           KEIN eigenes Panel — ein MENÜ: weiss, Wurfschatten und
+           Roll-Mechanik wie alle dd-Menüs (g4mToggleDropdown +
+           g4m-dd-down: Roll-Kante oben, bündig unter dem i-Button).
+           Geometrie setzt createInfoBoard (12u x 8u, horizontal auf
+           die Navi-Mitte zentriert, Oberkante = i-Button-Unterkante).
+           Inhalt: was g4m ist — Name, Claim, vier kurze Absätze. */
+        #g4m-info-board {
+            position: absolute;
+            background-color: #ffffff;
+            border: none;
+            z-index: 1000;
+            box-shadow: calc(var(--u) * 0.14) calc(var(--u) * 0.14) calc(var(--u) * 0.34) rgba(0, 0, 0, 0.42);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: min(15px, calc(var(--u) * 0.288));
+            color: #333333;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        #g4m-info-board > div {
+            padding: calc(var(--u) * 0.45) calc(var(--u) * 0.55);
+        }
+        /* Die Tafel ist reiner TEXT — der Menuitem-Fokus der
+           generischen Mechanik (Befund 16) braucht hier keinen Ring. */
+        #g4m-info-board > div:focus { outline: none; }
+        #g4m-info-board .g4m-ib-name {
+            font-weight: 700;
+            font-size: min(18px, calc(var(--u) * 0.34));
+        }
+        #g4m-info-board .g4m-ib-claim {
+            color: #888888;
+            margin-bottom: calc(var(--u) * 0.3);
+        }
+        /* Platzhalter-Kennzeichnung (v160.4): dezent, aber unüber-
+           sehbar — kursives Hellgrau zwischen Kopf und Fliesstext.
+           Zeile UND Regel fliegen mit der Endfassung des Textes. */
+        #g4m-info-board .g4m-ib-draft {
+            color: #aaaaaa;
+            font-style: italic;
+            font-size: min(12px, calc(var(--u) * 0.23));
+            margin-bottom: calc(var(--u) * 0.3);
+        }
+        #g4m-info-board p {
+            margin: 0 0 calc(var(--u) * 0.25) 0;
+            line-height: 1.5;
+        }
+        #g4m-info-board p:last-child { margin-bottom: 0; }
 
         /* Dropdown-Styles */
         #resolution-dropdown, #display-mode-dropdown, #canvas-color-dropdown,
@@ -2069,6 +2192,23 @@ Kontakt: dd@danidubs.ch
    10.8u ⇒ Schriftgrösse 10.8/16 = 0.675u. BEWUSST ohne px-Deckel:
    nur eine rein u-proportionale Grösse hält die Randgleichheit auf
    JEDER Bildschirmgrösse (der linke Rand ist ebenfalls reines u). */
+/* v157.136 (User): Titelzeile auf MAXIMALE BREITE — der Abstand zur
+   Nav-Naht (rechte Rahmenkante) ist DERSELBE 0.6u-Rand wie links.
+   Konstruktion statt Augenmass: JetBrains Mono ist strikt monospace
+   (jede Glyphe 0.6em), die Zeilenbreite ist also exakt
+   Zeichenzahl × 0.6em + Zwischenräume × letter-spacing. Der Rahmen
+   (#g4m-home-left-frame) wird Grössen-Container; die Schrift löst
+   sich aus seiner Breite: fs = (100cqw − 1.2u) / Zeilen-em.
+   Name «g4m · grid for magic» = 20 Zeichen, 19 Fugen à 0.04em
+   → 12.76em; Claim «where math meets random» = 23 Zeichen, 22 Fugen
+   à 0.08em → 15.56em. BEIDE Zeilen spannen damit exakt dieselbe
+   Breite auf (Blocksatz-Wirkung); der Claim wächst dadurch von
+   0.59× auf 0.82× der Namenshöhe — «ebenfalls grösser» ist so keine
+   zweite Stellgrösse, sondern folgt der Geometrie. Das nachlaufende
+   letter-spacing des letzten Zeichens ragt unsichtbar über die
+   Rechenkante hinaus — die SICHTBARE Glyphenkante endet exakt auf
+   dem 0.6u-Rand. */
+#g4m-home-left-frame { container-type: inline-size; }
 .g4m-home-title {
   position: absolute;
   top:  calc(var(--u) * 0.6);
@@ -2076,9 +2216,25 @@ Kontakt: dd@danidubs.ch
   color: #ffffff;
   font-family: 'JetBrains Mono', monospace;
   font-weight: 400;
-  font-size: calc(var(--u) * 0.675);
+  font-size: calc((100cqw - var(--u) * 1.2) / 12.76);
   letter-spacing: 0.04em;
   white-space: nowrap;
+}
+/* Claim unter dem Namen (v157.135, User-Naming; Grösse v157.136):
+   «where math meets random» — gedämpftes Weiss mit mehr Lauf, alles
+   klein wie die Marke «g4m» selbst. display:block macht aus dem span
+   die zweite Zeile, ohne die nowrap-Namenszeile anzutasten.
+   v160.0 (User): volle Namensbreite war ZU BREIT — der Claim spannt
+   jetzt 2/3 der Namensbreite auf, weiterhin linksbündig. Formel:
+   fs = (100cqw − 1.2u) × 2/3 / 15.56em — der Nenner 23.34 ist
+   15.56 × 3/2 (Zeilen-em des Claims, s. Herleitung oben). */
+.g4m-home-title .g4m-home-claim {
+  display: block;
+  margin-top: calc(var(--u) * 0.12);
+  font-size: calc((100cqw - var(--u) * 1.2) / 23.34);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.72);
 }
 /* Kontakt- und Copyright-Block (v157.109; Lage v157.111, User-
    Vorgabe): der Block hat die HÖHE DES GO-BUTTONS (2u) und ist
@@ -3928,7 +4084,12 @@ body.g4m-no-anim [data-panel-open] {   /* alle F-Panels (Befund 30) */
             <use href="#g4m-arrow" transform="rotate(-90 12 12)"/>
         </svg>
     </button>
-    <div></div>
+    <!-- v157.128/129 (User): das ZENTRUM erklärt den Rückweg — aber
+         NUR im Album-Modus, wenn das Menü ausgeblendet ist: «menu»
+         steht rechtsbündig direkt am Pfeil-nach-rechts und sagt, wo
+         der Pfeil wieder hinführt; der Klick aufs Wort nimmt
+         denselben Weg (g4mGalleryBack). Sonst bleibt die Zelle leer. -->
+    <button type="button" class="dpad-btn g4m-flex-center" id="dpad-menu" hidden title="Back towards the menu">menu</button>
     <button type="button" class="dpad-btn g4m-flex-center" id="dpad-right">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
             <use href="#g4m-arrow" transform="rotate(90 12 12)"/>
@@ -4760,6 +4921,15 @@ Max. 100</span>
      über das situative Menü (Reconstruct/Export/Import/Delete/Close). -->
 <div id="gallery-view" hidden>
     <img id="g4m-gal-view-img" alt="Gallery image preview">
+    <!-- v157.123: FOTOALBUM-BLÄTTERN — seitliche Tastzonen (je 30 %
+         Breite) blättern vor/zurück durch ALLE Bilder der Galerie;
+         die Mitte schliesst wie bisher (Klick auf das Bild). -->
+    <button type="button" class="g4m-gal-nav g4m-gal-nav-prev" id="g4m-gal-view-prev" aria-label="Previous image" title="Previous image">&#x2039;</button>
+    <button type="button" class="g4m-gal-nav g4m-gal-nav-next" id="g4m-gal-view-next" aria-label="Next image" title="Next image">&#x203A;</button>
+    <!-- v157.126: sichtbarer RÜCKWEG im Album-Modus — das ✕ oben
+         rechts führt zur Ansicht mit Menü zurück (wie Bildmitte,
+         Escape, rechter Pfeil und Galleries-Button). -->
+    <button type="button" class="g4m-gal-nav g4m-gal-nav-back" id="g4m-gal-view-back" aria-label="Back to menu" title="Back to menu">&#x2715;</button>
 </div>
 <input type="file" id="g4m-gal-import-file" accept="application/json,.json" hidden>
 
@@ -4782,11 +4952,14 @@ Max. 100</span>
 <div id="settings-panel" data-panel-open="0">
     <!-- Reihe 1 (v157.92): IDENTISCH zur F-Panel-Kopfzeile — links
          ein LEERES 2u-Feld (wo F1-F3 der Defaults-Button sitzt),
-         mittig der Titel (grosses Zahnrad), rechts der Info-Button
-         an der Formula-Position: der Griff zum Erklär-Panel. -->
+         mittig der Titel (grosses Zahnrad), rechts der Griff zum
+         Erklär-Panel an der Formula-Position. v160.1 (User): die
+         Beschriftung «Info» kollidierte mit dem i-Button gleich
+         rechts daneben in der Navi — sie heisst jetzt «Page 2»
+         nach der Konvention der F-Panel-Zweitseiten. -->
     <div class="g4m-arch-cell g4m-arch-top g4m-set-blank" aria-hidden="true"></div>
     <div class="g4m-arch-cell g4m-arch-top g4m-set-title"><span class="g4m-set-gear" aria-hidden="true">⚙</span>Settings</div>
-    <button type="button" id="g4m-set-info-btn" class="g4m-arch-cell g4m-arch-top" aria-label="Explain backup and statistics">Info</button>
+    <button type="button" id="g4m-set-info-btn" class="g4m-arch-cell g4m-arch-top" aria-label="Explain backup and statistics">Page 2</button>
     <!-- Reihen 2-9 (v157.93): die früheren acht Zeilen-Zellen sind
          EINE Relief-Fläche — darin sitzt, exakt nach dem Viz-Fenster-
          Prinzip (v157.16), ein um --g4m-viz-frame eingerücktes TEXT-
@@ -4929,13 +5102,14 @@ Max. 100</span>
 
 <!-- Linke Home-Abdeckung über dem Tools-Quadrat (v150s) — Pendant
      zum home-panel. v157.109 (User-Layout): das PNG ist GELÖSCHT;
-     die Abdeckung trägt OBEN LINKS die Titelzeile
-     «g4m · generative formulas» (JetBrains Mono, derselbe Wortlaut
-     wie Connect-Karte und Share-Text). Das Vollbild-Symbol
+     die Abdeckung trägt OBEN LINKS die Titelzeile. v157.135
+     (User-Naming): neuer Name «g4m — grid for magic», darunter der
+     Claim «where math meets random» (JetBrains Mono; Wortlaut
+     identisch mit Connect-Karte und Share-Text). Das Vollbild-Symbol
      (g4m-fs-home, eigenständiges Element) bleibt wie bisher. -->
 <div class="g4m-home-frame" id="g4m-home-left-frame">
 <div id="g4m-home-left" data-open="0" style="visibility: hidden;">
-    <div class="g4m-home-title">g4m&nbsp;·&nbsp;generative formulas</div>
+    <div class="g4m-home-title">g4m&nbsp;·&nbsp;grid for magic<span class="g4m-home-claim">where math meets random</span></div>
 </div>
 </div>
 
@@ -5436,7 +5610,15 @@ const G4M_PANELS = {
     'f3-panel':             { openAttr: 'data-panel-open',     side: 'canvas', zoomed: true  },
     'f3-options-panel':     { openAttr: 'data-f3-opts-open',   side: 'canvas', zoomed: true  },   // Page 2 (v157.52)
     'f3-formula-panel':     { openAttr: 'data-open',           side: 'tools',  zoomed: true  },   // Formel-Erklärung (v157.52)
-    'gallery-panel':        { openAttr: 'data-panel-open',     side: 'tools',  zoomed: true },   // Galleries (v157.60): TOOLS-Seite — von rechts unter dem Navi hervor
+    /* Galleries (v157.60): TOOLS-Seite — von rechts unter dem Navi
+       hervor. zoomed:FALSE seit v157.122 (Handy-Wurzelbefund): das
+       Panel ist seit dem Schacht-Design v157.62 px-genau auf den
+       Tools-Bereich gelegt und fährt mit SCALE FEST 1 — das alte
+       zoomed:true war ein Überbleibsel davor und liess updateUiScale
+       bei JEDEM Viewport-Wechsel (Vollbild!) scale(uiScale) auf das
+       offene Panel legen: auf Handys (uiScale < 1) schrumpfte der
+       Raster, am Desktop (uiScale = 1) blieb es unsichtbar. */
+    'gallery-panel':        { openAttr: 'data-panel-open',     side: 'tools',  zoomed: false },
     'f4-panel':             { openAttr: 'data-panel-open',     side: 'canvas', zoomed: true  },
     'f5-panel':             { openAttr: 'data-panel-open',     side: 'canvas', zoomed: true  },
     'f6-panel':             { openAttr: 'data-panel-open',     side: 'canvas', zoomed: true  },
@@ -7353,7 +7535,300 @@ const sliderData = {
    fehl (z. B. erloschene User-Geste), fällt Share auf den Karten-
    Download zurück statt still zu enden; nur der bewusste Abbruch
    (AbortError) bleibt folgenlos. */
-const G4M_RELEASE = Object.freeze({ version: 'v157.119', date: '31.07.2026' });
+/* v157.120: GALERIE-RASTER NACH VOLLBILD AUF DEM HANDY (User-Befund
+   31.07.). Diagnose: Handy-Viewports melden den Vollbildwechsel,
+   BEVOR die neuen Masse stehen — der zentrale Handler
+   (refreshAfterViewportChange) kennt darum seit je den SETTLE-
+   Zweitlauf (VIEWPORT_SETTLE_MS) und die webkit-Ereignisvariante;
+   der separate Galerie-Hook (v157.82) hatte BEIDES nicht und
+   vermass den Tools-Bereich mit alten Werten: Schacht, Panel und
+   Rahmenbreite des 6x6-Rasters stimmten nicht. Zwei Kuren:
+   1) Der zentrale Handler führt jetzt auch Galerie (PlaceMenu →
+   Schacht, Panel, Grossansicht, Rahmenbreite) und Settings-Schächte
+   nach — in BEIDEN Läufen, mit typeof-Wächtern über die Skript-
+   block-Grenze. 2) Der Galerie-Hook selbst erhielt Settle-Zweitlauf
+   und webkitfullscreenchange. Der Raster selbst ist reines
+   1fr-Grid — mit frischen Panel-Massen sitzt er von allein. */
+/* v157.121: DIE WURZEL DES VOLLBILD-RASTERS (User-Screenshot: Raster
+   nach Vollbild verkleinert, trotz v157.120). Diagnose: der zentrale
+   resize-Handler ist rAF-GEDROSSELT (Befund 23) — die UI-Skala --u,
+   aus der die Container-Grössen folgen, steht erst im Frame NACH dem
+   resize-Event. Der synchrone Galerie-Listener vermass den Tools-
+   Bereich damit stets einen Schritt zu alt; späte System-UI-Resizes
+   konnten korrekte Platzierungen sogar rückwirkend mit alten Massen
+   überschreiben — exakt das Screenshot-Bild. Kur: RESIZEOBSERVER
+   auf Tools- und Canvas-Container — er feuert nach der TATSÄCHLICHEN
+   Layout-Änderung der Ankerboxen und führt Galerie (Menü, Schacht,
+   Panel, Grossansicht, Rahmenbreite) und Settings-Schächte nach;
+   kein Timing-Raten mehr, beliebig späte Vollbild-Übergänge gedeckt.
+   Der resize-Rückfall (Browser ohne Observer) läuft doppelt-rAF-
+   verzögert und damit garantiert NACH dem Skalen-Update; die
+   Vollbild-Settle-Hooks bleiben als Redundanz. */
+/* v157.122: DER WAHRE TÄTER DES HANDY-RASTERS (User-Befund 31.07.,
+   dritter Anlauf — v157.120/121 kurierten echte, aber nachrangige
+   Timing-Schwächen). Das Galerie-Panel stand im Panel-Registry noch
+   als zoomed:true — ein Überbleibsel aus der Zeit VOR dem Schacht-
+   Design (v157.62, px-genaue Platzierung mit Scale fest 1). Folge:
+   updateUiScale legte bei JEDEM Viewport-Wechsel — also genau beim
+   Vollbild-Umschalten aus der offenen Galerie — scale(uiScale) auf
+   das Panel; auf Handys ist uiScale < 1, der Raster SCHRUMPFTE,
+   am Desktop (uiScale = 1) blieb der Fehler unsichtbar. showGallery-
+   Panel erzwang Scale 1 nur beim ÖFFNEN — der nächste Toggle
+   überschrieb es. Kur: zoomed:false im Registry (das Panel gehört
+   seit v157.62 nicht in die Zoom-Riege) plus Scale-1-Anker in
+   g4mGalleryPlaceClip als Vertragssicherung gegen künftige
+   Schreiber. Die Nachführ-Mechanik aus v157.120/121 bleibt — sie
+   ist für Masse und Position weiterhin richtig. */
+/* v157.123: FOTOALBUM-BLÄTTERN IN DER GROSSANSICHT (User-Wunsch
+   01.08.). 1) BLÄTTERN: seitliche Tastzonen (je 30 % Breite, dezente
+   Chevrons — weiss mit dunklem Schein, auf jedem Bildinhalt lesbar)
+   und die Pfeiltasten links/rechts blättern durch ALLE Bilder der
+   aktiven Galerie, mit Umlauf an den Enden; die Mitte schliesst wie
+   bisher. Der Raster führt die Grid-Seite mit (g4mGalPage aus dem
+   Bild-Index), die Markierung bleibt beim Seitenwechsel sichtbar.
+   2) MENÜ AUSGEBLENDET WÄHREND DES BETRACHTENS (User: «ohne dass
+   man Galleries verlässt»): OpenView blendet das Galleries-Menü
+   aus — die Bühne gehört dem Bild; Nav-Sperre und Galerie bleiben
+   bestehen. 3) AUSWAHL BLEIBT nach dem Schliessen: das situative
+   Menü kehrt mit den Bild-Aktionen (Reconstruct, Save as Default,
+   Export, Delete) für das zuletzt betrachtete Bild zurück — die
+   «weitere Verwendung» schliesst nahtlos ans Blättern an. Explizit
+   geräumt wird die Auswahl bei Delete (Datensatz weg), beim
+   Menü-Close (zurück zum Standard-Menü) und bei Reconstruct
+   (Galerie schliesst mit; keepMenuHidden verhindert das Anflackern
+   der Menü-Animation). Der Kachel-Toggle prüft jetzt die
+   SICHTBARKEIT der Ansicht statt nur der Auswahl. */
+/* v157.124: KLARER RÜCKWEG ZUM GALLERIES-MENÜ (User 01.08.).
+   1) Der Eintrag «Close» im situativen Menü heisst jetzt «Gallery
+   Menu» — er tat schon das Richtige (Auswahl räumen, Standard-Menü
+   zeigen), klang aber nach «Galleries verlassen». 2) Der GALLERIES-
+   BUTTON arbeitet hierarchisch als «eine Ebene zurück»: Grossansicht
+   offen -> Ansicht zu (Menü kehrt situativ zurück); Auswahl aktiv ->
+   Auswahl räumen (Standard-Menü); sonst -> Galerie schliessen wie
+   bisher. Damit führt IMMER ein sichtbarer, konsistenter Griff
+   zurück zur Galerie-Übersicht, ohne Galleries zu verlassen. */
+/* v157.125: ALBUM-MODUS ALS BEWUSSTE WAHL (User-Führung 01.08.:
+   «wenn man ein Bild anklickt, sollte wie zuvor das zweite Menü
+   erscheinen — mit einem neuen Auswahlpunkt»). Der KACHEL-KLICK
+   zeigt wieder Grossansicht PLUS situatives Menü (wie vor v157.123);
+   das Menü verschwindet nur noch im ausdrücklich gewählten
+   FOTOALBUM-MODUS: neuer oberster Menüpunkt «Browse Gallery»
+   (g4mGalleryBrowseStart) blendet das Menü aus und aktiviert die
+   Blätter-Zonen (CSS: Chevrons nur mit Klasse g4m-gal-browsing).
+   Bildmitte, Escape und der Galleries-Button führen aus dem Album
+   EINE Ebene zurück zur Ansicht MIT Menü (g4mGalleryBrowseEnd);
+   die Button-Hierarchie hat damit vier Stufen: Album -> Ansicht ->
+   Standard-Menü -> Galerie zu. Pfeiltasten blättern in beiden
+   Ansichts-Stufen (das situative Menü zieht mit); CloseView beendet
+   den Album-Modus in jedem Fall mit. */
+/* v157.126: EIN MENÜ + INTUITIVES ZURÜCK (User-Führung 01.08.).
+   1) EIN MENÜ statt zwei: links stehen IMMER die Galerie-Aktionen
+   (Save Image, Frame Color, New/Rename/Export/Import); die RECHTE
+   Spalte ist kontextuell — Galerien-Liste ohne Auswahl, Bild-
+   Aktionen (Browse Gallery, Reconstruct, Save as Default, Export,
+   Delete) bei offenem Bild. Der «Gallery Menu»-Eintrag entfiel:
+   das Menü IST immer das Galleries-Menü. Schliessen der Ansicht
+   räumt die Auswahl wieder (Signatur vereinfacht) — die frühere
+   Auswahl-Nachwirkung war nur nötig, solange das Menü während der
+   Ansicht versteckt war. 2) GETEILTE Zurück-Hierarchie
+   (g4mGalleryBack): Album -> Ansicht+Menü -> Raster+Menü -> zu —
+   genutzt vom Galleries-Button UND NEU vom RECHTEN D-PAD-PFEIL
+   (User: «intuitiv wählt man den Pfeil, aber dann verlässt man
+   Galleries») — der Pfeil führt jetzt eine Ebene zurück statt
+   hinaus. 3) SICHTBARER Rückweg im Album: ✕-Chip oben rechts auf
+   der Grossansicht (nur im Browse-Modus, Chevron-Optik) — plus
+   Bildmitte, Escape, Pfeil und Button: fünf Wege, alle zur Ansicht
+   mit Menü. */
+/* v157.127: GALERIE-IMPORT GEHÄRTET (User-Befund 01.08.: importierte
+   Galerien erschienen im Raster erst nach dem Neuöffnen; exakte
+   Reproduktion offen). Zwei Massnahmen: 1) EXPLIZITER Render-Epilog
+   nach dem Galerie-Wechsel — Raster, Menü (sicher sichtbar, frisch
+   gerendert) und Rahmenfarbe werden nach Abschluss der Import-Kette
+   nochmals idempotent gesetzt, unabhängig davon, was das Fokus-/
+   Resize-Zwischenspiel des Datei-Dialogs mit der Zwischenlage tat.
+   2) Der Fehlerpfad zeigt die ECHTE Ursache im Hinweis (err.message
+   statt Generik) — sollte der Effekt wieder auftreten, benennt die
+   Meldung den Schuldigen sofort. */
+/* v157.128: RÜCKWEG SICHTBAR GEMACHT (User 01.08.: «Bisher dienten
+   die Pfeile immer zum Wechseln der Panels — ob der User das
+   intuitiv merkt, ist offen»). 1) Das D-PAD-ZENTRUM trägt bei
+   offener Galerie die Wortmarke «menu» (JetBrains Mono, Pfeil-Grau,
+   700): sie ERKLÄRT, dass die Pfeile hier zum Menü zurückführen —
+   und ist selbst klickbar (g4mGalleryBack, derselbe Weg). Ausserhalb
+   der Galerie bleibt die Zelle leer wie eh. 2) HOVER-TITEL der
+   Grossansicht korrigiert: die Blätter-Zonen sagen «Previous image»
+   / «Next image» (statt des durchscheinenden «Click to close»), das
+   ✕ sagt «Back to menu», und die BILDMITTE wechselt ihren Titel mit
+   dem Modus — im Album «Back to menu» (dorthin führt der Klick),
+   in der normalen Ansicht «Click to close». */
+/* v157.129: «menu»-HINWEIS PRÄZISIERT (User-Korrektur 01.08.):
+   1) Er erscheint NUR im Album-Modus — genau dann, wenn das Menü
+   ausgeblendet ist und der User den Rückweg sucht; beim Öffnen der
+   Galerie (Menü sichtbar) bleibt das Zentrum leer. Gekoppelt an
+   BrowseStart/BrowseEnd, mit Sicherheitsnetzen in CloseView und
+   hideGalleryPanel. 2) Das Wort steht RECHTSBÜNDIG direkt am
+   Pfeil-nach-rechts (justify-content flex-end) — Wort und Pfeil
+   lesen sich als EIN Griff: dieser Pfeil führt zum Menü zurück. */
+/* v157.130: «menu» STAND VON BEGINN WEG DA (User-Befund 01.08.) —
+   die v157.68-Falle, erneut getappt: die Zentrum-Zelle trägt
+   g4m-flex-center (display:flex), und ein Autoren-display
+   überstimmt das hidden-Attribut, dessen Verstecken nur über das
+   UA-Stylesheet (display:none) wirkt. Kur wie damals: explizite
+   Regel #dpad-menu[hidden] { display:none } — die Sichtbarkeits-
+   Logik aus v157.129 (nur im Album-Modus) greift damit erst
+   wirklich. */
+/* v157.131: DIE Z-TIMER-RACE — Wurzel des «Bilder erscheinen erst
+   nach Neuöffnen»-Rätsels (User-Befunde 01.08., dritter Anlauf;
+   der Blitz beim Schliessen war der Schlüssel). Ablauf: hideGallery-
+   Panel senkt den Schacht nach Z_RESTORE_MS auf RESTING (10).
+   Schliesst man die Galerie und öffnet sie INNERT dieser Frist
+   wieder (beim Testen ständig), setzt Show z=50 — dann feuert der
+   VERWAISTE Timer und drückt den OFFENEN Schacht auf 10: das Panel
+   liegt fortan unter dem Tool-Panel (40), unsichtbar. Save und
+   Import rendern korrekt ins Unsichtbare; erst hideGalleryPanel
+   hebt den Schacht wieder auf 50 — der gefüllte Raster «blitzt»
+   während der Ausfahrt auf, und der nächste Show zeigt alles.
+   KUR (dreifach, auch für BEIDE Settings-Schächte, die dieselbe
+   Race tragen): 1) Timer stornierbar (clearTimeout in Show und
+   Hide); 2) Zustands-Wächter im Timer (senkt nur bei wirklich
+   geschlossenem Panel); 3) Z-Rückversicherung in g4mGalleryPlace-
+   Clip (bei offenem Panel gehört der Schacht auf 50 — jede
+   Platzierung stellt das her). AUSSERDEM: «menu»-Ausrichtung
+   gehärtet (#dpad-menu.dpad-btn doppelt die Spezifität gegen die
+   flex-center-Utility, text-align als Rückfall) und die Fuge zum
+   rechten Pfeil auf 0.12u erhöht (User-Wunsch). */
+/* v157.132: DATUM NACHGEFÜHRT (User: «noch das Datum von gestern»)
+   — der Stempel trägt jetzt den 01.08.2026; die Versionsvermerke
+   sprachen bereits vom 01.08. AUSSERDEM: das «menu»-Wort wird
+   rechnerisch ans PFEIL-DREIECK herangezogen (Details an der
+   CSS-Regel #dpad-menu.dpad-btn): rechtsbündig zur Zelle war es
+   schon — aber das fixe 24px-SVG des Pfeils sitzt zentriert in
+   SEINER Zelle, der Einzug liess optisch eine breite Lücke; ein
+   geklammerter negativer Aussenrand (u/3 − 16px Zug) bringt das
+   Wortende auf 4px Fuge vor das Dreieck, auf kleinen Schirmen
+   greift die 2px-Mindestpolsterung. */
+/* v157.133: «menu» AN DIE DREIECKSBASIS (User-Screenshot: «viel
+   näher an den Pfeil»). Der v157.132-Zug richtete auf die SVG-BOX
+   aus — das Dreieck beginnt aber erst 9px IN der Box (rotierter
+   Pfad spannt x 9..19): diese Totzone war die Restlücke. Formel
+   korrigiert auf Zug = u/3 − 5px (margin-right: calc(5px − u/3),
+   Klammer [−32px, 0]) — die 4px-Fuge zur sichtbaren Dreiecksbasis
+   ist damit konstruktiv exakt, auf jeder Bildschirmgrösse. */
+/* v157.134: BLÄTTER-PFEILE NUR, WENN SIE WIRKEN (User: «Pfeile im
+   D-Pad nur sichtbar, wenn etwas damit passieren kann»). Bisher
+   (v157.64) erschienen HOCH und RUNTER gemeinsam, sobald die Galerie
+   mehr als ein Grid hatte — auch am Anschlag, wo der Druck ins Leere
+   lief (g4mGalleryPage klammert und kehrt still um). Jetzt hängt
+   jeder Pfeil an SEINER Richtung: am ersten Grid (g4mGalPage 0, das
+   neueste) fehlt RUNTER (rückwärts), am letzten fehlt HOCH
+   (vorwärts); bei nur einem Grid fehlen beide wie gehabt. Kein
+   neuer Aufruf-Pfad nötig: jede Seitenänderung (Blättern, Galerie-
+   Wechsel, Grossansicht-Mitführung, Save/Delete/Import) läuft durch
+   g4mGalleryRenderPage, das updateArrowVisibility bereits am Ende
+   ruft — die Pfeile führen sich selbst nach. Die Positionslesung
+   klammert defensiv auf den Seitenbestand, falls sie einmal VOR der
+   Render-Klammerung liefe. */
+/* v157.135: NEUER NAME UND CLAIM (User): «g4m — grid for magic»,
+   darunter der Claim «where math meets random». BEWUSST ALLES
+   KLEIN — die Marke «g4m» ist klein, JetBrains Mono trägt die
+   technisch-stille Anmutung, und kleingeschrieben liest sich
+   «grid for magic» als Auflösung des Kürzels statt als Werbezeile;
+   Title Case bleibt als leicht umsetzbare Alternative notiert.
+   Der Gedankenstrich folgt dem Share-Text-Muster («g4m — …»).
+   Umgestellt: Seitentitel (<title>), Home-Titelzeile oben links
+   (Claim als zweite, leisere Zeile — neue Regel .g4m-home-claim),
+   Karten-Band der Connect-Karte (Zeile 1 der Name, der Claim führt
+   die Kontaktzeile an; der Breiten-Wächter skaliert wie gehabt)
+   und der Share-Text. Der frühere Wortlaut «g4m · generative
+   formulas» (v157.108) ist damit überall abgelöst; historische
+   Versionsvermerke bleiben unverändert wahr. */
+/* v157.136: TITELZEILE AUF MAXIMALE BREITE, CLAIM MIT (User);
+   TRENNER ZURÜCK AUF DEN PUNKT. Die Schriftgrössen von Name und
+   Claim rechnen sich jetzt aus der Breite der linken Home-Abdeckung
+   (Container-Query am Rahmen, Formeln an der CSS-Regel
+   .g4m-home-title): beide Zeilen enden mit ihrer sichtbaren
+   Glyphenkante exakt 0.6u vor der Nav-Naht — derselbe Rand wie
+   links, auf jeder Bildschirmgrösse, ohne px-Messung. Der Claim
+   spannt DIESELBE Breite auf wie der Name und wächst dadurch
+   von 0.59× auf 0.82× der Namenshöhe. AUSSERDEM (User): der
+   Gedankenstrich im Namen weicht wieder dem Mittelpunkt —
+   «g4m · grid for magic» an allen vier Stellen (Seitentitel,
+   Home-Titelzeile, Karten-Band L1, Share-Text); die Zeichenzahl 20
+   bleibt gleich, die Breitenformel stimmt unverändert. */
+/* v160.0: VERSIONSSPRUNG (User) — der neue Name «g4m · grid for
+   magic» mit dem Claim «where math meets random» markiert einen
+   Meilenstein; die Zählung springt von v157.136 auf v160.0.
+   INHALTLICH: der Claim in voller Namensbreite (v157.136) war zu
+   breit — er spannt jetzt 2/3 DER NAMENSBREITE auf, weiterhin
+   linksbündig am 0.6u-Rand. Die Konstruktion bleibt dieselbe
+   Container-Rechnung: fs = (100cqw − 1.2u) / 23.34, wobei
+   23.34 = 15.56em (Zeilen-em des Claims) × 3/2. Der Grössenbezug
+   Claim/Name liegt damit bei 0.82 × 2/3 ≈ 0.55 — nahe der
+   ursprünglichen v157.135-Proportion, nun aber breitenstabil aus
+   der Geometrie statt als fixer u-Wert. */
+/* v160.1: SETTINGS-KOPFZEILE «INFO» → «PAGE 2» (User): die
+   Beschriftung «Info» des Erklär-Panel-Griffs kollidierte begriff-
+   lich mit dem i-Button gleich rechts daneben in der Navigation —
+   zwei benachbarte Knöpfe, die beide «Info» versprachen, aber
+   Verschiedenes öffnen. Der Griff heisst jetzt «Page 2» nach der
+   etablierten Konvention der F-Panel-Zweitseiten (v157.52): gleiche
+   Kopfzeilen-Mechanik, gleiches Wort. Nur die BESCHRIFTUNG ändert
+   sich — Id (g4m-set-info-btn), aria-label, Verdrahtung
+   (g4mToggleSettingsInfo) und das Erklär-Panel selbst bleiben
+   unverändert. */
+/* v160.2: INFO-TAFEL AM i-BUTTON (User): der i-Button öffnet jetzt
+   eine MENÜ-Tafel — bewusst KEIN eigenes Panel, sondern Weiss mit
+   Wurfschatten in der Formensprache der dd-Menüs. Umsetzung über
+   die ZENTRALE Dropdown-Mechanik (g4mToggleDropdown): Toggle am
+   Button, Outside-Click/Escape schliessen, Abwärts-Roll per
+   g4m-dd-down (Roll-Kante oben — die Tafel wächst bündig unter dem
+   Button heraus, das Schatten-Polster liegt unten, v157.106).
+   Geometrie nach User-Vorgabe: 12u x 8u, horizontal auf die
+   NAVI-MITTE zentriert (Muster Save-Image-Menü v157.79), OBERKANTE
+   bündig an der i-Button-UNTERKANTE; u aus der Canvas-Breite
+   (v157.39), Viewport-Wächter klemmt in den Sichtbereich. INHALT:
+   was g4m ist — Name «g4m · grid for magic», Claim «where math
+   meets random», vier kurze Absätze (Formeln auf dem Raster mit
+   dosiertem Zufall; F1-F10 + Slider oder einfach Go; Galerien rein
+   lokal im Browser samt Reconstruct; Karte teilen, Export/Import).
+   Der Menuitem-Fokusring der generischen Mechanik (Befund 16) ist
+   für die reine Text-Tafel per CSS stillgelegt; Escape-Schliessen
+   bleibt. Der i-Button war bis hier ein Platzhalter ohne Handler —
+   die Nav-Sperre der Galerie (v157.66) erfasst ihn unverändert. */
+/* v160.3: INFO-TEXT NEU GEFASST — DIE APP IST DAS KUNSTWERK (User-
+   Konzept): «generative art» klang nach KI-generierter Kunst und
+   traf das Werk nicht. Die neue Fassung stellt das Konzept klar:
+   NICHT die Bilder sind Kunstwerke — g4m SELBST ist das Kunstwerk,
+   ein konzeptuelles Stück, das weltweit eine unermessliche
+   Bilderflut erzeugt und damit dem inflationären Umgang mit
+   Bildern den Spiegel vorhält. Die Bilder sind nur Bilder,
+   unendlich viele — allein die Superformula kann mehr Bilder
+   erzeugen, jedes ein Unikat, als es Sterne im Universum gibt.
+   Der Schluss dreht den Claim ins Konzept («add to the flood, or
+   pause and look. Where math meets random.»). NUR die Tafel ist
+   umgefasst; die Wörter «artwork» im E-Mail-Betreff («My g4m
+   artwork», v157.102) und im Karten-Hinweis der Galerie («your
+   card carries your artwork», v157.119) stehen noch — bewusst
+   unangetastet, bis der User ihre Ausrichtung entscheidet. */
+/* v160.4: INFO-TEXT ALS PLATZHALTER GEKENNZEICHNET (User): die
+   v160.3-Fassung umreisst das Konzept richtig, die PRÄZISE
+   Endformulierung steht aber noch aus. Kennzeichnung doppelt:
+   SICHTBAR in der Tafel (kursive Hellgrau-Zeile «[ placeholder
+   text — final wording to follow ]» zwischen Kopf und Fliesstext,
+   Klasse g4m-ib-draft) und im CODE (Kommentar an der Bau-Stelle in
+   createInfoBoard). Mit der Endfassung fliegen Zeile, CSS-Regel
+   und dieser Merker gemeinsam. */
+/* v160.5: INFO-TAFEL SCHLIESST PER KLICK AUF SICH SELBST (User:
+   «es kann schnell passieren, dass der User nicht weiss, wie er
+   schliessen kann»). Die generischen Wege bleiben alle — Klick
+   auf den i-Button (Toggle), Klick AUSSERHALB, Escape — neu kommt
+   der naheliegendste dazu: ein Klick IRGENDWO AUF DER TAFEL ruft
+   close() der Dropdown-Mechanik. Führung nach dem Muster der
+   Galerie-Grossansicht (v157.128): cursor:pointer und
+   title «Click to close» sagen es ohne eigenes UI-Element. Der
+   Tastaturpfad (Befund 16) profitiert mit: Enter/Space auf der
+   fokussierten Tafel läuft über el.click() denselben Weg. */
+const G4M_RELEASE = Object.freeze({ version: 'v160.5', date: '01.08.2026' });
 const G4M_BUILD = G4M_RELEASE.version;   // Kurzform für Titel und Konsole
 document.title = document.title + ' · ' + G4M_BUILD;
 console.log('g4m build', G4M_BUILD, '·', G4M_RELEASE.date);
@@ -10989,6 +11464,74 @@ function downloadImage() {
     createResolutionDropdown();
 }
 
+/* ── Info-Tafel am i-Button (v160.2, User) ────────────────────────
+   BEWUSST KEIN Panel, sondern ein MENÜ über die zentrale Dropdown-
+   Mechanik: Toggle am i-Button, Outside-Click und Escape schliessen,
+   Abwärts-Roll (g4m-dd-down — Roll-Kante oben, bündig unter dem
+   Button, Schatten-Polster unten). Geometrie nach User-Vorgabe:
+   12u BREIT, 8u HOCH, horizontal auf die NAVI-MITTE zentriert,
+   OBERKANTE bündig an der UNTERKANTE des i-Buttons; u aus der
+   Canvas-Breite wie beim Save-Image-Menü (v157.39). Ein Viewport-
+   Wächter klemmt die Tafel nötigenfalls in den Sichtbereich. */
+function createInfoBoard() {
+    g4mToggleDropdown('g4m-info-board', document.getElementById('info-btn'), function (dropdown, close) {
+        const iBtn = document.getElementById('info-btn');
+        const cv   = canvasContainer ? canvasContainer.getBoundingClientRect() : null;
+        const bR   = iBtn ? iBtn.getBoundingClientRect() : null;
+        if (bR && cv && cv.width > 0) {
+            const u   = cv.width / 12;
+            const w12 = Math.round(u * 12);
+            const h8  = Math.round(u * 8);
+            const nav = document.querySelector('.navigation-tool');
+            const nr  = nav ? nav.getBoundingClientRect() : bR;
+            dropdown.style.top    = Math.max(0, Math.min(bR.bottom, window.innerHeight - h8)) + 'px';
+            dropdown.style.bottom = 'auto';
+            dropdown.style.width  = w12 + 'px';
+            dropdown.style.height = h8 + 'px';
+            dropdown.style.left   = Math.max(0, Math.min(
+                nr.left + nr.width / 2 - w12 / 2, window.innerWidth - w12)) + 'px';
+            dropdown.classList.add('g4m-dd-down');
+        }
+        const box = document.createElement('div');
+        /* v160.4 (User): der Text ist ein PLATZHALTER — er umreisst
+           das Konzept (v160.3), die präzise Endfassung steht noch
+           aus. Sichtbar gekennzeichnet (g4m-ib-draft), damit die
+           Tafel beim Testen nicht als fertig gelesen wird. */
+        box.innerHTML =
+              '<div class="g4m-ib-name">g4m · grid for magic</div>'
+            + '<div class="g4m-ib-claim">where math meets random</div>'
+            + '<div class="g4m-ib-draft">[ placeholder text &#8212; final wording to follow ]</div>'
+            + '<p>g4m is not a tool for making art &#8212; g4m itself is the '
+            + 'artwork. A conceptual piece: an app that pours out an '
+            + 'immeasurable flood of images, worldwide, and in doing so holds '
+            + 'up a mirror to how inflationary our handling of images has '
+            + 'become.</p>'
+            + '<p>The images are not artworks. They are just images &#8212; '
+            + 'endlessly many. Every press of Go grows one from a '
+            + 'mathematical formula on a grid, stirred with a controlled '
+            + 'dose of chance. The superformula alone can produce more '
+            + 'images &#8212; each one unique &#8212; than there are stars '
+            + 'in the universe.</p>'
+            + '<p>Keep the few that mean something to you in your galleries. '
+            + 'They live entirely in your browser &#8212; no account, no '
+            + 'server &#8212; and Reconstruct brings any saved image back '
+            + 'with all its settings in a single click.</p>'
+            + '<p>Share a card, export galleries and settings as files &#8212; '
+            + 'add to the flood, or pause and look. Where math meets '
+            + 'random.</p>';
+        dropdown.appendChild(box);
+        /* v160.5 (User): die TAFEL SELBST schliesst per Klick — der
+           Outside-Click der generischen Mechanik bleibt, aber wer
+           auf die Tafel tippt, soll nicht rätseln müssen, wie sie
+           wieder zugeht. Hinweis wie bei der Galerie-Grossansicht
+           (v157.128): der Zeiger und das Titel-Wort sagen es. */
+        dropdown.style.cursor = 'pointer';
+        dropdown.title = 'Click to close';
+        dropdown.addEventListener('click', function () { close(); });
+    });
+}
+document.getElementById('info-btn').addEventListener('click', createInfoBoard);
+
 /* ── Formel-Menü am Modus-Indikator (v150d) ───────────────────────
    Nutzt die zentrale Dropdown-Mechanik (Toggle, Outside-Click,
    Tastaturpfad aus Befund 16). Die 10 Einträge entstehen aus den
@@ -13038,6 +13581,19 @@ function initFullscreenButton() {
         g4mPositionNavCovers();
         if (isGielisPanelOpen()) positionGielisPanel();
         repositionOpenPanels();
+        /* v157.120 (User-Befund: Galerie-Raster nach Vollbild auf dem
+           Handy falsch): die px-genauen Schacht-Bewohner vermessen
+           Tools-/Canvas-Bereich SELBST — nach Vollbildwechseln
+           liefert erst der Settle-Zweitlauf dieses Handlers frische
+           Masse. Galerie (Menü + Schacht + Panel + Grossansicht +
+           Rahmenbreite) und Settings-Zentrale hier nachführen;
+           typeof-Wächter, weil die Funktionen in einem späteren
+           Skriptblock wohnen. */
+        if (typeof g4mGalleryPlaceMenu === 'function') g4mGalleryPlaceMenu();
+        if (typeof g4mSettingsPlaceClip === 'function'
+            && g4mIsPanelOpen('settings-panel')) g4mSettingsPlaceClip();
+        if (typeof g4mSettingsInfoPlace === 'function'
+            && g4mIsPanelOpen('settings-info-panel')) g4mSettingsInfoPlace();
         updateArrowVisibility();
     }
     ['fullscreenchange', 'webkitfullscreenchange'].forEach(function(ev) {
@@ -13520,7 +14076,7 @@ const G4M_CONNECT = Object.freeze({
        «Create. Donate. Connect.» ist nicht mehr aktuell (User
        31.07.) — bewusst GELÖSCHT statt geleert, damit ihn kein
        Verbraucher versehentlich weiterträgt. */
-    TEXT:  'Look what I created with g4m — generative formulas in the browser.\n'
+    TEXT:  'Look what I created with g4m · grid for magic, where math meets random.\n'
          + 'Try it yourself: https://g4m.ch\n'
          + 'Questions: info@g4m.ch'
 });
@@ -13588,8 +14144,8 @@ function g4mConnectCardCanvas(srcCanvas) {
     c.fillStyle = '#333333';
     c.fillRect(0, H, W, band);
     const pad = Math.round(band * 0.35);
-    const L1 = 'g4m · generative formulas';   /* Wortlaut v157.108 (User) — identisch mit dem Share-Text */
-    const L2 = 'g4m.ch · ' + G4M_CONNECT.MAIL;
+    const L1 = 'g4m · grid for magic';   /* neuer Name (v157.135, User) — identisch mit Home-Titel und Share-Text */
+    const L2 = 'where math meets random · g4m.ch · ' + G4M_CONNECT.MAIL;   /* Claim führt die Kontaktzeile an (v157.135) */
     const R1 = '© ' + new Date().getFullYear() + ' ' + G4M_CONNECT.OWNER;
     const R2 = G4M_CONNECT.RIGHTS;
     let s1 = band * 0.32, s2 = band * 0.24, s3 = band * 0.22;
@@ -13786,6 +14342,8 @@ function g4mSettingsPlaceClip() {
     }
 }
 
+let g4mSetClipZTimer = null;   // v157.131: stornierbare Z-Absenkung (Race wie bei der Galerie)
+let g4mSetInfoZTimer = null;
 function showSettingsPanel() {
     const p = document.getElementById('settings-panel');
     const clip = document.getElementById('settings-clip');
@@ -13798,6 +14356,7 @@ function showSettingsPanel() {
     if (g4mIsPanelOpen('gallery-panel') && typeof hideGalleryPanel === 'function') hideGalleryPanel();
     g4mSettingsPlaceClip();
     if (typeof g4mSetPanelScale === 'function') g4mSetPanelScale(p, 1);   // reine Translation im Schacht
+    clearTimeout(g4mSetClipZTimer);   // v157.131: verwaiste Absenkung stornieren
     clip.style.zIndex = String(G4M_Z.FORMULA_SHOWN);   // über Tool-Panel (40) + Tools-Abdeckung (45)
     g4mParkPanelSlide(p, g4mHiddenTransform('tools'));   // Startkante instant (Befund 29)
     g4mSetPanelSlide(p, 'translateX(0)');
@@ -13817,8 +14376,11 @@ function hideSettingsPanel() {
     if (clip) clip.style.zIndex = String(G4M_Z.FORMULA_SHOWN);   // Ausfahrt SICHTBAR über dem Tool-Panel
     g4mSetPanelSlide(p, g4mHiddenTransform('tools'));
     g4mSetPanelOpen('settings-panel', false);
-    setTimeout(function () {
-        if (clip) clip.style.zIndex = String(G4M_Z.RESTING);
+    clearTimeout(g4mSetClipZTimer);
+    g4mSetClipZTimer = setTimeout(function () {
+        if (clip && !g4mIsPanelOpen('settings-panel')) {   // Zustands-Wächter (v157.131)
+            clip.style.zIndex = String(G4M_Z.RESTING);
+        }
         updateArrowVisibility();
     }, G4M_ANIM.Z_RESTORE_MS);
 }
@@ -14024,6 +14586,7 @@ function showSettingsInfoPanel() {
     if (!p) return;
     g4mSettingsInfoPlace();
     if (typeof g4mSetPanelScale === 'function') g4mSetPanelScale(p, 1);
+    clearTimeout(g4mSetInfoZTimer);   // v157.131: verwaiste Absenkung stornieren
     p.style.zIndex = String(G4M_Z.OPTIONS);   // über allem, was auf der Canvas-Seite ruht — wie Page 2
     g4mParkPanelSlide(p, g4mHiddenTransform('canvas'));   // Startkante instant (Befund 29)
     g4mSetPanelSlide(p, 'translateX(0)');
@@ -14036,8 +14599,11 @@ function hideSettingsInfoPanel() {
     if (!p) return;
     g4mSetPanelSlide(p, g4mHiddenTransform('canvas'));
     g4mSetPanelOpen('settings-info-panel', false);
-    setTimeout(function () {
-        p.style.zIndex = String(G4M_Z.RESTING);
+    clearTimeout(g4mSetInfoZTimer);
+    g4mSetInfoZTimer = setTimeout(function () {
+        if (!g4mIsPanelOpen('settings-info-panel')) {   // Zustands-Wächter (v157.131)
+            p.style.zIndex = String(G4M_Z.RESTING);
+        }
         updateArrowVisibility();
     }, G4M_ANIM.Z_RESTORE_MS);
 }
@@ -14678,11 +15244,18 @@ function updateArrowVisibility() {
        hoch = vorwärts (ältere Grids), runter = rückwärts; der RECHTE
        Pfeil schliesst (Tools-Seiten-Konvention, Querformat).
        v157.64: Die Blätter-Pfeile erscheinen erst, wenn es überhaupt
-       etwas zu blättern gibt — ab MINDESTENS 2 Rasterrahmen. */
+       etwas zu blättern gibt — ab MINDESTENS 2 Rasterrahmen.
+       v157.134 (User-Wunsch): Pfeile zeigen sich nur, wenn der Druck
+       auch WIRKT — am ERSTEN Grid geht nichts rückwärts (Pfeil runter
+       weg), am LETZTEN nichts vorwärts (Pfeil hoch weg). Jede
+       Seitenänderung läuft durch g4mGalleryRenderPage, das am Ende
+       hierher zurückruft — die Pfeile führen sich also selbst nach. */
     if (g4mIsPanelOpen('gallery-panel')) {
-        const canPage = (typeof g4mGalPageCount === 'function') && g4mGalPageCount() > 1;
-        showArrow(upArrow,    canPage, 'gallery-page');
-        showArrow(downArrow,  canPage, 'gallery-page');
+        const haveGal = (typeof g4mGalPageCount === 'function');
+        const pageCnt = haveGal ? g4mGalPageCount() : 1;
+        const page    = haveGal ? Math.min(g4mGalPage, pageCnt - 1) : 0;
+        showArrow(upArrow,   page < pageCnt - 1, 'gallery-page');   // vorwärts (ältere Grids)
+        showArrow(downArrow, page > 0,           'gallery-page');   // rückwärts (neuere Grids)
         showArrow(rightArrow, true, 'gallery-panel');
     }
 
@@ -14745,13 +15318,15 @@ function handleRightArrowClick(e) {
     e.stopPropagation();
 
     /* Galleries (v157.60): Pfeil HOCH blättert vorwärts (ältere Grids
-       «darunter»); der RECHTE Pfeil schliesst — die Galerie wohnt
-       jetzt auf der Tools-Seite. */
+       «darunter»). Der RECHTE Pfeil arbeitet seit v157.126 die
+       GETEILTE Zurück-Hierarchie ab (g4mGalleryBack) statt sofort zu
+       schliessen — der intuitive Pfeildruck im Album-Modus führt
+       damit zum Menü zurück, nicht aus Galleries hinaus (User). */
     if (g4mIsPanelOpen('gallery-panel')) {
         if (e.currentTarget && e.currentTarget.id === 'dpad-up') {
             g4mGalleryPage(1);
         } else {
-            hideGalleryPanel();
+            g4mGalleryBack();
         }
         return;
     }
@@ -14802,6 +15377,11 @@ let g4mGalMeta = null;      // { key:'meta', galleries:[{id,name,frameColor}], a
 let g4mGalImages = [];      // Einträge der AKTIVEN Galerie, ts absteigend (Feed)
 let g4mGalPage = 0;         // aktuelles Grid (0-basiert)
 let g4mGalSelectedId = null; // gewählte Kachel (Grossansicht: Etappe 2)
+let g4mGalBrowse = false;
+let g4mGalClipZTimer = null;   /* v157.131: Z-Absenkung der Ausfahrt ist STORNIERBAR —
+                                  siehe die Timer-Race-Diagnose im Versionsvermerk */      /* v157.125: Fotoalbum-Modus — nur wenn TRUE ist das
+                                  Menü ausgeblendet und die Blätter-Zonen sind aktiv;
+                                  der normale Kachel-Klick zeigt Ansicht + MENÜ. */
 let g4mGalPersisted = null;  // navigator.storage.persist(): true/false/unbekannt (v157.71)
 
 function g4mGalOpenDb() {
@@ -14905,8 +15485,14 @@ function buildGalleryPanel() {
         tile.addEventListener('click', function () {
             const id = tile.getAttribute('data-img-id');
             if (!id) return;
-            // Etappe 2 (v157.67): Klick oeffnet die Grossansicht ueber der Canvas
-            if (g4mGalSelectedId === id) g4mGalleryCloseView();
+            /* Etappe 2 (v157.67): Klick öffnet die Grossansicht über
+               der Canvas. v157.123: der Toggle prüft die SICHTBARKEIT
+               der Ansicht, nicht nur die Auswahl — die Auswahl bleibt
+               seit v157.123 auch nach dem Schliessen bestehen (das
+               situative Menü kehrt mit den Bild-Aktionen zurück), und
+               derselbe Kachel-Klick öffnet die Ansicht dann WIEDER. */
+            const view = document.getElementById('gallery-view');
+            if (view && !view.hidden && g4mGalSelectedId === id) g4mGalleryCloseView();
             else g4mGalleryOpenView(id);
         });
         grid.appendChild(tile);
@@ -15102,6 +15688,10 @@ function g4mGalleryOpenView(id) {
     const img = document.getElementById('g4m-gal-view-img');
     if (!rec || !view || !img) return;
     g4mGalSelectedId = id;
+    /* v157.123: Grid-Seite MITFÜHREN — beim Blättern über eine
+       Seitengrenze folgt der Raster, die Markierung bleibt sichtbar. */
+    const idx = g4mGalImages.findIndex(function (r) { return r.id === id; });
+    if (idx >= 0) g4mGalPage = Math.floor(idx / G4M_GAL.IMG_SLOTS);
     img.src = rec.preview || rec.thumb;
     if (typeof canvasContainer !== 'undefined' && canvasContainer) {
         const r = canvasContainer.getBoundingClientRect();
@@ -15114,14 +15704,89 @@ function g4mGalleryOpenView(id) {
     view.hidden = false;
     g4mGalApplyFrameColor();  // Rahmen der Grossansicht = Galerie-Farbe (v157.69)
     g4mGalleryRenderPage();   // Kachel-Markierung
-    g4mGalleryRenderMenu();   // Menü wird situativ (Reconstruct/…)
+    /* v157.125 (User-Führung): der KACHEL-KLICK zeigt Ansicht UND
+       das situative Menü — wie vor v157.123; das MENÜ verschwindet
+       nur im bewusst gewählten Fotoalbum-Modus («Browse Gallery»),
+       in dem auch das Weiterblättern hier durchläuft. */
+    if (g4mGalBrowse) g4mGalleryHideMenu();
+    else g4mGalleryRenderMenu();   // zweites Menü sofort — mit den Bild-Aktionen
 }
-function g4mGalleryCloseView() {
+
+/* Fotoalbum-Modus betreten/verlassen (v157.125): «Browse Gallery»
+   im situativen Menü startet ihn — Menü weg, Blätter-Zonen an;
+   Bildmitte, Escape oder der Galleries-Button beenden ihn ZUR
+   ANSICHT MIT MENÜ zurück (eine Ebene, nicht ganz hinaus). */
+function g4mGalleryBrowseStart() {
+    g4mGalBrowse = true;
     const view = document.getElementById('gallery-view');
-    if (view) view.hidden = true;
+    if (view) {
+        view.classList.add('g4m-gal-browsing');
+        view.title = 'Back to menu';   // Bildmitte führt im Album zum Menü zurück (v157.128)
+    }
+    g4mGalleryHideMenu();
+    /* v157.129 (User): der «menu»-Hinweis am rechten Pfeil erscheint
+       GENAU JETZT — das Menü ist ausgeblendet, und das Wort sagt,
+       wo der Pfeil wieder hinführt. */
+    const dm = document.getElementById('dpad-menu');
+    if (dm) dm.hidden = false;
+}
+function g4mGalleryBrowseEnd() {
+    g4mGalBrowse = false;
+    const view = document.getElementById('gallery-view');
+    if (view) {
+        view.classList.remove('g4m-gal-browsing');
+        view.title = 'Click to close';   // normale Ansicht: Klick schliesst (v157.128)
+    }
+    const dm = document.getElementById('dpad-menu');
+    if (dm) dm.hidden = true;   // Menü ist zurück — Hinweis erfüllt (v157.129)
+    if (g4mIsPanelOpen('gallery-panel')) g4mGalleryShowMenu();
+}
+
+/* Fotoalbum-Blättern (v157.123): vor/zurück durch ALLE Bilder der
+   aktiven Galerie, mit Umlauf an den Enden; OpenView führt Seite,
+   Markierung und Rahmen selbst nach. */
+function g4mGalleryStep(dir) {
+    if (!g4mGalImages.length) return;
+    let idx = g4mGalImages.findIndex(function (r) { return r.id === g4mGalSelectedId; });
+    idx = (idx < 0) ? 0 : (idx + dir + g4mGalImages.length) % g4mGalImages.length;
+    g4mGalleryOpenView(g4mGalImages[idx].id);
+}
+/* v157.126: Schliessen räumt die Auswahl IMMER — seit das eine
+   Menü während der Ansicht sichtbar ist (Bild-Aktionen rechts),
+   braucht es keine nachwirkende Auswahl mehr; das Menü zeigt nach
+   dem Schliessen wieder die Galerien-Liste. keepMenuHidden
+   unterdrückt die Menü-Rückkehr, wenn unmittelbar danach die ganze
+   Galerie schliesst (Reconstruct) — sonst flackerte die Abroll-
+   Animation an. */
+function g4mGalleryCloseView(keepMenuHidden) {
+    const view = document.getElementById('gallery-view');
+    if (view) {
+        view.hidden = true;
+        view.classList.remove('g4m-gal-browsing');
+        view.title = 'Click to close';   // Titel-Grundzustand (v157.128)
+    }
+    g4mGalBrowse = false;   // Ansicht zu beendet auch den Album-Modus (v157.125)
+    const dmCv = document.getElementById('dpad-menu');
+    if (dmCv) dmCv.hidden = true;   // Hinweis mit dem Album beenden (v157.129)
     g4mGalSelectedId = null;
     g4mGalleryRenderPage();
-    g4mGalleryRenderMenu();
+    if (!keepMenuHidden && g4mIsPanelOpen('gallery-panel')) {
+        g4mGalleryShowMenu();   // rendert das eine Menü (Liste rechts)
+    } else {
+        g4mGalleryRenderMenu();
+    }
+}
+
+/* v157.126: DIE eine Zurück-Hierarchie der Galerie — geteilt vom
+   Galleries-Button UND vom rechten D-Pad-Pfeil (User-Befund:
+   «intuitiv wählt man den Pfeil — aber dann verlässt man
+   Galleries»). Jede Betätigung eine Ebene:
+   Album -> Ansicht+Menü -> Raster+Menü -> Galerie zu. */
+function g4mGalleryBack() {
+    if (g4mGalBrowse) { g4mGalleryBrowseEnd(); return; }
+    const view = document.getElementById('gallery-view');
+    if (view && !view.hidden) { g4mGalleryCloseView(); return; }
+    hideGalleryPanel();
 }
 
 /* ── Reconstruct: Bild UND Einstellungen mit einem Klick zurück ───
@@ -15213,7 +15878,7 @@ function g4mGalleryReconstruct(rec) {
     if (!rec || !rec.data) return;
     g4mApplyImageRecord(rec);
     // Bühne frei: Grossansicht und Galerie schliessen, weiterarbeiten
-    g4mGalleryCloseView();
+    g4mGalleryCloseView(true);   // Menü bleibt zu — die Galerie geht gleich mit
     hideGalleryPanel();
     g4mGalleryHint('Image and settings reconstructed');
 }
@@ -15225,7 +15890,7 @@ function g4mGalleryDeleteImage(rec) {
         .then(function () {
             const i = g4mGalImages.findIndex(function (r) { return r.id === rec.id; });
             if (i >= 0) g4mGalImages.splice(i, 1);
-            g4mGalleryCloseView();
+            g4mGalleryCloseView();   // Datensatz weg — zurück zu Raster + Menü
             g4mGalleryHint('Image deleted \u2014 slot is free again');
         })
         .catch(function () { g4mGalleryHint('Delete failed \u2014 storage error'); });
@@ -15344,10 +16009,26 @@ function g4mGalleryImportGallery(payload) {
     });
     chain.then(function () { return g4mGallerySwitchTo(g.id); })
         .then(function () {
+            /* v157.127 (User-Befund: importierte Galerie erschien erst
+               nach Neuöffnen): EXPLIZITER Render-Epilog — SwitchTo
+               rendert zwar selbst, aber der Import kommt aus dem
+               Datei-Dialog zurück (Fokus-/Resize-Zwischenspiele) und
+               soll nicht von der Ketten-Zwischenlage abhängen. Alle
+               drei Schritte sind idempotent: Raster füllen, Menü
+               sicher sichtbar + frisch gerendert, Rahmenfarbe der
+               neuen Galerie anwenden. */
+            g4mGalleryRenderPage();
+            if (g4mIsPanelOpen('gallery-panel')) g4mGalleryShowMenu();
+            g4mGalApplyFrameColor();
             g4mGalleryHint('Gallery \u00ab' + name + '\u00bb imported ('
                 + imgs.length + ' images' + (cut > 0 ? ', ' + cut + ' beyond capacity skipped' : '') + ')');
         })
-        .catch(function () { g4mGalleryHint('Gallery import failed \u2014 storage error'); });
+        .catch(function (err) {
+            /* v157.127: ECHTE Ursache in den Hinweis — die generische
+               Meldung verschluckte bisher jede Diagnose. */
+            g4mGalleryHint('Gallery import failed \u2014 '
+                + ((err && err.message) ? err.message : 'storage error'));
+        });
 }
 
 
@@ -15564,35 +16245,41 @@ function g4mGalleryRenderMenu() {
     const head = document.createElement('div');
     head.className = 'g4m-gal-head';
 
-    function item(label, onClick) {
+    function item(label, onClick, col) {
         const el = document.createElement('div');
         el.className = 'g4m-gal-mi';
         el.setAttribute('role', 'menuitem');
         el.tabIndex = 0;
         el.textContent = label;
         el.addEventListener('click', onClick);
-        colL.appendChild(el);
+        (col || colL).appendChild(el);
         return el;
     }
 
-    /* SITUATIV (Entscheid 7): offenes Bild => nur die Bild-Befehle */
+    /* v157.126 (User: «zwei Menüs sind verwirrend — alles in EIN
+       Menü»): die frühere Zwei-Zustands-Modalität entfiel. Es gibt
+       nur noch DIESES eine Menü: links stehen IMMER die Galerie-
+       Aktionen; die RECHTE Spalte ist kontextuell — ohne Auswahl
+       die Galerien-Liste, mit offenem Bild dessen Aktionen (Browse,
+       Reconstruct, …). Der «Gallery Menu»-Rückwegs-Eintrag wurde
+       damit überflüssig: das Menü IST immer das Galleries-Menü. */
     const viewRec = g4mGalSelectedId ? g4mGalRecById(g4mGalSelectedId) : null;
     if (viewRec) {
         head.textContent = 'Image \u00b7 ' + new Date(viewRec.ts).toLocaleDateString();
         colR.appendChild(head);
-        item('Reconstruct', function () { g4mGalleryReconstruct(viewRec); });
-        item('Save as Default', function () { g4mGallerySaveAsDefault(viewRec); });
-        item('Export \u2026', function () { g4mGalleryExportImage(viewRec); });
-        item('Import \u2026', g4mGalleryImportImage);
-        item('Delete', function () { g4mGalleryDeleteImage(viewRec); });
-        item('Close', g4mGalleryCloseView);
-        return;
+        item('Browse Gallery', g4mGalleryBrowseStart, colR);   // Fotoalbum-Modus (v157.125)
+        item('Reconstruct', function () { g4mGalleryReconstruct(viewRec); }, colR);
+        item('Save as Default', function () { g4mGallerySaveAsDefault(viewRec); }, colR);
+        item('Export \u2026', function () { g4mGalleryExportImage(viewRec); }, colR);
+        item('Delete', function () { g4mGalleryDeleteImage(viewRec); }, colR);
     }
 
-    head.textContent = g.name + ' \u00b7 ' + g4mGalImages.length + ' images';
-    head.title = 'Persistent storage: ' + (g4mGalPersisted === true ? 'granted'
-        : g4mGalPersisted === false ? 'not granted (browser decision)' : 'unknown');
-    colR.appendChild(head);
+    if (!viewRec) {
+        head.textContent = g.name + ' \u00b7 ' + g4mGalImages.length + ' images';
+        head.title = 'Persistent storage: ' + (g4mGalPersisted === true ? 'granted'
+            : g4mGalPersisted === false ? 'not granted (browser decision)' : 'unknown');
+        colR.appendChild(head);
+    }
     item('Save Image to Gallery', g4mGallerySaveCurrent);
 
     // Frame Color: Picker direkt in der Zeile (pro Galerie, Entscheid 4/5)
@@ -15620,7 +16307,9 @@ function g4mGalleryRenderMenu() {
     item('Import \u2026', g4mGalleryImportImage);             // Bild- ODER Galerie-Datei (v157.71)
 
     /* Galerien-LISTE (v157.60): rechts, ALLE direkt wählbar, aktive
-       markiert; Bildzahl asynchron aus der DB. */
+       markiert; Bildzahl asynchron aus der DB. Bei offenem Bild
+       gehört die rechte Spalte den Bild-Aktionen (v157.126). */
+    if (viewRec) return;
     const lh = document.createElement('div');
     lh.className = 'g4m-gal-head';
     lh.textContent = 'Galleries';
@@ -15749,10 +16438,21 @@ function g4mGalleryPlaceClip() {
        der Schacht mit, das Panel darin behielt aber seine alten
        Pixelmasse — der Raster stimmte nicht mehr. Panel-Grösse hier
        mitziehen (Quelle ist immer der aktuelle Tools-Bereich). */
+    /* v157.131: Z-RÜCKVERSICHERUNG — bei offenem Panel gehört der
+       Schacht auf FORMULA_SHOWN; jede Platzierung (auch die vom
+       ResizeObserver) stellt das sicher, egal welcher verirrte
+       Schreiber ihn abgesenkt hätte. */
+    if (g4mIsPanelOpen('gallery-panel')) {
+        clip.style.zIndex = String(G4M_Z.FORMULA_SHOWN);
+    }
     const p2 = document.getElementById('gallery-panel');
     if (p2) {
         p2.style.width  = r.width + 'px';
         p2.style.height = r.height + 'px';
+        /* v157.122: Scale-1-Anker — sollte je wieder ein Schreiber
+           eine Skala auf das px-genaue Panel legen, stellt jede
+           Platzierung den Schacht-Vertrag (reine Translation) her. */
+        if (typeof g4mSetPanelScale === 'function') g4mSetPanelScale(p2, 1);
     }
     /* Grossansicht (falls offen) ebenfalls nachführen */
     const view = document.getElementById('gallery-view');
@@ -15802,6 +16502,7 @@ function showGalleryPanel() {
     p.style.width  = r.width + 'px';
     p.style.height = r.height + 'px';
     if (typeof g4mSetPanelScale === 'function') g4mSetPanelScale(p, 1);
+    clearTimeout(g4mGalClipZTimer);   // v157.131: verwaiste Absenkung der letzten Ausfahrt stornieren
     clip.style.zIndex = String(G4M_Z.FORMULA_SHOWN);   // über Tool-Panel + Tools-Abdeckung
     g4mParkPanelSlide(p, g4mHiddenTransform('tools'));   // Startkante instant (Befund 29)
     g4mSetPanelSlide(p, 'translateX(0)');
@@ -15809,6 +16510,9 @@ function showGalleryPanel() {
     g4mGalleryRenderPage();
     g4mGalleryShowMenu();
     g4mGallerySetNavLock(true);    // Guestbook/Home/Projects sperren (v157.65)
+    /* v157.129: der «menu»-Hinweis erscheint NICHT schon beim Öffnen
+       der Galerie — nur im Album-Modus, wenn das Menü wirklich
+       ausgeblendet ist (siehe g4mGalleryBrowseStart/End). */
     updateArrowVisibility();
 }
 function hideGalleryPanel() {
@@ -15821,18 +16525,37 @@ function hideGalleryPanel() {
     if (view) view.hidden = true;
     g4mGalSelectedId = null;
     g4mGallerySetNavLock(false);   // Nav wieder freigeben (v157.65)
+    const dmHide = document.getElementById('dpad-menu');
+    if (dmHide) dmHide.hidden = true;    // Sicherheitsnetz: Galerie zu => Hinweis zu (v157.129)
     if (clip) clip.style.zIndex = String(G4M_Z.FORMULA_SHOWN);   // Ausfahrt SICHTBAR über dem Tool-Panel
     g4mSetPanelSlide(p, g4mHiddenTransform('tools'));
     g4mSetPanelOpen('gallery-panel', false);
-    setTimeout(function () {
-        if (clip) clip.style.zIndex = String(G4M_Z.RESTING);
+    clearTimeout(g4mGalClipZTimer);
+    g4mGalClipZTimer = setTimeout(function () {
+        /* v157.131: nur absenken, wenn die Galerie WIRKLICH noch zu
+           ist — ein rascher Wiedereinstieg hat den Timer zwar schon
+           storniert, der Zustands-Wächter ist der doppelte Boden. */
+        if (clip && !g4mIsPanelOpen('gallery-panel')) {
+            clip.style.zIndex = String(G4M_Z.RESTING);
+        }
         updateArrowVisibility();
     }, G4M_ANIM.Z_RESTORE_MS);
 }
+/* v157.124 (User: «zurück zum Galleries-Menü, ohne Galleries zu
+   verlassen»): der Galleries-Button arbeitet HIERARCHISCH — jede
+   Betätigung führt eine Ebene zurück statt sofort alles zu
+   schliessen:
+     Grossansicht offen        -> Ansicht zu, Menü kehrt zurück
+                                  (situativ, mit den Bild-Aktionen)
+     situatives Menü (Auswahl) -> Auswahl räumen, STANDARD-Menü
+     Standard-Menü             -> Galerie schliessen (wie bisher)
+   Der Button ist damit immer der Weg «zur Galerie-Übersicht»; wer
+   die Galerie ganz verlassen will, drückt ihn schlicht so oft, bis
+   sie einfährt — oder nutzt wie bisher den D-Pad-Pfeil. */
 function g4mToggleGallery(e) {
     if (e) e.stopPropagation();
-    if (g4mIsPanelOpen('gallery-panel')) hideGalleryPanel();
-    else showGalleryPanel();
+    if (!g4mIsPanelOpen('gallery-panel')) showGalleryPanel();
+    else g4mGalleryBack();   // dieselbe Hierarchie wie der rechte Pfeil (v157.126)
 }
 
 /* Boot: DB öffnen, Meta laden/anlegen, aktive Galerie einlesen */
@@ -15847,16 +16570,94 @@ function initGalleries() {
     const view = document.getElementById('gallery-view');
     if (view) {
         view.title = 'Click to close';
-        view.addEventListener('click', function () { g4mGalleryCloseView(); });
+        view.addEventListener('click', function () {
+            /* v157.125: im Album-Modus führt die Bildmitte zur
+               Ansicht MIT Menü zurück; erst der nächste Klick
+               schliesst die Ansicht ganz. */
+            if (g4mGalBrowse) g4mGalleryBrowseEnd();
+            else g4mGalleryCloseView();
+        });
     }
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && g4mGalSelectedId
-            && !document.getElementById('gallery-view').hidden) {
-            g4mGalleryCloseView();
-        }
+    /* Fotoalbum-Blättern (v157.123): seitliche Tastzonen — die
+       stopPropagation-Aufrufe halten den Schliess-Klick der Fläche
+       darunter fern. */
+    [['g4m-gal-view-prev', -1], ['g4m-gal-view-next', +1]].forEach(function (pair) {
+        const zone = document.getElementById(pair[0]);
+        if (zone) zone.addEventListener('click', function (e) {
+            e.stopPropagation();
+            g4mGalleryStep(pair[1]);
+        });
     });
-    window.addEventListener('resize', g4mGalleryPlaceMenu);
-    document.addEventListener('fullscreenchange', g4mGalleryPlaceMenu);   // v157.82
+    const back = document.getElementById('g4m-gal-view-back');
+    if (back) back.addEventListener('click', function (e) {
+        e.stopPropagation();
+        g4mGalleryBrowseEnd();   // ✕: zurück zur Ansicht mit Menü (v157.126)
+    });
+    const dm = document.getElementById('dpad-menu');
+    if (dm) dm.addEventListener('click', function (e) {
+        e.stopPropagation();
+        g4mGalleryBack();   // das Wort ist auch der Weg (v157.128)
+    });
+    document.addEventListener('keydown', function (e) {
+        const viewOpen = g4mGalSelectedId
+            && !document.getElementById('gallery-view').hidden;
+        if (!viewOpen) return;
+        if (e.key === 'Escape') {
+            if (g4mGalBrowse) g4mGalleryBrowseEnd();   // eine Ebene (v157.125)
+            else g4mGalleryCloseView();
+            return;
+        }
+        /* v157.123/125: Pfeiltasten blättern — im Album-Modus UND in
+           der Ansicht mit Menü (das Menü zieht situativ mit). */
+        if (e.key === 'ArrowLeft')  { e.preventDefault(); g4mGalleryStep(-1); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); g4mGalleryStep(+1); }
+    });
+    /* v157.121 (User-Befund: Raster nach Vollbild VERKLEINERT —
+       trotz Settle-Läufen). WURZEL: der zentrale resize-Handler ist
+       rAF-GEDROSSELT (Befund 23) und setzt die UI-Skala --u, aus der
+       die Container-Grössen folgen, erst im NÄCHSTEN Frame. Der
+       bisherige synchrone Galerie-Listener vermass den Tools-Bereich
+       damit systematisch EINEN SCHRITT ZU ALT — und ein spätes
+       System-UI-Resize überschrieb so sogar korrekte Platzierungen
+       wieder mit alten Massen. Zwei Kuren:
+       1) RESIZEOBSERVER direkt auf den ANKERBOXEN (Tools- und
+          Canvas-Bereich): er feuert, NACHDEM sich deren Layout
+          tatsächlich geändert hat — kein Timing-Raten, deckt auch
+          Vollbild-Übergänge jenseits aller Settle-Fristen, URL-
+          Leisten und Rotationen ab. Kein Rückkopplungs-Risiko: der
+          Callback schreibt nur Stile FIXER Elemente ausserhalb der
+          beobachteten Container.
+       2) Der resize-Listener bleibt als Rückfall (Browser ohne
+          ResizeObserver), aber DOPPELT-rAF-VERZÖGERT — er läuft
+          damit garantiert NACH dem zentralen Skalen-Update. */
+    function g4mGalleryReplaceAnchored() {
+        g4mGalleryPlaceMenu();
+        if (typeof g4mSettingsPlaceClip === 'function'
+            && g4mIsPanelOpen('settings-panel')) g4mSettingsPlaceClip();
+        if (typeof g4mSettingsInfoPlace === 'function'
+            && g4mIsPanelOpen('settings-info-panel')) g4mSettingsInfoPlace();
+    }
+    if (typeof ResizeObserver === 'function'
+        && typeof toolsContainer !== 'undefined' && toolsContainer) {
+        const ro = new ResizeObserver(function () { g4mGalleryReplaceAnchored(); });
+        ro.observe(toolsContainer);
+        if (typeof canvasContainer !== 'undefined' && canvasContainer) {
+            ro.observe(canvasContainer);
+        }
+    }
+    window.addEventListener('resize', function () {
+        requestAnimationFrame(function () {
+            requestAnimationFrame(g4mGalleryReplaceAnchored);
+        });
+    });
+    /* v157.82/120: Vollbild-Hooks mit Settle-Zweitlauf und webkit-
+       Variante bleiben als Gürtel zum Hosenträger des Observers. */
+    ['fullscreenchange', 'webkitfullscreenchange'].forEach(function (ev) {
+        document.addEventListener(ev, function () {
+            g4mGalleryReplaceAnchored();
+            setTimeout(g4mGalleryReplaceAnchored, G4M_ANIM.VIEWPORT_SETTLE_MS);
+        });
+    });
     if (!('indexedDB' in window)) {
         console.warn('g4m galleries: IndexedDB not available');
         return;
