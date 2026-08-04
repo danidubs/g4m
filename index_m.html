@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>g4m · Hörprobe C — die Bibliothek als Sinfonie</title>
+<!--
+  WEGWERF-HÖRPROBE C (ausserhalb des Monolithen, Probeskripte sind frei).
+  User-Auftrag 04.08.2026: «könnte aus der Bibliothek eine Sinfonie
+  entstehen?» + «eigenes Musik Panel mit Mischpult».
+  Dies ist der Prototyp des künftigen Musik-Panels:
+    · Simulierte Galerie aus 5 Werken (F3-Teppich, F1-Geflecht,
+      F2-Brücke, F1-Geflecht, F3-Finale) — die Reihenfolge ist die
+      Partitur (Galerie-Ordnung = Kuration = Komposition).
+    · EIN Umlauf = EIN Takt. Satz = 8 Takte, davon 2 Takte Übergang,
+      in denen der nächste Satz bereits gestaffelt eintritt (Morphing:
+      f1↔f1 als echte Radius-Interpolation, sonst Blende).
+    · Tonart je Satz AUS DEN BILDDATEN: Quintenzirkel-Schritt aus der
+      Summe der m- bzw. k-Werte — die Sinfonie moduliert, weil die
+      Bilder verschieden sind.
+    · Gestaffelte Einsätze: Stimme i tritt einen halben Takt nach
+      Stimme i−1 ein; am Satzende treten alle gestaffelt ab.
+    · Mischpult: Teppich (F3-Drones) / Arpeggien (F1) / Sequenzen (F2)
+      / Master als getrennte Gain-Busse, dazu Takt, Ausklang,
+      Tonraster; Modus Sinfonie (Schleife) / Endlos (würfelt weiter).
+      «Live» existiert erst in der App (hier ohne Funktion, vermerkt).
+  Reine Oszillatoren + Math.random, keine Audiodaten, keine KI.
+  Ton erst nach User-Geste (Play).
+-->
+<style>
+  :root {
+    --board: #22312a;
+    --board-deep: #1a261f;
+    --chalk: #e8e6df;
+    --chalk-dim: rgba(232,230,223,0.9);  /* v-Befund (User 04.08.): «immer noch viel zu dunkel» — 0.68 → 0.9, Regler-Labels zusätzlich volle Kreide */
+    --f1: #D9FFB2;
+    --f2: #B1DAFA;
+    --f3: #F0B27B;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --hand: "Caveat", "Segoe Script", "Bradley Hand", cursive;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background:
+      radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.035), transparent 60%),
+      linear-gradient(160deg, var(--board), var(--board-deep));
+    color: var(--chalk);
+    font-family: var(--mono);
+    min-height: 100vh;
+    padding: 28px 20px 60px;
+  }
+  .wrap { max-width: 1220px; margin: 0 auto; }
+  header h1 { font-family: var(--hand); font-weight: 400; font-size: clamp(30px, 4.4vw, 46px); }
+  header p.sub {
+    margin-top: 6px; font-size: 13px; color: var(--chalk-dim);
+    max-width: 80ch; line-height: 1.55;
+  }
+  .layout {
+    margin-top: 24px;
+    display: grid;
+    grid-template-columns: minmax(320px, 620px) minmax(300px, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 780px) { .layout { grid-template-columns: 1fr; } }
+  canvas.stage {
+    width: 100%; aspect-ratio: 1 / 1; display: block;
+    border-radius: 4px; border: 1px solid rgba(232,230,223,0.14);
+  }
+  /* Programmzettel unter der Tafel */
+  .bill {
+    margin-top: 12px; padding: 12px 14px;
+    border: 1px solid rgba(232,230,223,0.16); border-radius: 6px;
+    background: rgba(0,0,0,0.14);
+  }
+  .bill .now { font-family: var(--hand); font-size: 21px; min-height: 28px; }
+  .bill .bar {
+    margin-top: 8px; height: 4px; border-radius: 2px;
+    background: rgba(232,230,223,0.15); overflow: hidden;
+  }
+  .bill .bar i { display: block; height: 100%; width: 0%; background: var(--chalk); opacity: 0.7; }
+  .bill ol { margin-top: 10px; list-style: none; display: flex; flex-direction: column; gap: 3px; }
+  .bill li {
+    font-size: 11px; color: var(--chalk-dim);
+    display: grid; grid-template-columns: 16px 12px 1fr auto; gap: 8px;
+    padding: 2px 4px; border-radius: 3px;
+  }
+  .bill li.on { color: var(--chalk); background: rgba(232,230,223,0.08); }
+  .bill li .dot { width: 9px; height: 9px; border-radius: 50%; align-self: center; }
+  .side { display: flex; flex-direction: column; gap: 14px; }
+  .panel {
+    border: 1px solid rgba(232,230,223,0.16); border-radius: 6px;
+    padding: 14px 16px; background: rgba(0,0,0,0.14);
+  }
+  .panel h2 { font-size: 13px; margin-bottom: 12px; font-weight: 600; }
+  .panel h2 small { font-weight: 400; color: var(--chalk-dim); }
+  .ctl-row {
+    display: grid; grid-template-columns: 92px 1fr 52px;
+    align-items: center; gap: 8px; font-size: 11px; margin-bottom: 9px;
+  }
+  .ctl-row:last-child { margin-bottom: 0; }
+  .ctl-row label { color: var(--chalk); display: flex; align-items: center; gap: 6px; }
+  .ctl-row label .sw { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .ctl-row output { text-align: right; font-variant-numeric: tabular-nums; }
+  input[type="range"] {
+    -webkit-appearance: none; appearance: none;
+    height: 3px; background: rgba(232,230,223,0.25);
+    border-radius: 2px; outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--chalk); cursor: pointer; border: none;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--chalk); cursor: pointer; border: none;
+  }
+  input[type="range"]:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--f1); }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  button {
+    font-family: var(--mono); font-size: 12px;
+    padding: 8px 14px; border-radius: 4px;
+    border: 1px solid rgba(232,230,223,0.35);
+    background: transparent; color: var(--chalk); cursor: pointer;
+  }
+  button:hover { background: rgba(232,230,223,0.1); }
+  button:focus-visible { outline: 2px solid var(--f1); outline-offset: 2px; }
+  button.play { min-width: 110px; font-weight: 600; }
+  button.play.on { background: var(--f1); color: #1a261f; border-color: var(--f1); }
+  .seg {
+    display: inline-flex; border: 1px solid rgba(232,230,223,0.3);
+    border-radius: 4px; overflow: hidden; justify-self: start;
+  }
+  .seg button { border: none; border-radius: 0; padding: 7px 8px; font-size: 10.5px; white-space: nowrap; }
+  .seg button.on { background: rgba(232,230,223,0.85); color: #1a261f; }
+  .seg button:disabled { opacity: 0.35; cursor: not-allowed; }
+  .hint { font-size: 10.5px; color: var(--chalk-dim); line-height: 1.55; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Die Bibliothek als Sinfonie</h1>
+  <p class="sub">g4m · Hörprobe C · 04.08.2026 — Prototyp des Musik-Panels. Fünf Werke
+  einer simulierten Galerie werden als EIN Stück gespielt: jeder Satz wählt seine Tonart
+  aus den eigenen Bilddaten (Quintenzirkel aus Σm bzw. Σk), die Stimmen treten gestaffelt
+  ein und ab, und im Übergang morpht das Bild in den nächsten Satz. Rechts das Mischpult.
+  Reine Mathematik — Oszillatoren + Math.random, keine Audiodaten, keine KI.</p>
+</header>
+
+<div class="layout">
+  <div>
+    <canvas class="stage" id="cv" width="860" height="860"></canvas>
+    <div class="bill">
+      <div class="now" id="bill-now">—</div>
+      <div class="bar"><i id="bill-bar"></i></div>
+      <ol id="bill-list"></ol>
+    </div>
+  </div>
+
+  <div class="side">
+    <div class="panel">
+      <h2>Mischpult</h2>
+      <div class="ctl-row"><label for="mx-drone"><span class="sw" style="background:var(--f3)"></span>Brummton</label><input type="range" id="mx-drone" min="0" max="100" step="1" value="40"><output id="mx-drone-o">40</output></div>
+      <div class="ctl-row"><label for="mx-bells"><span class="sw" style="background:var(--f3)"></span>Glocken</label><input type="range" id="mx-bells" min="0" max="100" step="1" value="85"><output id="mx-bells-o">85</output></div>
+      <div class="ctl-row"><label for="mx-breath"><span class="sw" style="background:var(--f3)"></span>Atmung</label><input type="range" id="mx-breath" min="0" max="100" step="1" value="60"><output id="mx-breath-o">60</output></div>
+      <div class="ctl-row"><label for="mx-arp"><span class="sw" style="background:var(--f1)"></span>Arpeggien</label><input type="range" id="mx-arp" min="0" max="100" step="1" value="75"><output id="mx-arp-o">75</output></div>
+      <div class="ctl-row"><label for="mx-seq"><span class="sw" style="background:var(--f2)"></span>Sequenzen</label><input type="range" id="mx-seq" min="0" max="100" step="1" value="70"><output id="mx-seq-o">70</output></div>
+      <div class="ctl-row"><label for="mx-master">Master</label><input type="range" id="mx-master" min="0" max="100" step="1" value="85"><output id="mx-master-o">85</output></div>
+    </div>
+
+    <div class="panel">
+      <h2>Effekte</h2>
+      <div class="ctl-row"><label for="fx-echo">Echo</label><input type="range" id="fx-echo" min="0" max="100" step="1" value="25"><output id="fx-echo-o">25</output></div>
+      <div class="ctl-row"><label for="fx-hall">Hall</label><input type="range" id="fx-hall" min="0" max="100" step="1" value="30"><output id="fx-hall-o">30</output></div>
+      <div class="ctl-row"><label for="fx-lo">Tiefen</label><input type="range" id="fx-lo" min="-12" max="12" step="1" value="0"><output id="fx-lo-o">0 dB</output></div>
+      <div class="ctl-row"><label for="fx-mid">Mitten</label><input type="range" id="fx-mid" min="-12" max="12" step="1" value="0"><output id="fx-mid-o">0 dB</output></div>
+      <div class="ctl-row"><label for="fx-hi">Höhen</label><input type="range" id="fx-hi" min="-12" max="12" step="1" value="0"><output id="fx-hi-o">0 dB</output></div>
+    </div>
+
+    <div class="panel">
+      <h2>Werk</h2>
+      <div class="ctl-row"><label for="c-voices">Stimmen (Geflecht)</label><input type="range" id="c-voices" min="4" max="50" step="1" value="14"><output id="c-voices-o">14</output></div>
+      <div class="ctl-row"><label for="c-gap">Satzabstand</label><input type="range" id="c-gap" min="2" max="6" step="0.5" value="4"><output id="c-gap-o">4.0 T</output></div>
+      <div class="ctl-row"><label for="c-takt">Takt (Umlauf)</label><input type="range" id="c-takt" min="3" max="14" step="0.5" value="7"><output id="c-takt-o">7.0 s</output></div>
+      <div class="ctl-row"><label for="c-rel">Ausklang</label><input type="range" id="c-rel" min="0.1" max="2" step="0.05" value="0.9"><output id="c-rel-o">0.90 s</output></div>
+      <div class="ctl-row"><label>Tonraster</label>
+        <span class="seg" id="c-scale">
+          <button data-v="penta" class="on">pentatonisch</button><button data-v="free">frei</button>
+        </span><span></span>
+      </div>
+      <div class="ctl-row"><label>Modus</label>
+        <span class="seg" id="c-mode">
+          <button data-v="sinfonie" class="on">Sinfonie</button><button data-v="endlos">Endlos</button><button data-v="live" disabled title="erst in der App: spielt das Bild auf der Tafel">Live</button>
+        </span><span></span>
+      </div>
+      <div class="btn-row">
+        <button class="play" id="c-play">▶ Aufführen</button>
+        <button id="c-roll">Bibliothek neu würfeln</button>
+      </div>
+    </div>
+
+    <div class="panel hint">
+      Sinfonie: die fünf Werke der Galerie in ihrer Ordnung, dann von vorn.
+      Endlos: nach dem Finale würfelt der Generator immer neue Sätze —
+      Hintergrundmusik ohne Ende. Übergänge: 2 Takte, in denen der nächste
+      Satz gestaffelt eintritt; zwischen zwei F1-Werken morpht die Kontur
+      als echte Radius-Interpolation, sonst blendet die Tafel. Der Brummton ist die «1»
+      der Fourier-Formel — der Grundkreis der Figur, taktlos von Natur; die Atmung
+      bindet ihn an die Strahlen-Umläufe (2/3/5 Takte).
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+'use strict';
+
+/* ═══ Grundlagen ════════════════════════════════════════════════ */
+
+let AC = null, BUS = null;
+function audio() {
+    if (!AC) {
+        AC = new (window.AudioContext || window.webkitAudioContext)();
+        const comp = AC.createDynamicsCompressor();      // Schutz vor Summen-Clipping
+        comp.threshold.value = -14; comp.ratio.value = 4;
+        comp.connect(AC.destination);
+        const master = AC.createGain();
+        /* v-Wunsch (User 04.08.): «Toneffekte von Anfang an einbauen,
+           z.B. Echo, Hall, Equalizer» — alles algorithmisch:
+           · EQ: drei Biquad-Filter (Shelf/Peak) in der Summenkette.
+           · Echo: Delay + Rückkopplung, TAKT-SYNCHRON (punktierte
+             Achtel des Umlaufs, delayTime folgt dem Takt-Regler live).
+           · Hall: Faltung mit PROZEDURALER Impulsantwort — Rauschen mit
+             exponentiellem Abklang, aus Math.random gerechnet, KEINE
+             Audiodatei (Regel 1 bleibt wahr). */
+        const eqLow = AC.createBiquadFilter();
+        eqLow.type = 'lowshelf'; eqLow.frequency.value = 200;
+        const eqMid = AC.createBiquadFilter();
+        eqMid.type = 'peaking'; eqMid.frequency.value = 1000; eqMid.Q.value = 0.9;
+        const eqHigh = AC.createBiquadFilter();
+        eqHigh.type = 'highshelf'; eqHigh.frequency.value = 3800;
+        master.connect(eqLow); eqLow.connect(eqMid);
+        eqMid.connect(eqHigh); eqHigh.connect(comp);
+        const echoSend = AC.createGain(); echoSend.gain.value = 0;
+        const delay = AC.createDelay(6);
+        const fb = AC.createGain(); fb.gain.value = 0.42;
+        const damp = AC.createBiquadFilter();
+        damp.type = 'lowpass'; damp.frequency.value = 2600;   // Echo dunkelt ab
+        master.connect(echoSend); echoSend.connect(delay);
+        delay.connect(damp); damp.connect(fb); fb.connect(delay);
+        damp.connect(eqLow);
+        const revSend = AC.createGain(); revSend.gain.value = 0;
+        const conv = AC.createConvolver(); conv.buffer = makeIR(AC);
+        master.connect(revSend); revSend.connect(conv); conv.connect(eqLow);
+        /* v-Befund (User 04.08.): «wie kontrolliere ich den Brummton, der
+           weder Rhythmus noch Takt hat?» — der Brumm ist die «1» der
+           Fourier-Formel (Grundkreis der Figur), sein taktloses Stehen ist
+           strukturell. Kontrolle: EIGENER Kanalzug (getrennt von den
+           Glocken) plus Atmung-Regler — der Brumm pulst dann hörbar mit
+           den Strahlen-Umläufen (2/3/5 Takte). */
+        BUS = { master, comp, eqLow, eqMid, eqHigh, echoSend, delay, revSend,
+            drone: AC.createGain(), bells: AC.createGain(),
+            arp: AC.createGain(), seq: AC.createGain() };
+        BUS.drone.connect(master); BUS.bells.connect(master);
+        BUS.arp.connect(master); BUS.seq.connect(master);
+        applyMixer(); applyFx();
+    }
+    if (AC.state === 'suspended') AC.resume();
+    return AC;
+}
+function rnd(min, max) { return Math.random() * (max - min) + min; }
+
+/* prozedurale Hall-Impulsantwort: 2.6 s Stereo-Rauschen mit
+   exponentiellem Abklang (τ = 1.15 s) — gerechnet, nicht geladen */
+function makeIR(ctx) {
+    const len = Math.floor(ctx.sampleRate * 2.6);
+    const buf = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let ch = 0; ch < 2; ch++) {
+        const d = buf.getChannelData(ch);
+        for (let i = 0; i < len; i++) {
+            const t = i / ctx.sampleRate;
+            d[i] = (Math.random() * 2 - 1) * Math.exp(-t / 1.15);
+        }
+    }
+    return buf;
+}
+
+const PENTA = [0, 2, 4, 7, 9];
+function quantPenta(semi) {
+    const oct = Math.floor(semi / 12), rest = semi - oct * 12;
+    let best = PENTA[0], d = 99;
+    for (const p of PENTA.concat([12])) {
+        const dd = Math.abs(rest - p);
+        if (dd < d) { d = dd; best = p; }
+    }
+    return oct * 12 + best;
+}
+const KEYS = ['C', 'Cis', 'D', 'Es', 'E', 'F', 'Fis', 'G', 'As', 'A', 'B', 'H'];
+const ROOT_HZ = 65.41;                                   // C2 — alles leitet sich hier ab
+
+/* Werkformeln (1:1 aus g4m v168.35) */
+function sfRadius(p, th) {
+    const t1 = Math.pow(Math.abs(Math.cos(p.m * th / 4) / p.a), p.n2);
+    const t2 = Math.pow(Math.abs(Math.sin(p.m * th / 4) / p.b), p.n3);
+    const s = t1 + t2;
+    return s === 0 ? 0 : Math.pow(s, -1 / p.n1);
+}
+function f3Radius(harm, th) {
+    let r = 1;
+    for (const h of harm) r += h.a * Math.sin(h.k * th + h.p);
+    return r;
+}
+function spRadius(kind, a, b, th) {
+    return kind === 'log' ? a * Math.exp(b * th) : a + b * th;
+}
+
+function playNote(t, freq, rel, gainVal, pan, bus) {
+    window.__notes = (window.__notes || 0) + 1;        // Proben-Zähler
+    const ctx = audio();
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(Math.max(gainVal, 0.0002), t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.012 + rel);
+    const p = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+    if (p) { p.pan.setValueAtTime(pan || 0, t); g.connect(p); p.connect(bus); }
+    else   { g.connect(bus); }
+    const o1 = ctx.createOscillator();
+    o1.type = 'triangle'; o1.frequency.setValueAtTime(freq, t);
+    const g1 = ctx.createGain(); g1.gain.value = 0.7;
+    o1.connect(g1); g1.connect(g);
+    const o2 = ctx.createOscillator();
+    o2.type = 'sine'; o2.frequency.setValueAtTime(freq / 2, t);
+    const g2 = ctx.createGain(); g2.gain.value = 0.35;
+    o2.connect(g2); g2.connect(g);
+    const end = t + 0.012 + rel + 0.05;
+    o1.start(t); o2.start(t); o1.stop(end); o2.stop(end);
+}
+
+function bindRange(id, fmt, onInput) {
+    const el = document.getElementById(id), out = document.getElementById(id + '-o');
+    const upd = () => {
+        out.textContent = fmt(parseFloat(el.value));
+        if (onInput) onInput(parseFloat(el.value));
+    };
+    el.addEventListener('input', upd);
+    out.textContent = fmt(parseFloat(el.value));
+    return () => parseFloat(el.value);
+}
+
+/* ═══ Mischpult ═════════════════════════════════════════════════ */
+
+const MX = {
+    drone:  bindRange('mx-drone',  v => v.toFixed(0), applyMixer),
+    bells:  bindRange('mx-bells',  v => v.toFixed(0), applyMixer),
+    breath: bindRange('mx-breath', v => v.toFixed(0)),
+    arp:    bindRange('mx-arp',    v => v.toFixed(0), applyMixer),
+    seq:    bindRange('mx-seq',    v => v.toFixed(0), applyMixer),
+    master: bindRange('mx-master', v => v.toFixed(0), applyMixer)
+};
+function applyMixer() {
+    if (!BUS) return;
+    const t = AC.currentTime;
+    BUS.drone.gain.setTargetAtTime(MX.drone() / 100, t, 0.03);
+    BUS.bells.gain.setTargetAtTime(MX.bells() / 100, t, 0.03);
+    BUS.arp.gain.setTargetAtTime(MX.arp() / 100, t, 0.03);
+    BUS.seq.gain.setTargetAtTime(MX.seq() / 100, t, 0.03);
+    BUS.master.gain.setTargetAtTime(Math.pow(MX.master() / 100, 1.6), t, 0.03);
+}
+
+/* ═══ Effekte ═══════════════════════════════════════════════════ */
+
+const FX = {
+    echo: bindRange('fx-echo', v => v.toFixed(0), applyFx),
+    hall: bindRange('fx-hall', v => v.toFixed(0), applyFx),
+    lo:   bindRange('fx-lo',   v => v.toFixed(0) + ' dB', applyFx),
+    mid:  bindRange('fx-mid',  v => v.toFixed(0) + ' dB', applyFx),
+    hi:   bindRange('fx-hi',   v => v.toFixed(0) + ' dB', applyFx)
+};
+function applyFx() {
+    if (!BUS) return;
+    const t = AC.currentTime;
+    BUS.echoSend.gain.setTargetAtTime(FX.echo() / 100 * 0.9, t, 0.03);
+    BUS.revSend.gain.setTargetAtTime(FX.hall() / 100 * 0.8, t, 0.03);
+    BUS.eqLow.gain.setTargetAtTime(FX.lo(), t, 0.03);
+    BUS.eqMid.gain.setTargetAtTime(FX.mid(), t, 0.03);
+    BUS.eqHigh.gain.setTargetAtTime(FX.hi(), t, 0.03);
+}
+
+/* ═══ Werk-Erzeugung (die simulierte Galerie) ═══════════════════ */
+
+const MOV_BARS = 6;                                     // Solo-Anteil je Satz
+const TRANS_BARS = 2;                                   // Übergang (Überlappung)
+const SLOT = MOV_BARS + TRANS_BARS;                     // Satzlänge gesamt
+
+function keyOf(sum) {                                   // Quintenzirkel aus Bilddaten
+    return (sum * 7) % 12;
+}
+function makeF1Work() {                                 // Geflecht (Arpeggien)
+    /* v-Befund (User 04.08.): «Überlagerung mit 20 Layern, da fängt es
+       an zu tönen!» — Dichte IST der Klang. Stimmenzahl darum als
+       Regler (4–20, ±2 Streuung je Werk); Staffelung auf max. 3 Takte
+       komprimiert (20 Stimmen à 0.5 Takte kämen sonst nie alle rein),
+       Lautstärke je Stimme mit √(6/L) normiert wie in Hörprobe B. */
+    const V = S.getVoices ? S.getVoices() : 14;
+    const L = Math.max(4, Math.min(50, Math.round(V + rnd(-2, 2))));  /* User-Fazit 04.08.: «bei 50 und mehr Layern, darauf bin ich gespannt» */
+    const layers = [];
+    let mSum = 0;
+    for (let i = 0; i < L; i++) {
+        const p = { a: 1, b: 1, m: Math.round(rnd(2, 10)),
+                    n1: rnd(0.5, 3), n2: rnd(0.5, 3), n3: rnd(0.5, 3) };
+        mSum += p.m;
+        const N = Math.max(6, 2 * p.m);
+        const notes = [];
+        let rMin = 1e9, rMax = -1e9;
+        for (let j = 0; j < N; j++) {
+            const th = j * 2 * Math.PI / N, r = sfRadius(p, th);
+            notes.push({ th, r, barPos: j / N });
+            if (r < rMin) rMin = r;
+            if (r > rMax) rMax = r;
+        }
+        const span = (rMax - rMin) || 1;
+        notes.forEach(n => { n.norm = (n.r - rMin) / span; });
+        let cMax = 0, cMin = 1e9;
+        for (let j = 0; j <= 720; j++) {
+            const rr = sfRadius(p, j * Math.PI / 360);
+            cMax = Math.max(cMax, rr); cMin = Math.min(cMin, rr);
+        }
+        layers.push({ p, notes, cMax, rLo: cMin, rHi: cMax,
+                      size: rnd(0.45, 1.0), hue: Math.round(rnd(0, 360)) });
+    }
+    layers.forEach((l, i) => {
+        l.octUp = 1 + (1 - l.size) / 0.55 * 1.5;        // Register aus Grösse (+1 üb. Grundlage)
+        l.pan = L > 1 ? (i / (L - 1)) * 1.4 - 0.7 : 0;
+    });
+    return { type: 'f1', label: 'Geflecht', layers, key: keyOf(mSum) };
+}
+function makeF3Work() {                                 // Teppich (Drones)
+    /* v-Befund (User 04.08.): «bei Sinfonie meist nur 2 Kurven und nur
+       ein bis zwei Töne, sonst nichts, das tönt nicht sehr interessant»
+       — Teppich-Sätze bestanden NUR aus stehenden Drones. Lösung:
+       (1) immer DREI Register, (2) die rotierenden Abtaststrahlen
+       SCHLAGEN die Kontur an: je Lappen (höchstes k) eine Glocke auf
+       der Tonhöhe des dortigen Radius — Glockengeflecht über dem
+       Teppich, Umlaufzeiten 2/3/5 Takte halten es unwiederholt. */
+    const B = 3;
+    const blobs = [];
+    let kSum = 0;
+    const IV = [1, 1.5, 2, 3];                          // Grundton, Quinte, Oktave(n)
+    for (let i = 0; i < B; i++) {
+        const K = Math.round(rnd(2, 4));
+        const harm = [];
+        for (let j = 0; j < K; j++) {
+            const h = { k: Math.round(rnd(1, 8)), a: rnd(0.1, 0.45), p: rnd(0, 2 * Math.PI) };
+            harm.push(h); kSum += h.k;
+        }
+        /* v-Befund (User 04.08.): «warum sehe ich bei der Sinfonie nur
+           einen Abtaststrahl?» → Ursache 1: der Zeiger wurde nur für
+           blobs[0] gezeichnet. Ursache 2: alle Register drehten gleich
+           schnell — mehrere Strahlen lägen deckungsgleich. Lösung: jedes
+           Register dreht (und ATMET) mit eigener Umlaufzeit, teilerfremd
+           2/3/5 Takte — die Konstellation kehrt erst nach 30 Takten wieder. */
+        blobs.push({ harm, iv: IV[i], size: 1 - i * 0.28,
+                     hue: Math.round(rnd(15, 45)), rotBars: [2, 3, 5][i] });
+    }
+    return { type: 'f3', label: 'Teppich', blobs, key: keyOf(kSum) };
+}
+function makeF2Work() {                                 // Brücke (Sequenz)
+    const kind = Math.random() < 0.5 ? 'log' : 'arch';
+    const p = kind === 'log'
+        ? { a: 1, b: rnd(0.08, 0.15), rev: rnd(3.5, 4.5) }
+        : { a: 0, b: 1, rev: rnd(4, 5.5) };
+    const N = Math.round(p.rev * 8);
+    const thMax = p.rev * 2 * Math.PI;
+    const notes = [];
+    let rMax = 0;
+    for (let i = 1; i <= N; i++) {
+        const th = i * thMax / N, r = spRadius(kind, p.a, p.b, th);
+        notes.push({ th, r, barPos: (i - 1) * 2 / N }); // Sequenz über 2 Takte
+        rMax = Math.max(rMax, r);
+    }
+    notes.forEach(n => { n.norm = n.r / rMax; });
+    return { type: 'f2', label: 'Brücke', kind, p, notes, thMax,
+             key: keyOf(Math.round(p.rev * 10)) };
+}
+function makeWorkOfType(t) {
+    return t === 'f1' ? makeF1Work() : t === 'f2' ? makeF2Work() : makeF3Work();
+}
+function rollLibrary() {                                // die kuratierte Ordnung
+    return ['f3', 'f1', 'f2', 'f1', 'f3'].map(makeWorkOfType);
+}
+function rollEndlessNext(prevType) {                    // Endlos: nie zweimal F2 in Folge
+    const pool = prevType === 'f2' ? ['f1', 'f3'] : ['f1', 'f3', 'f1', 'f2'];
+    return makeWorkOfType(pool[Math.floor(Math.random() * pool.length)]);
+}
+
+/* ═══ Dirigent ══════════════════════════════════════════════════ */
+
+/* v-Befund (User 04.08., dritte Nachfrage): «bei der Sinfonie verstehe
+   ich noch immer nicht, weshalb ich nur 2 Kurven sehe» → IST-Probe:
+   kein Zeichenfehler — die Sinfonie spielte immer nur EIN Werk aufs Mal;
+   Teppich (3 Kurven) und Brücke (1 Kurve) füllen je 42 s. Das
+   widerspricht dem User-Fazit «die Überlagerungen bringen die
+   spannendste Musik hervor». Lösung: Sätze können sich VERZAHNEN —
+   Regler «Satzabstand» (2–6 Takte); jeder Satz behält seine 8 Takte
+   Lebensdauer, startet aber früher: bei 2 klingen und erscheinen
+   3–4 Werke gleichzeitig. S.starts trägt den Startakt je Satz. */
+const S = {
+    lib: [], movements: [], starts: [], built: -1, low: 0, lastType: null,
+    playing: false, mode: 'sinfonie', scale: 'penta',
+    bars: 0, lastNow: 0, drones: new Map(),
+    cv: document.getElementById('cv'),
+    getVoices: bindRange('c-voices', v => v.toFixed(0)),
+    getGap: bindRange('c-gap', v => v.toFixed(1) + ' T'),
+    getTakt: bindRange('c-takt', v => v.toFixed(1) + ' s'),
+    getRel:  bindRange('c-rel',  v => v.toFixed(2) + ' s')
+};
+
+
+function baseFreq(work) { return ROOT_HZ * Math.pow(2, work.key / 12); }
+
+/* v-Befund (User 04.08.): «ob pentatonisch oder frei, es gibt keinen
+   Unterschied zu hören?» → Ursache 2: das Register (octUp, kontinuierlich
+   aus der Layer-Grösse) stand AUSSERHALB der Quantisierung — pentatonisch
+   ergab so nie eine reine Skala. Lösung: EINE Halbton-Gesamtrechnung,
+   das Raster schnappt Register UND Melodie gemeinsam auf die Tonart. */
+function pitch(work, octUp, norm) {
+    const semi = octUp * 12 + norm * 24;
+    if (S.scale === 'penta') {
+        return baseFreq(work) * Math.pow(2, quantPenta(Math.round(semi)) / 12);
+    }
+    return baseFreq(work) * Math.pow(2, semi / 12);
+}
+
+/* Stimmen eines Satzes bauen (Scheduler-Einheiten) */
+function buildVoices(work, start) {
+    const voices = [];
+    if (work.type === 'f1') {
+        const L = work.layers.length;
+        const step = Math.min(0.5, 3 / L);              // alle drin bis Takt 3
+        const g = 0.13 * Math.sqrt(6 / L);              // Summen-Normierung
+        work.layers.forEach((l, i) => {
+            /* v-Wunsch (User 04.08.): «Könntest du auch Achteltöne
+               einfügen?» — Notenwert aus der GRÖSSE der Figur, wie im
+               Orchester: kleine Figuren (hohe Lage) spielen Achtel
+               (doppeltes Tempo), mittlere Viertel, grosse Halbe.
+               Umsetzung: periodBars = 1/sub, barPos je Stimme auf ihre
+               Periode skaliert (eigene Noten-Kopie, Layer-Daten bleiben
+               unberührt); Achtel leicht zurückgenommen im Pegel. */
+            const sub = l.size < 0.58 ? 2 : (l.size > 0.85 ? 0.5 : 1);
+            const myNotes = l.notes.map(n =>
+                ({ th: n.th, norm: n.norm, barPos: n.barPos / sub }));
+            voices.push({
+                kind: 'arp', work, layer: l, notes: myNotes,
+                periodBars: 1 / sub, sub,
+                enter: start + i * step,
+                exitAt: start + MOV_BARS + (i + 1) * (TRANS_BARS / (L + 1)),
+                cycle: 0, idx: 0, base: start,
+                gain: g * (sub === 2 ? 0.8 : 1),
+                octUp: l.octUp, pan: l.pan,
+                lastIdx: -1
+            });
+        });
+    } else if (work.type === 'f2') {
+        voices.push({
+            kind: 'seq', work, notes: work.notes, periodBars: 3,   // 2 Takte + 1 Pause
+            enter: start, exitAt: start + MOV_BARS + TRANS_BARS * 0.5,
+            cycle: 0, idx: 0, base: start, gain: 0.15, octUp: 1, pan: 0,
+            lastIdx: -1
+        });
+    }
+    return voices;                                       // f3 = Drones, kein Voice-Scheduler
+}
+
+function fadeOf(v, bar) {                                // gestaffeltes Ein-/Austreten
+    const fin = Math.min(Math.max((bar - v.enter) / 0.5, 0), 1);
+    const fout = Math.min(Math.max((v.exitAt - bar) / 0.5, 0), 1);
+    return fin * fout;
+}
+
+function ensureMovement(k) {
+    if (S.movements[k]) return;
+    const start = k === 0 ? 0 : S.starts[k - 1] + S.getGap();
+    S.starts[k] = start;
+    let work;
+    if (S.mode === 'sinfonie') {
+        work = S.lib[k % S.lib.length];
+    } else {
+        work = rollEndlessNext(S.lastType);
+    }
+    S.lastType = work.type;
+    S.movements[k] = { work, start, voices: buildVoices(work, start) };
+}
+
+function tick() {
+    if (!S.playing) return;
+    const ctx = audio();
+    const now = ctx.currentTime;
+    const T = S.getTakt();
+    S.bars += (now - S.lastNow) / T;
+    S.lastNow = now;
+    BUS.delay.delayTime.setTargetAtTime(T * 0.375, now, 0.1);   // punktierte Achtel
+
+    /* Sätze bauen, bis einer in der Zukunft liegt; abgespielte vorn
+       freigeben. Sinfonie zykliert weiterhin ohne Zeitsprung über
+       lib[k % lib.length]. */
+    while (S.built < 0 || S.starts[S.built] <= S.bars) ensureMovement(++S.built);
+    while (S.starts[S.low] !== undefined && S.starts[S.low] + SLOT + 0.5 < S.bars) {
+        delete S.movements[S.low]; S.low++;
+    }
+    let curK = S.low;
+    for (let k = S.low; k <= S.built; k++) {
+        if (S.starts[k] !== undefined && S.starts[k] <= S.bars) curK = k;
+    }
+
+    const look = 0.15;                                   // Sekunden Vorlauf
+    const lookBars = look / T;
+    const rel = S.getRel();
+
+    /* Noten-Stimmen ALLER lebenden Sätze (S.low..S.built) */
+    const activeKs = [];
+    for (let k = S.low; k <= S.built; k++) activeKs.push(k);
+    activeKs.forEach(k => {
+        const mov = S.movements[k];
+        if (!mov) return;
+        mov.voices.forEach(v => {
+            while (true) {
+                const nb = v.base + v.cycle * v.periodBars + v.notes[v.idx].barPos;
+                if (nb >= S.bars + lookBars) break;
+                if (nb > v.exitAt) break;
+                if (nb >= S.bars - 0.02 && nb >= v.enter) {
+                    const f = fadeOf(v, nb);
+                    if (f > 0.01) {
+                        const n = v.notes[v.idx];
+                        const t = now + (nb - S.bars) * T;
+                        let freq, thP;
+                        if (v.kind === 'arp') {
+                            /* praezedierende Abtastung (goldener Bruchteil):
+                               Umlauf c tastet bei (j + c·0.618)·2π/N ab —
+                               über die Umläufe erklingt die GANZE Kontur */
+                            const N = v.notes.length;
+                            thP = (v.idx + v.cycle * 0.618034) * 2 * Math.PI / N;
+                            const l = v.layer;
+                            const rr = sfRadius(l.p, thP);
+                            const nn = Math.min(Math.max(
+                                (rr - l.rLo) / ((l.rHi - l.rLo) || 1), 0), 1);
+                            freq = pitch(v.work, v.octUp, nn);
+                        } else {
+                            freq = pitch(v.work, v.octUp, n.norm);
+                            thP = n.th;
+                        }
+                        playNote(t, freq, rel, v.gain * f, v.pan,
+                                 v.kind === 'arp' ? BUS.arp : BUS.seq);
+                        n.at = t; n.ii = v.idx; n.thP = thP;
+                    }
+                }
+                v.idx++;
+                if (v.idx >= v.notes.length) { v.idx = 0; v.cycle++; }
+            }
+            let best = -1;
+            v.notes.forEach(n => {
+                if (n.at !== undefined && n.at <= now && n.at > best) { best = n.at; v.lastIdx = n.ii; }
+            });
+        });
+    });
+
+    /* Drones (F3) aller lebenden Sätze */
+    activeKs.forEach(k => {
+        const mov = S.movements[k];
+        if (!mov || mov.work.type !== 'f3') return;
+        const start = mov.start;
+        mov.work.blobs.forEach((b, i) => {
+            const enter = start + i * 0.7;
+            const exitAt = start + MOV_BARS + (i + 1) * (TRANS_BARS / (mov.work.blobs.length + 1));
+            const fin = Math.min(Math.max((S.bars - enter) / 1.0, 0), 1);
+            const fout = Math.min(Math.max((exitAt - S.bars) / 1.0, 0), 1);
+            const f = fin * fout;
+            const id = k + ':' + i;
+            if (f > 0.01) {
+                let d = S.drones.get(id);
+                if (!d) d = startDrone(id, mov.work, b);
+                const depth = MX.breath() / 100;
+                /* Atmung auf der AMPLITUDE: bei 0 steht der Brumm, bei 100
+                   pulst er kräftig mit dem Konturradius seines Strahls */
+                /* Atmung: Blende folgt dem Konturradius — Umlaufzeit je
+                   Register eigen (rotBars), die Atmungen laufen versetzt */
+                const ang = (S.bars / b.rotBars) * 2 * Math.PI;
+                const r = f3Radius(b.harm, ang);
+                const norm = (r - b.rLo) / ((b.rHi - b.rLo) || 1);
+                d.master.gain.setTargetAtTime(
+                    0.20 * f * (1 - depth * 0.55 * (1 - norm)), now, 0.1);
+                d.lp.frequency.setTargetAtTime(
+                    2400 * (1 - depth) + (500 + 4300 * norm) * depth, now, 0.08);
+                /* Glocken: der Strahl schlägt die Kontur an — ein Schlag je
+                   Lappen (Anzahl = höchste Harmonische des Registers) */
+                if (!b.bellN) b.bellN = Math.max.apply(null, b.harm.map(h => h.k));
+                const bellIdx = Math.floor(ang / (2 * Math.PI / b.bellN));
+                if (d.lastBell === undefined) d.lastBell = bellIdx;
+                if (bellIdx !== d.lastBell) {
+                    d.lastBell = bellIdx;
+                    if (f > 0.05) {
+                        playNote(now + 0.03,
+                                 pitch(mov.work, Math.log2(b.iv) + 1, norm),
+                                 Math.max(rel * 2, 1.5), 0.10 * f,
+                                 Math.cos(ang) * 0.5, BUS.bells);
+                    }
+                }
+            } else {
+                const d = S.drones.get(id);
+                if (d && S.bars > exitAt) killDrone(id, 0.5);
+            }
+        });
+    });
+    /* verwaiste Drones vergangener Sätze räumen */
+    S.drones.forEach((d, id) => {
+        const k = parseInt(id, 10);
+        if (k < S.low) killDrone(id, 0.4);
+    });
+
+    drawScene(curK);
+    updateBill(curK);
+    requestAnimationFrame(tick);
+}
+
+function startDrone(id, work, b) {
+    const ctx = audio();
+    let lo = 1e9, hi = -1e9;
+    for (let i = 0; i < 360; i++) {
+        const r = f3Radius(b.harm, i * Math.PI / 180);
+        if (r < lo) lo = r; if (r > hi) hi = r;
+    }
+    b.rLo = lo; b.rHi = hi;
+    const master = ctx.createGain();
+    master.gain.value = 0.0001;
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = 1800; lp.Q.value = 0.5;
+    lp.connect(master); master.connect(BUS.drone);
+    const base = baseFreq(work) * b.iv;
+    /* v-Befund (User 04.08.): «den Brummton müssen wir ein wenig
+       reduzieren können, er nervt relativ schnell» — der Gleichanteil
+       (die «1» der Formel) bekam volles Klanggewicht und stellte damit
+       >50 % der Drone-Energie bei 65–130 Hz: wörtliches Brummen, dazu
+       Kompressor-Pumpen. Lösung: fester Gewichtsfaktor 0.5 NUR in der
+       Übersetzung Amplitude→Lautstärke; in Formel, Bild und Normierung
+       bleibt die 1 unangetastet. Dazu Grundpegel 0.24 → 0.20 und
+       Fader-Vorgabe 65 → 40. */
+    const parts = [{ k: 1, a: 0.5 }].concat(b.harm);
+    let aSum = 0; parts.forEach(h => { aSum += h.a; });
+    const oscs = parts.map(h => {
+        const o = ctx.createOscillator();
+        o.type = 'sine'; o.frequency.value = base * h.k;
+        const g = ctx.createGain(); g.gain.value = h.a / aSum;
+        o.connect(g); g.connect(lp); o.start();
+        return o;
+    });
+    const d = { master, lp, oscs };
+    S.drones.set(id, d);
+    return d;
+}
+function killDrone(id, fade) {
+    const d = S.drones.get(id);
+    if (!d) return;
+    const ctx = audio();
+    d.master.gain.cancelScheduledValues(ctx.currentTime);
+    d.master.gain.setTargetAtTime(0.0001, ctx.currentTime, fade / 3);
+    d.oscs.forEach(o => o.stop(ctx.currentTime + fade + 0.2));
+    S.drones.delete(id);
+}
+function stopAllDrones(fade) {
+    Array.from(S.drones.keys()).forEach(id => killDrone(id, fade));
+}
+
+/* ═══ Tafel ═════════════════════════════════════════════════════ */
+
+function drawWork(c, cv, mov, alpha, morphMov, u) {
+    const cx = cv.width / 2, cy = cv.height / 2, R = cv.width * 0.44;
+    const w = mov.work;
+    if (w.type === 'f1') {
+        const partner = (morphMov && morphMov.work.type === 'f1') ? morphMov.work : null;
+        const count = partner ? Math.max(w.layers.length, partner.layers.length) : w.layers.length;
+        for (let i = 0; i < count; i++) {
+            const A = w.layers[i], B = partner ? partner.layers[i] : null;
+            let a = alpha;
+            if (partner) { a = A && B ? 1 : A ? (1 - u) : u; }
+            if (!A && !B) continue;
+            const hue = A ? A.hue : B.hue;
+            c.save();
+            c.lineJoin = 'round'; c.lineCap = 'round';
+            c.strokeStyle = 'hsla(' + hue + ',65%,74%,' + (0.62 * a) + ')';
+            c.lineWidth = 1.8;
+            c.beginPath();
+            for (let j = 0; j <= 720; j++) {
+                const th = j * Math.PI / 360;
+                let rr = 0;
+                if (A) rr += (partner ? (1 - u) : 1) * sfRadius(A.p, th) / A.cMax * A.size;
+                if (B) rr += u * sfRadius(B.p, th) / B.cMax * B.size;
+                if (A && !B) rr = sfRadius(A.p, th) / A.cMax * A.size;
+                if (!A && B) rr = sfRadius(B.p, th) / B.cMax * B.size;
+                const r = rr * R;
+                const x = cx + r * Math.cos(th), y = cy - r * Math.sin(th);
+                j ? c.lineTo(x, y) : c.moveTo(x, y);
+            }
+            c.stroke();
+            c.globalAlpha = 0.35 * a; c.lineWidth = 4; c.stroke();
+            c.restore();
+        }
+        /* Spielköpfe */
+        mov.voices.forEach(v => {
+            if (v.lastIdx < 0) return;
+            const l = v.layer, n = v.notes[v.lastIdx];
+            if (!l) return;
+            const th = (n.thP !== undefined) ? n.thP : n.th;   // praezedierte Stelle
+            const rr = sfRadius(l.p, th) / l.cMax * l.size * R;
+            const x = cx + rr * Math.cos(th), y = cy - rr * Math.sin(th);
+            c.strokeStyle = 'hsla(' + l.hue + ',65%,74%,' + (0.45 * alpha) + ')';
+            c.lineWidth = 1.2;
+            c.beginPath(); c.moveTo(cx, cy); c.lineTo(x, y); c.stroke();
+            c.beginPath(); c.arc(x, y, 6, 0, 7);
+            c.fillStyle = 'hsla(' + l.hue + ',65%,74%,' + alpha + ')';
+            c.fill();
+        });
+    } else if (w.type === 'f3') {
+        w.blobs.forEach(b => {
+            let cMax = 0;
+            for (let j = 0; j <= 720; j++) cMax = Math.max(cMax, f3Radius(b.harm, j * Math.PI / 360));
+            c.save();
+            c.lineJoin = 'round';
+            c.strokeStyle = 'hsla(' + b.hue + ',62%,72%,' + (0.6 * alpha) + ')';
+            c.lineWidth = 2;
+            c.beginPath();
+            for (let j = 0; j <= 720; j++) {
+                const th = j * Math.PI / 360;
+                const r = f3Radius(b.harm, th) / cMax * b.size * R;
+                const x = cx + r * Math.cos(th), y = cy - r * Math.sin(th);
+                j ? c.lineTo(x, y) : c.moveTo(x, y);
+            }
+            c.stroke();
+            c.globalAlpha = 0.35 * alpha; c.lineWidth = 4.5; c.stroke();
+            c.restore();
+        });
+        /* Abtaststrahlen: EIN Strahl je Register, in dessen Farbe und
+           mit dessen Umlaufzeit (siehe rotBars am Werk) */
+        w.blobs.forEach(b => {
+            const ang = (S.bars / b.rotBars) * 2 * Math.PI;
+            let cMax = 0;
+            for (let j = 0; j <= 720; j++) cMax = Math.max(cMax, f3Radius(b.harm, j * Math.PI / 360));
+            const r = f3Radius(b.harm, ang) / cMax * b.size * R;
+            const x = cx + r * Math.cos(ang), y = cy - r * Math.sin(ang);
+            c.strokeStyle = 'hsla(' + b.hue + ',62%,72%,' + (0.55 * alpha) + ')';
+            c.lineWidth = 1.5;
+            c.beginPath(); c.moveTo(cx, cy); c.lineTo(x, y); c.stroke();
+            c.beginPath(); c.arc(x, y, 6, 0, 7);
+            c.fillStyle = 'hsla(' + b.hue + ',62%,72%,' + alpha + ')'; c.fill();
+        });
+    } else {                                             // f2
+        const rEnd = spRadius(w.kind, w.p.a, w.p.b, w.thMax);
+        const Sc = R / rEnd;
+        c.save();
+        c.strokeStyle = 'rgba(177,218,250,' + (0.65 * alpha) + ')';
+        c.lineWidth = 1.6; c.lineJoin = 'round';
+        c.beginPath();
+        for (let j = 0; j <= 1200; j++) {
+            const th = j * w.thMax / 1200;
+            const r = spRadius(w.kind, w.p.a, w.p.b, th) * Sc;
+            const x = cx + r * Math.cos(th), y = cy - r * Math.sin(th);
+            j ? c.lineTo(x, y) : c.moveTo(x, y);
+        }
+        c.stroke();
+        c.globalAlpha = 0.32 * alpha; c.lineWidth = 4; c.stroke();
+        c.restore();
+        mov.voices.forEach(v => {
+            if (v.lastIdx < 0) return;
+            const n = v.notes[v.lastIdx];
+            const r = spRadius(w.kind, w.p.a, w.p.b, n.th) * Sc;
+            const x = cx + r * Math.cos(n.th), y = cy - r * Math.sin(n.th);
+            c.strokeStyle = 'rgba(177,218,250,' + (0.5 * alpha) + ')';
+            c.lineWidth = 1.2;
+            c.beginPath(); c.moveTo(cx, cy); c.lineTo(x, y); c.stroke();
+            c.beginPath(); c.arc(x, y, 6, 0, 7);
+            c.fillStyle = 'rgba(177,218,250,' + alpha + ')'; c.fill();
+        });
+    }
+}
+
+function drawScene(curK) {
+    const cv = S.cv, c = cv.getContext('2d');
+    c.clearRect(0, 0, cv.width, cv.height);
+    /* alle Sätze zeichnen, deren 8-Takt-Fenster den Moment trifft */
+    const act = [];
+    for (let k = S.low; k <= S.built; k++) {
+        const mov = S.movements[k];
+        if (!mov) continue;
+        const local = S.bars - mov.start;
+        if (local < -0.001 || local >= SLOT) continue;
+        const aIn = k === 0 ? 1 : Math.min(Math.max(local / TRANS_BARS, 0), 1);
+        const aOut = Math.min(Math.max((SLOT - local) / TRANS_BARS, 0), 1);
+        act.push({ mov, alpha: aIn * aOut, u: Math.min(Math.max(local / TRANS_BARS, 0), 1) });
+    }
+    /* Sonderfall wie bisher: genau zwei F1 im klassischen Abstand →
+       echtes Radius-Morphing statt Blende */
+    if (act.length === 2 && S.getGap() >= MOV_BARS
+        && act[0].mov.work.type === 'f1' && act[1].mov.work.type === 'f1') {
+        drawWork(c, cv, act[0].mov, 1, act[1].mov, act[1].u);
+        return;
+    }
+    act.forEach(a => drawWork(c, cv, a.mov, a.alpha, null, 0));
+}
+
+/* ═══ Programmzettel ════════════════════════════════════════════ */
+
+const TYPE_COLOR = { f1: 'var(--f1)', f2: 'var(--f2)', f3: 'var(--f3)' };
+function buildBill() {
+    const ol = document.getElementById('bill-list');
+    ol.textContent = '';
+    S.lib.forEach((w, i) => {
+        const li = document.createElement('li');
+        li.id = 'bill-li-' + i;
+        const num = document.createElement('span');
+        num.textContent = (i + 1) + '.';
+        const dot = document.createElement('span');
+        dot.className = 'dot'; dot.style.background = TYPE_COLOR[w.type];
+        const name = document.createElement('span');
+        name.textContent = w.label + (w.type === 'f1' ? ' · ' + w.layers.length + ' Stimmen'
+                          : w.type === 'f3' ? ' · ' + w.blobs.length + ' Register'
+                          : ' · ' + (w.kind === 'log' ? 'logarithmisch' : 'archimedisch'));
+        const key = document.createElement('span');
+        key.textContent = KEYS[w.key];
+        li.appendChild(num); li.appendChild(dot); li.appendChild(name); li.appendChild(key);
+        ol.appendChild(li);
+    });
+}
+function updateBill(curK) {
+    const mov = S.movements[curK];
+    if (!mov) return;
+    const w = mov.work;
+    const L = S.lib.length;
+    const satz = S.mode === 'sinfonie'
+        ? 'Satz ' + ((curK % L) + 1) + ' von ' + L
+        : 'Satz ' + (curK + 1) + ' · endlos';
+    document.getElementById('bill-now').textContent =
+        satz + ' — ' + w.label + ' in ' + KEYS[w.key] +
+        ' · Takt ' + (Math.floor(S.bars - mov.start) + 1);
+    const frac = Math.min((S.bars - mov.start) / S.getGap(), 1);
+    const prog = S.mode === 'sinfonie'
+        ? (((curK % L) + frac) / L) * 100
+        : ((S.bars - mov.start) / SLOT) * 100;
+    document.getElementById('bill-bar').style.width = Math.min(prog, 100) + '%';
+    S.lib.forEach((_, i) => {
+        const li = document.getElementById('bill-li-' + i);
+        if (li) li.classList.toggle('on', S.mode === 'sinfonie' && (curK % S.lib.length) === i);
+    });
+}
+
+/* ═══ Steuerung ═════════════════════════════════════════════════ */
+
+function start() {
+    audio();
+    S.playing = true;
+    S.bars = 0;
+    S.lastNow = AC.currentTime;
+    S.movements = []; S.starts = []; S.built = -1; S.low = 0; S.lastType = null;
+    const b = document.getElementById('c-play');
+    b.textContent = '■ Anhalten'; b.classList.add('on');
+    requestAnimationFrame(tick);
+}
+function stop() {
+    S.playing = false;
+    stopAllDrones(0.4);
+    const b = document.getElementById('c-play');
+    b.textContent = '▶ Aufführen'; b.classList.remove('on');
+}
+document.getElementById('c-play').addEventListener('click', () => {
+    S.playing ? stop() : start();
+});
+document.getElementById('c-roll').addEventListener('click', () => {
+    const was = S.playing;
+    if (was) stop();
+    S.lib = rollLibrary();
+    buildBill();
+    S.movements = [];
+    if (was) start(); else previewDraw();
+});
+document.getElementById('c-scale').querySelectorAll('button').forEach(b => {
+    b.addEventListener('click', () => {
+        document.getElementById('c-scale').querySelectorAll('button').forEach(x => x.classList.remove('on'));
+        b.classList.add('on'); S.scale = b.dataset.v;
+    });
+});
+document.getElementById('c-mode').querySelectorAll('button').forEach(b => {
+    b.addEventListener('click', () => {
+        if (b.disabled) return;
+        if (S.mode === b.dataset.v) return;          // aktiver Knopf: nichts tun
+        document.getElementById('c-mode').querySelectorAll('button').forEach(x => x.classList.remove('on'));
+        b.classList.add('on');
+        /* v-Befund (User 04.08.): «Kurvenauswahl ändert sich beim Umschalten
+           auf Sinfonie» → Ursache: stop();start() setzte auf Takt 0/Satz 1
+           zurück und ersetzte Endlos-Würfe durch die Bibliothek. Lösung:
+           NAHTLOS — der laufende Satz spielt fertig, nur die Herkunft
+           KÜNFTIGER Sätze wechselt (ensureMovement liest S.mode). */
+        S.mode = b.dataset.v;
+    });
+});
+
+function previewDraw() {                                 // Standbild vor dem Start
+    S.movements = [];
+    ensureMovementPreview();
+    drawScene(0);
+    document.getElementById('bill-now').textContent =
+        'Bereit — ' + S.lib.length + ' Werke · ' +
+        S.lib.map(w => KEYS[w.key]).join(' → ');
+}
+function ensureMovementPreview() {
+    S.movements = []; S.starts = [0]; S.built = 0; S.low = 0;
+    S.movements[0] = { work: S.lib[0], start: 0, voices: buildVoices(S.lib[0], 0) };
+}
+
+S.lib = rollLibrary();
+buildBill();
+previewDraw();
+</script>
+</body>
+</html>
